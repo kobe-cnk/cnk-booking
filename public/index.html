@@ -842,6 +842,12 @@
         <button class="sidebar-btn" onclick="showAdminView('upcoming')">
           <span class="icon">→</span> Upcoming
         </button>
+        <button class="sidebar-btn" onclick="showAdminView('newbooking')">
+          <span class="icon">+</span> New Booking
+        </button>
+        <button class="sidebar-btn" onclick="cnkAdminLogout()" style="margin-top:24px;color:var(--cream-dim);">
+          <span class="icon">⎋</span> Log Out
+        </button>
       </div>
     </div>
 
@@ -1601,5 +1607,310 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
 
 
 </script>
+
+<!-- ===== CNK MANUAL BOOKING (injected) ===== -->
+<div id="admin-newbooking" class="admin-view">
+  <div class="admin-header">
+    <div class="admin-title">New <span>Booking</span></div>
+  </div>
+  <div class="mb-success" id="mb-success"></div>
+  <div class="form-wrapper" style="margin-bottom:40px;">
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="form-label">First Name</label>
+        <input type="text" id="mb-first" class="form-input" placeholder="Jane">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Last Name</label>
+        <input type="text" id="mb-last" class="form-input" placeholder="Smith">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" id="mb-email" class="form-input" placeholder="jane@example.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Phone</label>
+        <input type="tel" id="mb-phone" class="form-input" placeholder="(801) 555-0100">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Event Date</label>
+        <input type="date" id="mb-date" class="form-input">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Package</label>
+        <select id="mb-package" class="form-select" onchange="cnkMbRecalc()">
+          <option value="hourly">Hourly ($125/hr)</option>
+          <option value="halfday" selected>Half Day ($399)</option>
+          <option value="fullday">Full Day ($699)</option>
+        </select>
+      </div>
+      <div class="form-group" id="mb-hours-group" style="display:none;">
+        <label class="form-label">Hours (Hourly only, max 3)</label>
+        <input type="number" id="mb-hours" class="form-input" value="1" min="1" max="3" onchange="cnkMbRecalc()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Extra Hours (+$125 each)</label>
+        <input type="number" id="mb-addon" class="form-input" value="0" min="0" onchange="cnkMbRecalc()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Event Type</label>
+        <input type="text" id="mb-type" class="form-input" placeholder="Wedding, Corporate, etc.">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Expected Guests</label>
+        <input type="text" id="mb-guests" class="form-input" placeholder="e.g. 150">
+      </div>
+      <div class="form-group form-full">
+        <label class="form-label">Event Location / Venue</label>
+        <input type="text" id="mb-location" class="form-input" placeholder="Venue name or address">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Payment Method</label>
+        <select id="mb-payment" class="form-select" onchange="cnkMbRecalc()">
+          <option value="Cash">Cash</option>
+          <option value="Venmo">Venmo</option>
+          <option value="Zelle">Zelle</option>
+          <option value="Check">Check</option>
+          <option value="Other">Other / Comp</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select id="mb-status" class="form-select">
+          <option value="confirmed">Confirmed</option>
+          <option value="pending">Pending</option>
+          <option value="complete">Complete</option>
+        </select>
+      </div>
+      <div class="form-group form-full">
+        <label class="form-label">Notes</label>
+        <textarea id="mb-notes" class="form-textarea" placeholder="Any details..."></textarea>
+      </div>
+    </div>
+
+    <div class="deposit-info" style="margin-top:24px;">
+      <div>
+        <div class="deposit-label">Total (no card fee — manual payment)</div>
+        <div class="deposit-amount" id="mb-total">$399.00</div>
+      </div>
+      <div class="deposit-note">Manual bookings record the full amount as the agreed price. No deposit or card processing is applied — mark balance as paid below if already collected.</div>
+    </div>
+
+    <div class="extra-hours-row" style="margin-top:16px;">
+      <span class="extra-hours-label">Payment already collected in full?</span>
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;color:var(--cream);">
+        <input type="checkbox" id="mb-paid" checked style="width:18px;height:18px;accent-color:var(--gold);"> Paid
+      </label>
+    </div>
+
+    <button class="submit-btn" onclick="cnkCreateManualBooking()">Create Booking</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  var TAX = 0.0745;       // matches site
+  // No CC fee on manual bookings
+  function pkgBase(pkg, hours){
+    if (pkg === 'hourly') return 125 * Math.max(1, Math.min(3, hours||1));
+    if (pkg === 'fullday') return 699;
+    return 399; // halfday
+  }
+  window.cnkMbRecalc = function(){
+    var pkg = document.getElementById('mb-package').value;
+    var hours = parseInt(document.getElementById('mb-hours').value||'1',10);
+    var addon = parseInt(document.getElementById('mb-addon').value||'0',10);
+    document.getElementById('mb-hours-group').style.display = (pkg==='hourly') ? '' : 'none';
+    var base = pkgBase(pkg, hours) + (Math.max(0,addon) * 125);
+    var tax = base * TAX;
+    var total = base + tax;
+    document.getElementById('mb-total').textContent = '$' + total.toFixed(2);
+    window._mbCalc = { base: base, tax: tax, total: total };
+  };
+
+  window.cnkCreateManualBooking = function(){
+    cnkMbRecalc();
+    var first = (document.getElementById('mb-first').value||'').trim();
+    var last = (document.getElementById('mb-last').value||'').trim();
+    var email = (document.getElementById('mb-email').value||'').trim();
+    var phone = (document.getElementById('mb-phone').value||'').trim();
+    var date = document.getElementById('mb-date').value||'';
+    var pkg = document.getElementById('mb-package').value;
+    var type = (document.getElementById('mb-type').value||'').trim();
+    var guests = (document.getElementById('mb-guests').value||'').trim();
+    var loc = (document.getElementById('mb-location').value||'').trim();
+    var pay = document.getElementById('mb-payment').value;
+    var status = document.getElementById('mb-status').value;
+    var notes = (document.getElementById('mb-notes').value||'').trim();
+    var paid = document.getElementById('mb-paid').checked;
+    var c = window._mbCalc || { base:0, tax:0, total:0 };
+
+    if (!first || !last || !date){
+      alert('Please fill in at least first name, last name, and event date.');
+      return;
+    }
+
+    // Build booking matching the app's canonical shape
+    var bookings = [];
+    try { bookings = JSON.parse(localStorage.getItem('cnk_bookings')||'[]'); } catch(e){ bookings = []; }
+
+    // Generate id in same family (CNK-1xxxxx)
+    var maxNum = 100290;
+    bookings.forEach(function(b){
+      var m = (b.id||'').match(/CNK-(\d+)/);
+      if (m){ var n = parseInt(m[1],10); if(n>maxNum) maxNum=n; }
+    });
+    var id = 'CNK-' + (maxNum + 1);
+
+    var noteFull = (notes ? notes + ' ' : '') + '[Manual booking · ' + pay + (paid ? ' · PAID IN FULL' : ' · UNPAID') + ']';
+
+    var booking = {
+      id: id,
+      name: (first + ' ' + last).trim(),
+      email: email,
+      phone: phone,
+      date: date,
+      package: pkg,
+      basePrice: c.base,
+      tax: c.tax,
+      ccFee: 0,
+      price: c.total,
+      deposit: 0,
+      balance: paid ? 0 : c.total,
+      status: status,
+      eventType: type,
+      location: loc,
+      guests: guests,
+      notes: noteFull,
+      source: 'Manual (' + pay + ')',
+      created: Date.now()
+    };
+
+    bookings.push(booking);
+    localStorage.setItem('cnk_bookings', JSON.stringify(bookings));
+
+    // Refresh admin views if those renderers exist
+    try { if (typeof loadBookings === 'function') loadBookings(); } catch(e){}
+    try { if (typeof renderOverview === 'function') renderOverview(); } catch(e){}
+    try { if (typeof renderAllBookings === 'function') renderAllBookings(); } catch(e){}
+    try { if (typeof renderUpcoming === 'function') renderUpcoming(); } catch(e){}
+    try { if (typeof renderCalendar === 'function') renderCalendar(); } catch(e){}
+
+    var sx = document.getElementById('mb-success');
+    sx.textContent = 'Booking ' + id + ' created for ' + booking.name + ' — $' + c.total.toFixed(2) + ' (' + pay + (paid?', paid':', unpaid') + ').';
+    sx.classList.add('show');
+
+    // Clear form
+    ['mb-first','mb-last','mb-email','mb-phone','mb-date','mb-type','mb-guests','mb-location','mb-notes'].forEach(function(idv){
+      var el = document.getElementById(idv); if(el) el.value='';
+    });
+    document.getElementById('mb-addon').value = '0';
+    document.getElementById('mb-hours').value = '1';
+    cnkMbRecalc();
+    if (typeof showToast === 'function') { try { showToast('Manual booking created: ' + id); } catch(e){} }
+    setTimeout(function(){ sx.classList.remove('show'); }, 8000);
+  };
+
+  // initial calc once DOM ready
+  document.addEventListener('DOMContentLoaded', function(){ try{ cnkMbRecalc(); }catch(e){} });
+})();
+</script>
+<!-- ===== END CNK MANUAL BOOKING ===== -->
+
+
+<!-- ===== CNK ADMIN ACCESS CONTROL + LOGIN (injected) ===== -->
+<style>
+  #admin-login-overlay { position: fixed; inset: 0; z-index: 500; display: none;
+    align-items: center; justify-content: center; padding: 20px; background: var(--charcoal); }
+  #admin-login-overlay.show { display: flex; }
+  .login-card { background: var(--charcoal-soft); border: 1px solid rgba(196,152,58,0.25);
+    border-radius: 12px; padding: 48px 40px; width: 100%; max-width: 400px; box-shadow: var(--shadow); }
+  .login-logo { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 600;
+    letter-spacing: 0.1em; color: var(--gold); text-align: center; margin-bottom: 8px; }
+  .login-logo span { color: var(--cream); }
+  .login-sub { text-align: center; font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--cream-dim); margin-bottom: 32px; }
+  .login-card .form-group { margin-bottom: 18px; }
+  .login-error { color: #e05c70; font-size: 13px; min-height: 18px; margin-top: 4px; text-align: center; }
+  .login-back { display:block; text-align:center; margin-top:18px; font-size:12px; color:var(--cream-dim);
+    text-decoration:none; letter-spacing:0.05em; }
+  .login-back:hover { color: var(--gold); }
+</style>
+
+<div id="admin-login-overlay">
+  <div class="login-card">
+    <div class="login-logo">CNK<span> Booths</span></div>
+    <div class="login-sub">Staff Login</div>
+    <div class="form-group">
+      <label class="form-label">Email</label>
+      <input type="email" id="login-email" class="form-input" placeholder="you@cnkbooths.com" autocomplete="username">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <input type="password" id="login-pass" class="form-input" placeholder="" autocomplete="current-password" onkeydown="if(event.key==='Enter')cnkAdminLogin()">
+    </div>
+    <div class="login-error" id="login-error"></div>
+    <button class="submit-btn" style="margin-top:8px" onclick="cnkAdminLogin()">Sign In</button>
+    <a href="#" class="login-back" onclick="cnkExitLogin();return false;">&larr; Back to booking page</a>
+  </div>
+</div>
+
+<script>
+(function(){
+  var EMAIL = [112,104,111,116,111,115,64,99,110,107,98,111,111,116,104,115,46,99,111,109].map(function(c){return String.fromCharCode(c);}).join('');
+  var PASS  = [67,78,75,66,111,111,116,104,115,50,48,50,54,33].map(function(c){return String.fromCharCode(c);}).join('');
+  var KEY = 'cnk_admin_authed';
+  function isAuthed(){ try { return sessionStorage.getItem(KEY)==='1'; } catch(e){ return false; } }
+  function setAuthed(v){ try { v ? sessionStorage.setItem(KEY,'1') : sessionStorage.removeItem(KEY); } catch(e){} }
+
+  function hideAdminTab(){
+    var tabs = document.querySelectorAll('.nav-tab');
+    tabs.forEach(function(t){ if (/admin/i.test(t.textContent)) t.style.display='none'; });
+  }
+  function showLogin(){ var o=document.getElementById('admin-login-overlay'); if(o){o.classList.add('show'); var e=document.getElementById('login-email'); if(e)e.focus();} }
+  function hideLogin(){ var o=document.getElementById('admin-login-overlay'); if(o)o.classList.remove('show'); var err=document.getElementById('login-error'); if(err)err.textContent=''; }
+
+  // Directly show admin without relying on the original showView's global event usage
+  function openAdmin(){
+    var vb = document.getElementById('view-booking');
+    var va = document.getElementById('view-admin');
+    if (vb) vb.classList.remove('active');
+    if (va) va.classList.add('active');
+    // nav tab active states (admin tab is hidden, but keep booking tab not-active)
+    document.querySelectorAll('.nav-tab').forEach(function(t){ t.classList.remove('active'); });
+    window.scrollTo(0,0);
+  }
+  window._cnkOpenAdmin = openAdmin;
+
+  window.cnkAdminLogin = function(){
+    var em=(document.getElementById('login-email').value||'').trim().toLowerCase();
+    var pw=document.getElementById('login-pass').value||'';
+    var err=document.getElementById('login-error');
+    if (em===EMAIL.toLowerCase() && pw===PASS){
+      setAuthed(true); hideLogin(); document.getElementById('login-pass').value=''; openAdmin();
+    } else { err.textContent='Incorrect email or password.'; }
+  };
+  window.cnkExitLogin = function(){ hideLogin(); var va=document.getElementById('view-admin'); if(va)va.classList.remove('active'); var vb=document.getElementById('view-booking'); if(vb)vb.classList.add('active'); if(location.hash)history.replaceState(null,'',location.pathname); window.scrollTo(0,0); };
+  window.cnkAdminLogout = function(){ setAuthed(false); var va=document.getElementById('view-admin'); if(va)va.classList.remove('active'); var vb=document.getElementById('view-booking'); if(vb)vb.classList.add('active'); if(location.hash)history.replaceState(null,'',location.pathname); window.scrollTo(0,0); };
+
+  function installGate(){
+    if (typeof window.showView !== 'function'){ setTimeout(installGate,50); return; }
+    if (window._origShowView) return;
+    window._origShowView = window.showView;
+    window.showView = function(v){
+      if (v==='admin'){ if(!isAuthed()){ showLogin(); return; } openAdmin(); return; }
+      return window._origShowView(v);
+    };
+  }
+  function checkHash(){ if (location.hash.toLowerCase()==='#admin'){ if(isAuthed())openAdmin(); else showLogin(); } }
+
+  document.addEventListener('DOMContentLoaded', function(){ hideAdminTab(); installGate(); checkHash(); });
+  hideAdminTab(); installGate();
+  window.addEventListener('hashchange', checkHash);
+  setTimeout(checkHash,100);
+})();
+</script>
+<!-- ===== END CNK ADMIN ACCESS CONTROL ===== -->
+
 </body>
 </html>
