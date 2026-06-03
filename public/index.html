@@ -2938,6 +2938,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
     window._cnkNotified[b.id] = true;
     try {
       fetch('/api/notify-booking', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({booking:b}) }).catch(function(){});
+      if(b.email && b.email.indexOf('@')!==-1){ fetch('/api/confirm-booking', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({booking:b}) }).catch(function(){}); }
     } catch(e){}
   }
   // Fire once when a booking is completed (covers online + admin step-by-step, both end at cnkFinish)
