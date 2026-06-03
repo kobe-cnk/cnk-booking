@@ -50,8 +50,8 @@ module.exports = async function handler(req, res) {
     if (address.length < 5) { res.status(400).json({ error: 'Please enter a valid address' }); return; }
 
     const dest = await geocode(address);
-    const precise = (dest.layer === 'address' && dest.accuracy === 'point');
-    if (!precise) {
+    const okLayer = (dest.layer === 'address' || dest.layer === 'street');
+    if (!okLayer) {
       res.status(200).json({ ok: false, error: 'Please enter a full street address (street number, street, city, state)', needAddress: true, matched: dest.label });
       return;
     }
