@@ -720,7 +720,7 @@
               <option>Nonprofit / Charity</option><option>Other</option>
             </select>
           </div>
-          <div class="form-group form-full"><label class="form-label">Event Location / Venue</label><input class="form-input" id="cnk-venue" placeholder="Venue name or address, Salt Lake City, UT"></div>
+          <div class="form-group form-full"><label class="form-label">Event Address</label><input class="form-input" id="cnk-venue" placeholder="Full street address, city, state, ZIP (e.g. 123 S Main St, Provo, UT 84601)"></div>
           <div class="form-group form-full"><label class="form-label">Expected Guest Count</label><input class="form-input" id="cnk-guests" placeholder="e.g. 150"></div>
           <div class="form-group form-full"><label class="form-label">Special Requests or Notes</label><textarea class="form-textarea" id="cnk-notes" placeholder="Custom overlay design, specific setup requirements, themed props, etc."></textarea></div>
           <div class="form-group form-full"><label class="form-label">How did you hear about us?</label>
@@ -2553,7 +2553,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
     var wrap=document.createElement('div');
     wrap.className='form-group form-full';
     wrap.id='cnk-deliv-wrap';
-    wrap.innerHTML='<div style="font-size:12px;color:var(--cream-dim);line-height:1.5;">Delivery within 50 miles round-trip is included; beyond that it is $1.25/mile, calculated automatically from your venue address.</div><div id="cnk-deliv-result" style="margin-top:8px;font-size:13px;"></div>';
+    wrap.innerHTML='<div style="font-size:12px;color:var(--cream-dim);line-height:1.5;">Delivery within 50 miles round-trip is included; beyond that it is $1.25/mile, calculated automatically from the address above.</div><div id="cnk-deliv-result" style="margin-top:8px;font-size:13px;"></div>';
     group.parentNode.insertBefore(wrap, group.nextSibling);
     // auto-calc when they finish with the venue field
     venue.addEventListener('blur', function(){ autoCalc(); });
@@ -2574,7 +2574,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
       .then(function(r){return r.json();})
       .then(function(d){
         if(!d || !d.ok){
-          if(res) res.innerHTML='<span style="color:#e0a05c;">Could not locate that address for delivery. Please enter a full street address, city, and state.</span>';
+          if(res) res.innerHTML='<span style="color:#e0a05c;">'+((d&&d.error)||'Could not locate that address')+'. Please enter a full street address, city, and state.</span>';
           if(window._cnkState){window._cnkState.delivery=0;window._cnkState.deliveryMiles=null;}
           lastAddr=''; // allow retry
           return;
