@@ -2818,7 +2818,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
         // apply discount to price
         if(disc>0){ b.discount=disc; b.price=Math.max(0,(Number(b.price)||0)-disc); }
         // manual payment: no card fee, deposit = amount collected, balance = remainder
-        b.ccFee=0;
+        var prevCc=Number(b.ccFee)||0; b.price=Math.max(0,(Number(b.price)||0)-prevCc); b.ccFee=0;
         b.deposit=paid;
         b.balance=Math.max(0,(Number(b.price)||0)-paid);
         b.source='Manual ('+method+')';
