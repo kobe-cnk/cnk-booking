@@ -2534,5 +2534,154 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
 })();
 </script>
 
+
+
+<script>
+(function(){
+  var DEPOSIT_RATE = 0.5;
+  function money(n){ n=Number(n)||0; return '$'+n.toFixed(2); }
+  function getDelivery(){ return (window._cnkState && Number(window._cnkState.delivery)) || 0; }
+  function deliveryDepositCents(){ return Math.round(getDelivery()*DEPOSIT_RATE*100); }
+
+  // ---- Add address field + calc UI into step 1, right after the venue field ----
+  function injectAddressUI(){
+    if(document.getElementById('cnk-deliv-wrap')) return;
+    var venue=document.getElementById('cnk-venue');
+    if(!venue){ setTimeout(injectAddressUI,100); return; }
+    var group=venue.closest('.form-group');
+    if(!group){ setTimeout(injectAddressUI,100); return; }
+    var wrap=document.createElement('div');
+    wrap.className='form-group form-full';
+    wrap.id='cnk-deliv-wrap';
+    wrap.innerHTML=''
+      + '<label class="form-label">Delivery Distance</label>'
+      + '<div style="font-size:12.5px;color:var(--cream-dim);line-height:1.5;margin-bottom:8px;">Delivery within 50 miles round-trip is included. Beyond that, it is $1.25/mile. Enter the venue address above, then tap Calculate.</div>'
+      + '<button type="button" id="cnk-deliv-btn" style="background:rgba(196,152,58,0.15);color:var(--gold);border:1px solid rgba(196,152,58,0.4);border-radius:6px;padding:10px 16px;font-size:13px;letter-spacing:0.05em;cursor:pointer;font-family:DM Sans,sans-serif;">Calculate Delivery Fee</button>'
+      + '<div id="cnk-deliv-result" style="margin-top:10px;font-size:13px;color:var(--cream);"></div>';
+    group.parentNode.insertBefore(wrap, group.nextSibling);
+    document.getElementById('cnk-deliv-btn').addEventListener('click', calcDelivery);
+  }
+
+  function calcDelivery(){
+    var venue=document.getElementById('cnk-venue');
+    var addr=venue?venue.value.trim():'';
+    var res=document.getElementById('cnk-deliv-result');
+    if(addr.length<5){ res.innerHTML='<span style="color:#e0a05c;">Please enter the venue address above first.</span>'; return; }
+    res.innerHTML='<span style="color:var(--cream-dim);">Calculating distance…</span>';
+    fetch('/api/distance',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({address:addr})})
+      .then(function(r){return r.json();})
+      .then(function(d){
+        if(!d || !d.ok){ res.innerHTML='<span style="color:#e0a05c;">'+((d&&d.error)||'Could not find that address')+'. Please enter a full street address.</span>'; if(window._cnkState) window._cnkState.delivery=0; return; }
+        if(window._cnkState){ window._cnkState.delivery=d.fee; window._cnkState.deliveryMiles=d.roundTripMiles; window._cnkState.deliveryAddr=d.address; }
+        if(d.fee>0){
+          res.innerHTML='<div style="padding:10px 12px;background:rgba(196,152,58,0.08);border:1px solid rgba(196,152,58,0.25);border-radius:6px;">'
+            +'<strong style="color:var(--gold);">Delivery fee: '+money(d.fee)+'</strong><br>'
+            +'<span style="color:var(--cream-dim);font-size:12px;">'+d.roundTripMiles+' mi round-trip · '+d.billableMiles+' billable mi beyond the 50 included</span></div>';
+        } else {
+          res.innerHTML='<div style="padding:10px 12px;background:rgba(94,204,136,0.08);border:1px solid rgba(94,204,136,0.25);border-radius:6px;color:#5ecc88;">Within the included range — no delivery fee ('+d.roundTripMiles+' mi round-trip).</div>';
+        }
+      })
+      .catch(function(){ res.innerHTML='<span style="color:#e0a05c;">Distance lookup failed, please try again.</span>'; });
+  }
+
+  // ---- Patch the step-2 summary to show delivery + fold into total/deposit/balance ----
+  function patchSummary(){
+    var d=getDelivery();
+    var totalEl=document.getElementById('cnk-sum-total');
+    var depEl=document.getElementById('cnk-sum-deposit');
+    var balEl=document.getElementById('cnk-sum-balance');
+    var payEl=document.getElementById('cnk-pay-amt');
+    if(!totalEl||!depEl||!balEl) return;
+    // Read the base numbers the existing code rendered
+    function num(el){ return el?(parseFloat(el.textContent.replace(/[^0-9.]/g,''))||0):0; }
+    var baseTotal=num(totalEl), baseDep=num(depEl), baseBal=num(balEl);
+    // Remove any prior delivery row we added, to avoid stacking
+    var old=document.getElementById('cnk-sum-deliv-row'); if(old) old.remove();
+    if(d>0){
+      // insert a delivery row before the total row
+      var totalRow=totalEl.closest('.pb-total-row')||totalEl.parentNode;
+      var row=document.createElement('div');
+      row.id='cnk-sum-deliv-row';
+      row.className='pb-row';
+      row.innerHTML='<span class="pb-label">Delivery'+(window._cnkState&&window._cnkState.deliveryMiles?(' ('+window._cnkState.deliveryMiles+' mi RT)'):'')+'</span><span class="pb-val">'+money(d)+'</span>';
+      totalRow.parentNode.insertBefore(row, totalRow);
+      var depShare=Math.round(d*DEPOSIT_RATE*100)/100;
+      totalEl.textContent=money(baseTotal+d);
+      depEl.textContent=money(baseDep+depShare);
+      balEl.textContent=money(baseBal+(d-depShare));
+      if(payEl) payEl.textContent=' · '+money(baseDep+depShare);
+    }
+  }
+
+  function wrapToPayment(){
+    if(typeof window.cnkToPayment!=='function'){ setTimeout(wrapToPayment,60); return; }
+    if(window._cnkToPaymentWrapped) return;
+    window._cnkToPaymentWrapped=true;
+    var orig=window.cnkToPayment;
+    window.cnkToPayment=function(){
+      var rv=orig.apply(this,arguments);
+      // after original renders the summary, patch in delivery
+      setTimeout(patchSummary,30);
+      return rv;
+    };
+  }
+
+  // ---- Intercept the charge to add the delivery deposit delta (cents) ----
+  function installChargeIntercept(){
+    if(window._cnkChargeIntercepted) return;
+    window._cnkChargeIntercepted=true;
+    var origFetch=window.fetch;
+    window.fetch=function(url,opts){
+      try{
+        if(typeof url==='string' && url.indexOf('/api/charge')!==-1 && opts && opts.body){
+          var extra=deliveryDepositCents();
+          if(extra>0){
+            var body=JSON.parse(opts.body);
+            if(typeof body.amount==='number'){
+              body.amount=body.amount+extra;
+              opts=Object.assign({},opts,{body:JSON.stringify(body)});
+            }
+          }
+        }
+      }catch(e){}
+      return origFetch.call(this,url,opts);
+    };
+  }
+
+  // ---- Save delivery onto the booking (cnkFinish already pushes latest to DB) ----
+  function wrapFinishForDelivery(){
+    if(typeof window.cnkFinish!=='function'){ setTimeout(wrapFinishForDelivery,60); return; }
+    if(window._cnkFinishDelivWrapped) return;
+    window._cnkFinishDelivWrapped=true;
+    var orig=window.cnkFinish;
+    window.cnkFinish=function(){
+      orig.apply(this,arguments);
+      var d=getDelivery();
+      if(d>0){
+        try{
+          var arr=JSON.parse(localStorage.getItem('cnk_bookings')||'[]');
+          if(arr.length){
+            var b=arr[arr.length-1];
+            var depShare=Math.round(d*DEPOSIT_RATE*100)/100;
+            b.deliveryFee=d; b.deliveryMiles=(window._cnkState&&window._cnkState.deliveryMiles)||null;
+            b.price=(Number(b.price)||0)+d;
+            b.deposit=(Number(b.deposit)||0)+depShare;
+            b.balance=(Number(b.balance)||0)+(d-depShare);
+            b.notes=(b.notes?b.notes+' ':'')+'[Delivery: '+(b.deliveryMiles||'?')+' mi RT, fee '+money(d)+']';
+            arr[arr.length-1]=b;
+            localStorage.setItem('cnk_bookings',JSON.stringify(arr));
+            if(typeof window.cnkDbSave==='function') window.cnkDbSave(b);
+          }
+        }catch(e){}
+      }
+    };
+  }
+
+  function init(){ injectAddressUI(); wrapToPayment(); installChargeIntercept(); wrapFinishForDelivery(); }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
+  setTimeout(init,400); setTimeout(init,1000);
+})();
+</script>
+
 </body>
 </html>
