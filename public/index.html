@@ -2929,5 +2929,149 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
   setTimeout(wireLogo,500);
 })();
 </script>
+
+<script>
+(function(){
+  window._cnkNotified = window._cnkNotified || {};
+  function notify(b){
+    if(!b || !b.id || window._cnkNotified[b.id]) return;
+    window._cnkNotified[b.id] = true;
+    try {
+      fetch('/api/notify-booking', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({booking:b}) }).catch(function(){});
+    } catch(e){}
+  }
+  // Fire once when a booking is completed (covers online + admin step-by-step, both end at cnkFinish)
+  function wrapFinishNotify(){
+    if(typeof window.cnkFinish!=='function'){ setTimeout(wrapFinishNotify,60); return; }
+    if(window._cnkFinishNotifyWrapped) return;
+    window._cnkFinishNotifyWrapped=true;
+    var orig=window.cnkFinish;
+    window.cnkFinish=function(){
+      orig.apply(this,arguments);
+      // after all other finish-wrappers have run and saved, grab the latest booking and notify
+      setTimeout(function(){
+        try{
+          var arr=JSON.parse(localStorage.getItem('cnk_bookings')||'[]');
+          if(arr.length) notify(arr[arr.length-1]);
+        }catch(e){}
+      }, 250);
+    };
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',wrapFinishNotify); else wrapFinishNotify();
+  setTimeout(wrapFinishNotify,500);
+})();
+</script>
+<script>
+(function(){
+  var APP_ID='sq0idp-ch7FwGd6cjBOMX_SzQ3UPA';
+  var LOC_ID='LF3G4CFPFPKDV';
+  function money(n){ n=Number(n)||0; return '$'+n.toFixed(2); }
+  function getBookings(){ try{ return JSON.parse(localStorage.getItem('cnk_bookings')||'[]'); }catch(e){ return []; } }
+  function findB(id){ return getBookings().filter(function(x){return x.id===id;})[0]; }
+
+  // Add a "Collect Balance (card)" button into the modal action row whenever a booking
+  // with a remaining balance is open. We hook openModal (already overridden) by observing the modal.
+  window.cnkCollectBalance = function(id){
+    var b=findB(id); if(!b) return;
+    var bal=Number(b.balance)||0;
+    if(bal<=0){ alert('This booking has no remaining balance.'); return; }
+    var content=document.getElementById('modal-content'); if(!content) return;
+    var panel=document.createElement('div');
+    panel.id='cnk-bal-panel';
+    panel.className='cnk-modal-sec';
+    panel.innerHTML=''
+      + '<div class="cnk-modal-sec-title">Collect Remaining Balance</div>'
+      + '<div style="font-size:13px;color:var(--cream-dim);margin-bottom:10px;">Charging '+money(bal)+' to the customer\'s card. Enter their card below.</div>'
+      + '<div id="cnk-bal-card" style="background:#fff;border-radius:8px;padding:14px;min-height:48px;"></div>'
+      + '<div id="cnk-bal-err" style="color:#e0a05c;font-size:12px;margin-top:6px;"></div>'
+      + '<div id="cnk-bal-processing" style="display:none;color:var(--cream-dim);font-size:13px;margin-top:8px;">Processing…</div>'
+      + '<div class="cnk-modal-actions"><button class="cnk-mbtn cnk-mbtn-save" id="cnk-bal-charge">Charge '+money(bal)+'</button>'
+      + '<button class="cnk-mbtn cnk-mbtn-back" id="cnk-bal-cancel">Cancel</button></div>';
+    content.appendChild(panel);
+    panel.scrollIntoView({block:'center'});
+    document.getElementById('cnk-bal-cancel').addEventListener('click', function(){ panel.remove(); });
+    initBalCard(b, bal);
+  };
+
+  function initBalCard(b, bal){
+    var errEl=document.getElementById('cnk-bal-err');
+    if(typeof Square==='undefined'){ if(errEl) errEl.textContent='Payment library not loaded — refresh and try again.'; return; }
+    var payments, card;
+    (async function(){
+      try{
+        payments = Square.payments(APP_ID, LOC_ID);
+        card = await payments.card();
+        await card.attach('#cnk-bal-card');
+      }catch(e){ if(errEl) errEl.textContent='Could not load card field: '+(e&&e.message||e); return; }
+      var chargeBtn=document.getElementById('cnk-bal-charge');
+      chargeBtn.addEventListener('click', async function(){
+        errEl.textContent='';
+        document.getElementById('cnk-bal-processing').style.display='block';
+        chargeBtn.disabled=true;
+        try{
+          var result=await card.tokenize();
+          if(result.status!=='OK'){ throw new Error('Card not accepted. Check the details.'); }
+          var cents=Math.round(bal*100);
+          var resp=await fetch('/api/charge',{method:'POST',headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({ nonce:result.token, amount:cents, currency:'USD', description:'Balance — '+b.id, email:b.email, name:b.name, bookingId:b.id })});
+          var out=await resp.json();
+          if(!resp.ok || out.error){ throw new Error(out.error||('HTTP '+resp.status)); }
+          // success: update booking — balance paid in full
+          var arr=getBookings();
+          var bb=arr.filter(function(x){return x.id===b.id;})[0];
+          if(bb){
+            bb.deposit=(Number(bb.deposit)||0)+bal;
+            bb.balance=0;
+            bb.status='complete';
+            bb.notes=(bb.notes?bb.notes+' ':'')+'[Balance '+money(bal)+' charged to card]';
+            localStorage.setItem('cnk_bookings',JSON.stringify(arr));
+            if(typeof window.cnkDbSave==='function') window.cnkDbSave(bb);
+            try{ if(typeof loadBookings==='function') loadBookings(); }catch(e){}
+            ['renderOverview','renderAllBookings','renderUpcoming','renderCalendar'].forEach(function(fn){ try{ if(typeof window[fn]==='function') window[fn](); }catch(e){} });
+          }
+          document.getElementById('cnk-bal-processing').style.display='none';
+          var panel=document.getElementById('cnk-bal-panel');
+          if(panel) panel.innerHTML='<div class="cnk-modal-sec-title" style="color:#5ecc88;">Balance Collected</div><div style="font-size:13px;color:var(--cream);">Charged '+money(bal)+' successfully. Booking marked complete.</div>';
+          if(typeof window.openModal==='function') setTimeout(function(){ window.openModal(b.id); }, 1200);
+        }catch(e){
+          document.getElementById('cnk-bal-processing').style.display='none';
+          chargeBtn.disabled=false;
+          errEl.textContent=(e&&e.message)||'Charge failed.';
+        }
+      });
+    })();
+  }
+
+  // Inject the "Collect Balance" button into the modal whenever it shows a booking with balance>0.
+  function watchModal(){
+    var modal=document.getElementById('booking-modal');
+    if(!modal){ setTimeout(watchModal,200); return; }
+    var obs=new MutationObserver(function(){
+      if(!modal.classList.contains('open')) return;
+      if(document.getElementById('cnk-collect-bal-btn')) return;
+      // find the booking id from the Edit button (onclick="editBooking('ID')")
+      var editBtn=[...modal.querySelectorAll('button')].filter(function(x){return /edit booking/i.test(x.textContent);})[0];
+      if(!editBtn) return;
+      var oc=editBtn.getAttribute('onclick')||'';
+      var m=oc.match(/editBooking\('([^']+)'\)/);
+      if(!m) return;
+      var id=m[1];
+      var b=findB(id);
+      if(!b || (Number(b.balance)||0)<=0) return; // only show when there's a balance
+      var actions=editBtn.closest('.cnk-modal-actions');
+      if(!actions) return;
+      var btn=document.createElement('button');
+      btn.id='cnk-collect-bal-btn';
+      btn.className='cnk-mbtn cnk-mbtn-save';
+      btn.textContent='Collect Balance (card)';
+      btn.addEventListener('click', function(){ window.cnkCollectBalance(id); });
+      actions.insertBefore(btn, actions.firstChild);
+    });
+    obs.observe(modal, { attributes:true, childList:true, subtree:true });
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',watchModal); else watchModal();
+  setTimeout(watchModal,600);
+})();
+</script>
 </body>
 </html>
