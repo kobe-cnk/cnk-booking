@@ -3366,6 +3366,17 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
       }
     }
 
+    // 1b) inject Discount row (before Total) if discount>0
+    if(b && Number(b.discount)>0 && !mc.querySelector('[data-cnk-disc-row]')){
+      var drows=[...mc.querySelectorAll('.cnk-mrow')];
+      var totalRow2=drows.find(function(r){ var l=r.querySelector('.ml'); return l && /^total$/i.test(l.textContent.trim()); });
+      if(totalRow2){
+        var discR=document.createElement('div'); discR.className='cnk-mrow'; discR.setAttribute('data-cnk-disc-row','1');
+        discR.innerHTML='<span class="ml">Discount</span><span class="mv">-'+mMoney(b.discount)+'</span>';
+        totalRow2.parentNode.insertBefore(discR, totalRow2);
+      }
+    }
+
     // 2) add "Review & Download Agreement" button in the paperwork section (once)
     if(b && !mc.querySelector('[data-cnk-agree-btn]')){
       // find the Signed Agreement section title
