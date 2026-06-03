@@ -1000,7 +1000,7 @@
     var booking={
       id:id, name:(val('cnk-first')+' '+val('cnk-last')).trim(), email:val('cnk-email'), phone:val('cnk-phone'),
       date:val('cnk-date'), package:state.pkg, basePrice:c.base, tax:c.tax, ccFee:c.cc, price:c.total,
-      deposit:c.deposit, balance:c.balance, status:'confirmed', eventType:val('cnk-type'),
+      deposit:c.deposit, balance:c.balance, status:((Number(c.balance)>0.005)?'balance_due':'confirmed'), eventType:val('cnk-type'),
       location:val('cnk-venue'), guests:val('cnk-guests'), notes:val('cnk-notes'),
       source:val('cnk-source')||'Online Booking', created:Date.now(), paperwork:paperwork
     };
@@ -1474,7 +1474,7 @@ async function submitBooking() {
       price: selectedPricing.total,
       deposit: selectedPricing.deposit,
       balance: selectedPricing.balance,
-      status: 'confirmed',
+      status: ((Number(selectedPricing.balance)>0.005)?'balance_due':'confirmed'),
       cardBrand: result.cardBrand || '',
       cardLast4: result.cardLast4 || '',
       squarePaymentId: result.paymentId,
@@ -3023,7 +3023,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
           if(bb){
             bb.deposit=(Number(bb.deposit)||0)+bal;
             bb.balance=0;
-            bb.status='complete';
+            bb.status='confirmed';
             bb.notes=(bb.notes?bb.notes+' ':'')+'[Balance '+money(bal)+' charged to card]';
             localStorage.setItem('cnk_bookings',JSON.stringify(arr));
             if(typeof window.cnkDbSave==='function') window.cnkDbSave(bb);
@@ -3072,6 +3072,40 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',watchModal); else watchModal();
   setTimeout(watchModal,600);
+})();
+</script>
+
+<script>
+(function(){
+  function deriveStatusFinish(){
+    if(typeof window.cnkFinish!=='function'){ setTimeout(deriveStatusFinish,60); return; }
+    if(window._cnkStatusDeriveWrapped) return;
+    window._cnkStatusDeriveWrapped=true;
+    var orig=window.cnkFinish;
+    window.cnkFinish=function(){
+      orig.apply(this,arguments);
+      // Run last: after admin/delivery wrappers adjust the balance, set status from the final balance.
+      setTimeout(function(){
+        try{
+          var arr=JSON.parse(localStorage.getItem('cnk_bookings')||'[]');
+          if(!arr.length) return;
+          var b=arr[arr.length-1];
+          if(b.status==='complete') return; // don't override a manually-completed event
+          var bal=Number(b.balance)||0;
+          var want = (bal>0.005) ? 'balance_due' : 'confirmed';
+          if(b.status!==want){
+            b.status=want;
+            arr[arr.length-1]=b;
+            localStorage.setItem('cnk_bookings',JSON.stringify(arr));
+            if(typeof window.cnkDbSave==='function') window.cnkDbSave(b);
+            ['renderOverview','renderAllBookings','renderUpcoming','renderCalendar'].forEach(function(fn){ try{ if(typeof window[fn]==='function') window[fn](); }catch(e){} });
+          }
+        }catch(e){}
+      }, 400); // after the 250ms notify + admin/delivery wrappers
+    };
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',deriveStatusFinish); else deriveStatusFinish();
+  setTimeout(deriveStatusFinish,600);
 })();
 </script>
 </body>
