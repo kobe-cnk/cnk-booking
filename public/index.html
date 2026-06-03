@@ -2412,7 +2412,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
     b.name=v('eb-name'); b.date=v('eb-date'); b.email=v('eb-email'); b.phone=v('eb-phone');
     b.eventType=v('eb-type'); b.guests=v('eb-guests'); b.location=v('eb-location');
     b.status=v('eb-status'); b.balance=parseFloat(v('eb-balance'))||0; b.notes=v('eb-notes');
-    var ebMiles=parseFloat(v('eb-miles'))||0; var ebBillable=Math.max(0,ebMiles-50); var ebFee=Math.round(ebBillable*1.25*100)/100; var prevFee=Number(b.deliveryFee)||0; b.deliveryMiles=ebMiles; b.deliveryFee=ebFee; b.price=(Number(b.price)||0)-prevFee+ebFee; if(Number(b.balance)>0){} 
+    var ebMiles=parseFloat(v('eb-miles'))||0; var ebBillable=Math.max(0,ebMiles-50); var ebFee=Math.round(ebBillable*1.25*100)/100; var prevFee=Number(b.deliveryFee)||0; b.deliveryMiles=ebMiles; b.deliveryFee=ebFee; b.price=(Number(b.price)||0)-prevFee+ebFee; b.balance=Math.max(0,(Number(b.balance)||0)-prevFee+ebFee); 
     b.paperwork=b.paperwork||{};
     b.paperwork.startTime=v('eb-start'); b.paperwork.endTime=v('eb-end');
     b.paperwork.setup=v('eb-setup'); b.paperwork.overlay=v('eb-overlay'); b.paperwork.dayContact=v('eb-contact');
