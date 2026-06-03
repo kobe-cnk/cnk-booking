@@ -598,227 +598,395 @@
 <!-- ─── BOOKING VIEW ───────────────────────────── -->
 <div id="view-booking" class="view active">
 
-  <div id="booking-form-container">
-    <div class="booking-hero">
+<style>
+  #cnk-flow { padding-top: 0; }
+  .cnk-steps { display:flex; align-items:center; justify-content:center; gap:8px; padding:24px 20px 0; flex-wrap:wrap; }
+  .cnk-step-pill { display:flex; align-items:center; gap:8px; font-size:12px; letter-spacing:0.08em; text-transform:uppercase; color:var(--cream-dim); }
+  .cnk-step-pill span { width:24px; height:24px; border-radius:50%; border:1px solid rgba(245,240,232,0.2); display:flex; align-items:center; justify-content:center; font-size:12px; }
+  .cnk-step-pill.active { color:var(--gold); }
+  .cnk-step-pill.active span { border-color:var(--gold); background:rgba(196,152,58,0.12); color:var(--gold); }
+  .cnk-step-pill.done span { background:var(--gold); border-color:var(--gold); color:var(--charcoal); }
+  .cnk-step-line { width:40px; height:1px; background:rgba(245,240,232,0.15); }
+  .cnk-stage { display:none; }
+  .cnk-stage.active { display:block; animation:cnkFade 0.3s ease; }
+  @keyframes cnkFade { from{opacity:0;transform:translateY(8px);} to{opacity:1;transform:translateY(0);} }
+  .cnk-err { color:#e05c70; font-size:13px; min-height:18px; margin-top:10px; text-align:center; }
+  .cnk-back { width:100%; margin-top:12px; padding:12px; background:transparent; border:1px solid rgba(245,240,232,0.2); border-radius:6px; color:var(--cream-dim); cursor:pointer; font-family:'DM Sans',sans-serif; font-size:12px; letter-spacing:0.1em; text-transform:uppercase; transition:all 0.2s; }
+  .cnk-back:hover { border-color:var(--cream-dim); color:var(--cream); }
+  .cnk-processing { display:none; align-items:center; gap:10px; color:var(--cream-dim); font-size:13px; margin-top:12px; justify-content:center; }
+  .cnk-processing.show { display:flex; }
+  #cnk-card { background:var(--charcoal-mid); border:1px solid rgba(245,240,232,0.1); border-radius:6px; padding:14px 16px; min-height:56px; transition:border-color 0.2s; }
+  #cnk-card.is-focused { border-color:var(--gold); box-shadow:0 0 0 3px rgba(196,152,58,0.1); }
+  .cnk-contract { background:var(--charcoal-mid); border:1px solid rgba(245,240,232,0.08); border-radius:8px; padding:28px 32px; max-height:340px; overflow-y:auto; }
+  .cnk-contract h3 { font-family:'Cormorant Garamond',serif; font-size:22px; font-weight:400; color:var(--cream); margin-bottom:16px; }
+  .cnk-contract p { font-size:13px; line-height:1.7; color:var(--cream-dim); margin-bottom:12px; }
+  .cnk-contract strong { color:var(--cream); }
+  .cnk-check { display:flex; align-items:flex-start; gap:10px; margin-top:16px; font-size:13px; color:var(--cream-dim); cursor:pointer; line-height:1.5; }
+  .cnk-check input { width:18px; height:18px; accent-color:var(--gold); flex-shrink:0; margin-top:1px; }
+  .package-card.selected #cnk-hourly-ctrl { display:block !important; }
+</style>
+
+
+<div id="cnk-flow">
+  <!-- progress -->
+  <div class="cnk-steps">
+    <div class="cnk-step-pill active" data-s="1"><span>1</span> Package &amp; Details</div>
+    <div class="cnk-step-line"></div>
+    <div class="cnk-step-pill" data-s="2"><span>2</span> Payment</div>
+    <div class="cnk-step-line"></div>
+    <div class="cnk-step-pill" data-s="3"><span>3</span> Paperwork</div>
+  </div>
+
+  <!-- ===== STEP 1 ===== -->
+  <section class="cnk-stage active" id="cnk-s1">
+    <div class="booking-hero" style="padding:48px 40px 32px;">
       <div class="hero-eyebrow">Premium Photo Booth Rentals — Utah</div>
-      <h1 class="hero-title">Reserve Your<br><em>Experience</em></h1>
+      <h1 class="hero-title">Reserve Your <em>Experience</em></h1>
       <p class="hero-sub">Fully managed photo booths for weddings, corporate events, and celebrations</p>
     </div>
-
     <div class="packages-section">
       <div class="section-label">Choose Your Package</div>
       <div class="packages-grid">
-        <div class="package-card" id="pkg-hourly" data-pkg="hourly" data-price="125">
-          <div class="pkg-badge">Hourly</div>
+        <div class="package-card" data-pkg="hourly" onclick="cnkPick('hourly')">
+          <span class="pkg-badge">Hourly</span>
           <div class="pkg-price"><sup>$</sup>125</div>
           <div class="pkg-duration">per hour · maximum 3 hours</div>
           <div class="pkg-divider"></div>
           <ul class="pkg-features">
-            <li>Unlimited photo sessions</li>
-            <li>Digital delivery included</li>
-            <li>Custom branding overlay</li>
-            <li>Onsite attendant</li>
-            <li>Printable photo strips included</li>
+            <li>Unlimited photo sessions</li><li>Digital delivery included</li>
+            <li>Custom branding overlay</li><li>Onsite attendant</li><li>Printable photo strips included</li>
           </ul>
-          <div class="addon-hours-bar" style="margin-top:20px" id="hourly-qty-bar">
-            <div class="addon-hours-info">
-              <div class="addon-hours-title">How many hours?</div>
-              <div class="addon-hours-sub">Max 3 hrs · 4+ hrs = Half Day</div>
+          <div id="cnk-hourly-ctrl" style="display:none;margin-top:20px;background:rgba(196,152,58,0.06);border:1px solid rgba(196,152,58,0.15);border-radius:8px;padding:16px;">
+            <div style="font-size:13px;color:var(--cream);margin-bottom:4px;font-weight:500;">How many hours?</div>
+            <div style="font-size:11px;color:var(--cream-dim);margin-bottom:12px;">Max 3 hrs · 4+ hrs = Half Day</div>
+            <div style="display:flex;align-items:center;justify-content:center;gap:16px;">
+              <button type="button" class="addon-btn" onclick="event.stopPropagation();cnkHours(-1)">−</button>
+              <div style="text-align:center;"><span id="cnk-hours" style="font-family:'Cormorant Garamond',serif;font-size:32px;color:var(--cream);">1</span><div style="font-size:10px;letter-spacing:0.15em;color:var(--cream-dim);">HOURS</div></div>
+              <button type="button" class="addon-btn" onclick="event.stopPropagation();cnkHours(1)">+</button>
             </div>
-            <div class="addon-hours-ctrl">
-              <button class="addon-btn" id="hourly-minus">−</button>
-              <div class="addon-count-wrap">
-                <span class="addon-count" id="hourly-count">1</span>
-                <span class="addon-count-label">hours</span>
-              </div>
-              <button class="addon-btn" id="hourly-plus">+</button>
-            </div>
-            <div class="addon-cost" id="hourly-cost">$125.00</div>
           </div>
-          <button class="pkg-select-btn">Select Hourly</button>
+          <button type="button" class="pkg-select-btn">Select Hourly</button>
         </div>
-        <div class="package-card" id="pkg-halfday" data-pkg="halfday" data-price="399">
-          <div class="pkg-badge">Half Day</div>
+        <div class="package-card" data-pkg="halfday" onclick="cnkPick('halfday')">
+          <span class="pkg-badge">Half Day</span>
           <div class="pkg-price"><sup>$</sup>399</div>
           <div class="pkg-duration">up to 4 hours</div>
           <div class="pkg-divider"></div>
           <ul class="pkg-features">
-            <li>Unlimited photo sessions</li>
-            <li>Digital delivery included</li>
-            <li>Custom branding overlay</li>
-            <li>Onsite attendant</li>
-            <li>Printable photo strips included</li>
+            <li>Unlimited photo sessions</li><li>Digital delivery included</li>
+            <li>Custom branding overlay</li><li>Onsite attendant</li><li>Printable photo strips included</li>
           </ul>
-          <button class="pkg-select-btn">Select Half Day</button>
+          <button type="button" class="pkg-select-btn">Select Half Day</button>
         </div>
-        <div class="package-card" id="pkg-fullday" data-pkg="fullday" data-price="699">
-          <div class="pkg-badge">Full Day</div>
+        <div class="package-card" data-pkg="fullday" onclick="cnkPick('fullday')">
+          <span class="pkg-badge">Full Day</span>
           <div class="pkg-price"><sup>$</sup>699</div>
           <div class="pkg-duration">up to 8 hours</div>
           <div class="pkg-divider"></div>
           <ul class="pkg-features">
-            <li>Unlimited photo sessions</li>
-            <li>Digital delivery included</li>
-            <li>Custom branding overlay</li>
-            <li>Onsite attendant</li>
-            <li>Printable photo strips included</li>
+            <li>Unlimited photo sessions</li><li>Digital delivery included</li>
+            <li>Custom branding overlay</li><li>Onsite attendant</li><li>Printable photo strips included</li>
           </ul>
-          <button class="pkg-select-btn">Select Full Day</button>
+          <button type="button" class="pkg-select-btn">Select Full Day</button>
         </div>
       </div>
 
-      <!-- Additional Hours Add-On — shown only for Half Day / Full Day -->
-      <div id="addon-hours-section" style="display:none; margin-bottom: 40px;">
-        <div class="section-label">Additional Hours</div>
-        <div class="addon-hours-bar">
-          <div class="addon-hours-info">
-            <div class="addon-hours-title">Need more time? Add extra hours at $125/hr</div>
-            <div class="addon-hours-sub">Added directly to your invoice — no separate booking needed</div>
-          </div>
-          <div class="addon-hours-ctrl">
-            <button class="addon-btn" id="addon-minus">−</button>
-            <div class="addon-count-wrap">
-              <span class="addon-count" id="addon-count">0</span>
-              <span class="addon-count-label">additional hrs</span>
-            </div>
-            <button class="addon-btn" id="addon-plus">+</button>
-          </div>
-          <div class="addon-cost" id="addon-cost">+$0.00</div>
+      <div class="addon-hours-bar" style="margin-bottom:40px;">
+        <div class="addon-hours-info">
+          <div class="addon-hours-title">Need more time? Add extra hours at $125/hr</div>
+          <div class="addon-hours-sub">Added directly to your invoice — no separate booking needed</div>
         </div>
+        <div class="addon-hours-ctrl">
+          <button type="button" class="addon-btn" onclick="cnkAddon(-1)">−</button>
+          <div class="addon-count-wrap"><span class="addon-count" id="cnk-addon">0</span><span class="addon-count-label">Add'l Hrs</span></div>
+          <button type="button" class="addon-btn" onclick="cnkAddon(1)">+</button>
+        </div>
+        <div class="addon-cost" id="cnk-addon-cost">+$0.00</div>
       </div>
 
-      <div class="section-label">Event Details</div>
       <div class="form-wrapper">
+        <div class="section-label">Event Details</div>
         <div class="form-grid">
-          <div class="form-group">
-            <label class="form-label">First Name</label>
-            <input type="text" class="form-input" id="f-fname" placeholder="Jane" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Last Name</label>
-            <input type="text" class="form-input" id="f-lname" placeholder="Smith" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Email Address</label>
-            <input type="email" class="form-input" id="f-email" placeholder="jane@example.com" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Phone Number</label>
-            <input type="tel" class="form-input" id="f-phone" placeholder="(801) 555-0100" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Event Date</label>
-            <input type="date" class="form-input" id="f-date" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Event Type</label>
-            <select class="form-select" id="f-eventtype">
+          <div class="form-group"><label class="form-label">First Name</label><input class="form-input" id="cnk-first" placeholder="Jane"></div>
+          <div class="form-group"><label class="form-label">Last Name</label><input class="form-input" id="cnk-last" placeholder="Smith"></div>
+          <div class="form-group"><label class="form-label">Email Address</label><input class="form-input" id="cnk-email" type="email" placeholder="jane@example.com"></div>
+          <div class="form-group"><label class="form-label">Phone Number</label><input class="form-input" id="cnk-phone" type="tel" placeholder="(801) 555-0100"></div>
+          <div class="form-group"><label class="form-label">Event Date</label><input class="form-input" id="cnk-date" type="date"></div>
+          <div class="form-group"><label class="form-label">Event Type</label>
+            <select class="form-select" id="cnk-type">
               <option value="">Select event type…</option>
-              <option>Wedding</option>
-              <option>Corporate Event</option>
-              <option>Birthday Party</option>
-              <option>Graduation</option>
-              <option>School Event</option>
-              <option>Festival / Expo</option>
-              <option>Nonprofit / Charity</option>
-              <option>Other</option>
+              <option>Wedding</option><option>Corporate Event</option><option>Birthday Party</option>
+              <option>Graduation</option><option>School Event</option><option>Festival / Expo</option>
+              <option>Nonprofit / Charity</option><option>Other</option>
             </select>
           </div>
-          <div class="form-group form-full">
-            <label class="form-label">Event Location / Venue</label>
-            <input type="text" class="form-input" id="f-location" placeholder="Venue name or address, Salt Lake City, UT" />
-          </div>
-          <div class="form-group form-full">
-            <label class="form-label">Expected Guest Count</label>
-            <input type="number" class="form-input" id="f-guests" placeholder="e.g. 150" min="1" max="10000" />
-          </div>
-          <div class="form-group form-full">
-            <label class="form-label">Special Requests or Notes</label>
-            <textarea class="form-textarea" id="f-notes" placeholder="Custom overlay design, specific setup requirements, themed props, etc."></textarea>
-          </div>
-          <div class="form-group form-full">
-            <label class="form-label">How did you hear about us?</label>
-            <select class="form-select" id="f-source">
+          <div class="form-group form-full"><label class="form-label">Event Location / Venue</label><input class="form-input" id="cnk-venue" placeholder="Venue name or address, Salt Lake City, UT"></div>
+          <div class="form-group form-full"><label class="form-label">Expected Guest Count</label><input class="form-input" id="cnk-guests" placeholder="e.g. 150"></div>
+          <div class="form-group form-full"><label class="form-label">Special Requests or Notes</label><textarea class="form-textarea" id="cnk-notes" placeholder="Custom overlay design, specific setup requirements, themed props, etc."></textarea></div>
+          <div class="form-group form-full"><label class="form-label">How did you hear about us?</label>
+            <select class="form-select" id="cnk-source">
               <option value="">Select…</option>
-              <option>Google Search</option>
-              <option>Instagram</option>
-              <option>Facebook</option>
-              <option>Friend / Referral</option>
-              <option>Wedding Planner</option>
-              <option>Venue Recommendation</option>
-              <option>Other</option>
+              <option>Google Search</option><option>Instagram</option><option>Facebook</option>
+              <option>Friend / Referral</option><option>Wedding Planner</option><option>Venue Recommendation</option><option>Other</option>
             </select>
           </div>
-          <div class="form-group form-full" id="price-breakdown-wrapper" style="display:none">
-            <div class="price-breakdown">
-              <div class="pb-title">Price Breakdown</div>
-              <div class="pb-row">
-                <span class="pb-label">Package Price</span>
-                <span class="pb-val" id="pb-base">—</span>
-              </div>
-              <div class="pb-row" id="pb-extra-row" style="display:none">
-                <span class="pb-label">Additional Hours</span>
-                <span class="pb-val" id="pb-extra">—</span>
-              </div>
-              <div class="pb-row">
-                <span class="pb-label">Sales Tax (7.45%)</span>
-                <span class="pb-val" id="pb-tax">—</span>
-              </div>
-              <div class="pb-row">
-                <span class="pb-label">Credit Card Fee (3%)</span>
-                <span class="pb-val" id="pb-cc">—</span>
-              </div>
-              <div class="pb-divider"></div>
-              <div class="pb-row pb-total-row">
-                <span class="pb-label">Total</span>
-                <span class="pb-val pb-total" id="pb-total">—</span>
-              </div>
-              <div class="pb-row">
-                <span class="pb-label">Deposit Due Today (50%)</span>
-                <span class="pb-val pb-deposit" id="pb-deposit">—</span>
-              </div>
-              <div class="pb-row">
-                <span class="pb-label">Balance Due 7 Days Before Event</span>
-                <span class="pb-val" id="pb-balance">—</span>
-              </div>
-              <div class="pb-note">A 50% deposit is required to secure your date. The remaining balance is due 7 days before your event. All prices include sales tax and credit card processing fees.</div>
-            </div>
-          </div>
-
-          <!-- Square Card Entry -->
-          <div class="form-group form-full" id="stripe-section" style="display:none">
-            <label class="form-label">Card Details</label>
-            <div id="square-card-element"></div>
-            <div id="stripe-card-errors" class="stripe-error"></div>
-          </div>
-
         </div>
-        <button class="submit-btn" id="submit-btn" onclick="submitBooking()">
-          Confirm Booking &amp; Pay Deposit
-        </button>
+        <div class="cnk-err" id="cnk-s1-err"></div>
+        <button type="button" class="submit-btn" onclick="cnkToPayment()">Continue to Payment →</button>
       </div>
     </div>
-  </div>
+  </section>
+  <!-- STEP 2 & 3 markup appended separately -->
+</div>
 
-  <!-- Success -->
-  <div class="success-screen" id="success-screen">
-    <div class="success-icon">✦</div>
-    <h2 class="success-title">You're Booked!</h2>
-    <p class="success-sub">Your deposit has been processed and your photo booth is reserved. A confirmation will be sent to your email along with your rental agreement to review and sign.</p>
-    <div class="success-ref" id="success-ref">CNK-000000</div>
-    <div style="display:flex;gap:24px;justify-content:center;flex-wrap:wrap;margin-bottom:24px">
-      <div style="text-align:center">
-        <div style="font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:var(--cream-dim);margin-bottom:6px">Deposit Charged</div>
-        <div style="font-family:'Cormorant Garamond',serif;font-size:28px;color:var(--gold)" id="success-deposit">—</div>
-      </div>
-      <div style="text-align:center">
-        <div style="font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:var(--cream-dim);margin-bottom:6px">Card Charged</div>
-        <div style="font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--cream)" id="success-card">—</div>
+
+  <!-- ===== STEP 2: PAYMENT ===== -->
+  <section class="cnk-stage" id="cnk-s2">
+    <div class="packages-section" style="max-width:640px;">
+      <div class="section-label">Complete Payment</div>
+      <div class="form-wrapper">
+        <div class="price-breakdown" style="margin-bottom:28px;">
+          <div class="pb-title">Order Summary</div>
+          <div class="pb-row"><span class="pb-label" id="cnk-sum-pkg">Package</span><span class="pb-val" id="cnk-sum-base">$0</span></div>
+          <div class="pb-row" id="cnk-sum-addon-row" style="display:none;"><span class="pb-label" id="cnk-sum-addon-label">Extra hours</span><span class="pb-val" id="cnk-sum-addon">$0</span></div>
+          <div class="pb-row"><span class="pb-label">Sales tax (7.45%)</span><span class="pb-val" id="cnk-sum-tax">$0</span></div>
+          <div class="pb-row"><span class="pb-label">Card processing (3%)</span><span class="pb-val" id="cnk-sum-cc">$0</span></div>
+          <div class="pb-divider"></div>
+          <div class="pb-row pb-total-row"><span class="pb-label">Total</span><span class="pb-total" id="cnk-sum-total">$0</span></div>
+          <div class="pb-row"><span class="pb-label">Deposit due today (50%)</span><span class="pb-val pb-deposit" id="cnk-sum-deposit">$0</span></div>
+          <div class="pb-row"><span class="pb-label">Balance due at event</span><span class="pb-val" id="cnk-sum-balance">$0</span></div>
+          <div class="pb-note">A 50% deposit reserves your date. The remaining balance is collected before your event.</div>
+        </div>
+
+        <div class="form-group form-full">
+          <label class="form-label">Card Details</label>
+          <div id="cnk-card"></div>
+          <div class="cnk-err" id="cnk-card-err"></div>
+        </div>
+
+        <div class="cnk-processing" id="cnk-processing"><div class="stripe-spinner"></div> Processing your payment…</div>
+
+        <button type="button" class="submit-btn" id="cnk-pay-btn" onclick="cnkPay()">Pay Deposit <span id="cnk-pay-amt"></span></button>
+        <button type="button" class="cnk-back" onclick="cnkGoStep(1)">← Back to details</button>
       </div>
     </div>
-    <p class="success-sub" style="margin-bottom: 24px;">A CNK Booths team member will contact you within 24 hours to confirm your event details. The remaining balance is due 7 days before your event.</p>
-    <button class="success-back" onclick="resetBooking()">Book Another Event</button>
-  </div>
+  </section>
+
+  <!-- ===== STEP 3: PAPERWORK ===== -->
+  <section class="cnk-stage" id="cnk-s3">
+    <div class="packages-section" style="max-width:760px;">
+      <div class="section-label">Rental Agreement &amp; Event Details</div>
+      <div class="form-wrapper">
+        <div class="mb-success show" id="cnk-paid-banner" style="margin-bottom:24px;">Deposit received — thank you! Please review the agreement and confirm your event details below.</div>
+
+        <div class="cnk-contract" id="cnk-contract">
+          <h3>CNK Booths LLC — Photo Booth Rental Agreement</h3>
+          <p>This Agreement is between CNK Booths LLC ("Provider") and the client named below ("Client") for photo booth rental services on the event date specified at booking.</p>
+          <p><strong>1. Deposit &amp; Payment.</strong> A non-refundable 50% deposit reserves the Client's date. The remaining balance is due before the event start time. Bookings are not confirmed until the deposit is received.</p>
+          <p><strong>2. Cancellation.</strong> The deposit is non-refundable. Cancellations made within 14 days of the event are responsible for the full balance. Date changes are subject to availability.</p>
+          <p><strong>3. Service.</strong> Provider supplies the booth, an onsite attendant, props, digital delivery, and printed strips for the booked duration. Setup requires a flat, covered space with access to a standard power outlet within 25 feet.</p>
+          <p><strong>4. Client Responsibilities.</strong> Client ensures safe venue access, adequate space (min. 10×10 ft), and power. Client is responsible for any damage to equipment caused by guests due to negligence or misuse.</p>
+          <p><strong>5. Liability.</strong> Provider's liability is limited to the total amount paid. Provider is not liable for delays caused by circumstances beyond its control (weather, venue access, power failure).</p>
+          <p><strong>6. Media Release.</strong> Client grants Provider permission to use event photos for marketing unless opted out below.</p>
+        </div>
+
+        <div class="form-grid" style="margin-top:24px;">
+          <div class="form-group"><label class="form-label">Event Start Time</label><input class="form-input" id="cnk-pw-start" type="time"></div>
+          <div class="form-group"><label class="form-label">Event End Time</label><input class="form-input" id="cnk-pw-end" type="time"></div>
+          <div class="form-group form-full"><label class="form-label">Setup Location / Room within Venue</label><input class="form-input" id="cnk-pw-setup" placeholder="e.g. Main ballroom, north wall near entrance"></div>
+          <div class="form-group form-full"><label class="form-label">Power Outlet Available within 25 ft?</label>
+            <select class="form-select" id="cnk-pw-power"><option value="">Select…</option><option>Yes</option><option>No / Not sure — please advise</option></select>
+          </div>
+          <div class="form-group form-full"><label class="form-label">Custom Overlay / Theme Details</label><textarea class="form-textarea" id="cnk-pw-overlay" placeholder="Names, date, colors, logo, theme for the photo strip design…"></textarea></div>
+          <div class="form-group form-full"><label class="form-label">Onsite Contact (name &amp; phone for event day)</label><input class="form-input" id="cnk-pw-contact" placeholder="Day-of coordinator name & cell"></div>
+        </div>
+
+        <label class="cnk-check"><input type="checkbox" id="cnk-pw-media"> I allow CNK Booths to use event photos for marketing (uncheck to opt out)</label>
+        <label class="cnk-check"><input type="checkbox" id="cnk-pw-agree"> I have read and agree to the Rental Agreement above.<span style="color:#e05c70;"> *</span></label>
+
+        <div class="form-group" style="margin-top:16px;">
+          <label class="form-label">Type your full name to sign <span style="color:#e05c70;">*</span></label>
+          <input class="form-input" id="cnk-pw-sign" placeholder="Full legal name" style="font-family:'Cormorant Garamond',serif;font-size:20px;">
+        </div>
+
+        <div class="cnk-err" id="cnk-s3-err"></div>
+        <button type="button" class="submit-btn" onclick="cnkFinish()">Submit Paperwork &amp; Confirm Booking</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== DONE ===== -->
+  <section class="cnk-stage" id="cnk-done">
+    <div class="success-screen show" style="display:block;">
+      <div class="success-icon">✓</div>
+      <h2 class="success-title">You're all set!</h2>
+      <p class="success-sub" id="cnk-done-sub">Your booking is confirmed and your deposit has been received. We've saved your event details and agreement. Our team will reach out with next steps.</p>
+      <div class="success-ref" id="cnk-done-ref">CNK-000000</div>
+      <div style="margin-top:8px;"><button type="button" class="success-back" onclick="cnkReset()">Book Another Event</button></div>
+    </div>
+  </section>
+
+
+<script>
+(function(){
+  var APP_ID='sq0idp-ch7FwGd6cjBOMX_SzQ3UPA', LOC_ID='LF3G4CFPFPKDV';
+  var TAX=0.0745, CC=0.03, DEP=0.5, HOUR=125;
+  var state={ pkg:null, hours:1, addon:0 };
+  var sqPayments=null, sqCard=null, cardMounted=false;
+  var PKG={ hourly:{label:'Hourly',base:125}, halfday:{label:'Half Day',base:399}, fullday:{label:'Full Day',base:699} };
+
+  function money(n){ return '$'+n.toFixed(2); }
+  function calc(){
+    if(!state.pkg) return null;
+    var base = state.pkg==='hourly' ? HOUR*Math.max(1,Math.min(3,state.hours)) : PKG[state.pkg].base;
+    var addonCost = Math.max(0,state.addon)*HOUR;
+    var sub = base + addonCost;
+    var tax = sub*TAX;
+    var cc = (sub+tax)*CC;
+    var total = sub+tax+cc;
+    var deposit = total*DEP;
+    return { base:base, addonCost:addonCost, sub:sub, tax:tax, cc:cc, total:total, deposit:deposit, balance:total-deposit };
+  }
+
+  window.cnkPick=function(pkg){
+    state.pkg=pkg;
+    document.querySelectorAll('#cnk-s1 .package-card').forEach(function(c){ c.classList.toggle('selected', c.getAttribute('data-pkg')===pkg); });
+    document.getElementById('cnk-hourly-ctrl').style.display = (pkg==='hourly') ? 'block' : 'none';
+    refreshAddon();
+  };
+  window.cnkHours=function(d){ state.hours=Math.max(1,Math.min(3,state.hours+d)); document.getElementById('cnk-hours').textContent=state.hours; };
+  window.cnkAddon=function(d){ state.addon=Math.max(0,state.addon+d); refreshAddon(); };
+  function refreshAddon(){
+    document.getElementById('cnk-addon').textContent=state.addon;
+    document.getElementById('cnk-addon-cost').textContent='+'+money(state.addon*HOUR);
+  }
+
+  function val(id){ var e=document.getElementById(id); return e?e.value.trim():''; }
+  window.cnkToPayment=function(){
+    var err=document.getElementById('cnk-s1-err'); err.textContent='';
+    if(!state.pkg){ err.textContent='Please choose a package.'; window.scrollTo({top:0,behavior:'smooth'}); return; }
+    if(!val('cnk-first')||!val('cnk-last')){ err.textContent='Please enter your first and last name.'; return; }
+    var em=val('cnk-email'); if(!em||!/^[^@]+@[^@]+\.[^@]+$/.test(em)){ err.textContent='Please enter a valid email address.'; return; }
+    if(!val('cnk-phone')){ err.textContent='Please enter a phone number.'; return; }
+    if(!val('cnk-date')){ err.textContent='Please choose your event date.'; return; }
+    fillSummary();
+    cnkGoStep(2);
+    setTimeout(mountCard, 150);
+  };
+
+  function fillSummary(){
+    var c=calc(); if(!c) return;
+    document.getElementById('cnk-sum-pkg').textContent = PKG[state.pkg].label + (state.pkg==='hourly'?(' · '+state.hours+'hr'):'');
+    document.getElementById('cnk-sum-base').textContent = money(c.base);
+    var ar=document.getElementById('cnk-sum-addon-row');
+    if(state.addon>0){ ar.style.display='flex'; document.getElementById('cnk-sum-addon-label').textContent='Extra hours ('+state.addon+' × $125)'; document.getElementById('cnk-sum-addon').textContent=money(c.addonCost); }
+    else ar.style.display='none';
+    document.getElementById('cnk-sum-tax').textContent=money(c.tax);
+    document.getElementById('cnk-sum-cc').textContent=money(c.cc);
+    document.getElementById('cnk-sum-total').textContent=money(c.total);
+    document.getElementById('cnk-sum-deposit').textContent=money(c.deposit);
+    document.getElementById('cnk-sum-balance').textContent=money(c.balance);
+    document.getElementById('cnk-pay-amt').textContent=' · '+money(c.deposit);
+  }
+
+  async function mountCard(){
+    if(cardMounted) return;
+    try{
+      if(!window.Square){ document.getElementById('cnk-card-err').textContent='Payment system loading… please wait a moment and try again.'; return; }
+      sqPayments = sqPayments || window.Square.payments(APP_ID, LOC_ID);
+      sqCard = await sqPayments.card();
+      await sqCard.attach('#cnk-card');
+      cardMounted=true;
+      sqCard.addEventListener('focusClassAdded', function(){ document.getElementById('cnk-card').classList.add('is-focused'); });
+      sqCard.addEventListener('focusClassRemoved', function(){ document.getElementById('cnk-card').classList.remove('is-focused'); });
+    }catch(e){ document.getElementById('cnk-card-err').textContent='Could not load the card form. Please refresh and try again.'; }
+  }
+
+  window.cnkPay=async function(){
+    var err=document.getElementById('cnk-card-err'); err.textContent='';
+    if(!cardMounted||!sqCard){ err.textContent='Card form not ready yet — one moment.'; mountCard(); return; }
+    var btn=document.getElementById('cnk-pay-btn'); var proc=document.getElementById('cnk-processing');
+    btn.disabled=true; proc.classList.add('show');
+    try{
+      var result=await sqCard.tokenize();
+      if(result.status!=='OK'){ throw new Error('Card not accepted. Please check your details.'); }
+      var c=calc();
+      var depositCents=Math.round(c.deposit*100);
+      var bookingId=window._cnkBookingId || ('CNK-'+Math.floor(100000+Math.random()*900000));
+      window._cnkBookingId=bookingId;
+      var name=(val('cnk-first')+' '+val('cnk-last')).trim();
+      var resp=await fetch('/api/charge',{
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({ nonce:result.token, amount:depositCents, currency:'USD',
+          description:'CNK Booths – '+PKG[state.pkg].label+' deposit ('+bookingId+')',
+          email:val('cnk-email'), name:name, bookingId:bookingId })
+      });
+      var data=await resp.json().catch(function(){return {};});
+      if(!resp.ok){ throw new Error(data.error || 'Payment was declined. Please try another card.'); }
+      window._cnkPaid=true;
+      proc.classList.remove('show'); btn.disabled=false;
+      cnkGoStep(3);
+      document.getElementById('cnk-pw-sign').value='';
+    }catch(e){
+      proc.classList.remove('show'); btn.disabled=false;
+      err.textContent = e.message || 'Payment failed. Please try again.';
+    }
+  };
+
+  window.cnkFinish=function(){
+    var err=document.getElementById('cnk-s3-err'); err.textContent='';
+    if(!document.getElementById('cnk-pw-agree').checked){ err.textContent='Please agree to the Rental Agreement to continue.'; return; }
+    if(!val('cnk-pw-sign')){ err.textContent='Please type your full name to sign.'; return; }
+    var c=calc();
+    var bookings=[]; try{ bookings=JSON.parse(localStorage.getItem('cnk_bookings')||'[]'); }catch(e){}
+    var id=window._cnkBookingId||('CNK-'+Math.floor(100000+Math.random()*900000));
+    var paperwork={
+      startTime:val('cnk-pw-start'), endTime:val('cnk-pw-end'), setup:val('cnk-pw-setup'),
+      power:val('cnk-pw-power'), overlay:val('cnk-pw-overlay'), dayContact:val('cnk-pw-contact'),
+      mediaRelease:document.getElementById('cnk-pw-media').checked, signature:val('cnk-pw-sign'),
+      agreedAt:new Date().toISOString()
+    };
+    var booking={
+      id:id, name:(val('cnk-first')+' '+val('cnk-last')).trim(), email:val('cnk-email'), phone:val('cnk-phone'),
+      date:val('cnk-date'), package:state.pkg, basePrice:c.base, tax:c.tax, ccFee:c.cc, price:c.total,
+      deposit:c.deposit, balance:c.balance, status:'confirmed', eventType:val('cnk-type'),
+      location:val('cnk-venue'), guests:val('cnk-guests'), notes:val('cnk-notes'),
+      source:val('cnk-source')||'Online Booking', created:Date.now(), paperwork:paperwork
+    };
+    bookings.push(booking); localStorage.setItem('cnk_bookings', JSON.stringify(bookings));
+    try{ if(typeof loadBookings==='function') loadBookings(); }catch(e){}
+    document.getElementById('cnk-done-ref').textContent=id;
+    document.getElementById('cnk-done-sub').textContent='Your '+PKG[state.pkg].label+' booth is confirmed for '+val('cnk-date')+'. Your deposit of '+money(c.deposit)+' has been received. The balance of '+money(c.balance)+' is due before your event. Reference your booking number below in any correspondence.';
+    cnkGoStep('done');
+  };
+
+  window.cnkGoStep=function(s){
+    ['1','2','3','done'].forEach(function(n){ var el=document.getElementById('cnk-s'+n)||document.getElementById('cnk-'+n); if(el) el.classList.remove('active'); });
+    var t=document.getElementById('cnk-s'+s)||document.getElementById('cnk-'+s); if(t) t.classList.add('active');
+    document.querySelectorAll('.cnk-step-pill').forEach(function(p){
+      var ps=p.getAttribute('data-s'); p.classList.remove('active','done');
+      var order=['1','2','3']; var cur=(s==='done')?3:order.indexOf(String(s));
+      var idx=order.indexOf(ps);
+      if(s==='done'){ p.classList.add('done'); }
+      else if(idx<cur) p.classList.add('done');
+      else if(idx===cur) p.classList.add('active');
+    });
+    window.scrollTo({top:0,behavior:'smooth'});
+  };
+
+  window.cnkReset=function(){
+    state={pkg:null,hours:1,addon:0};
+    window._cnkPaid=false; window._cnkBookingId=null;
+    ['cnk-first','cnk-last','cnk-email','cnk-phone','cnk-date','cnk-venue','cnk-guests','cnk-notes','cnk-pw-setup','cnk-pw-overlay','cnk-pw-contact','cnk-pw-sign','cnk-pw-start','cnk-pw-end'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
+    ['cnk-type','cnk-source','cnk-pw-power'].forEach(function(id){var e=document.getElementById(id);if(e)e.selectedIndex=0;});
+    document.getElementById('cnk-pw-agree').checked=false; document.getElementById('cnk-pw-media').checked=false;
+    document.querySelectorAll('#cnk-s1 .package-card').forEach(function(c){c.classList.remove('selected');});
+    document.getElementById('cnk-hourly-ctrl').style.display='none';
+    document.getElementById('cnk-hours').textContent='1'; refreshAddon();
+    cnkGoStep(1);
+  };
+})();
+</script>
 
 </div><!-- end booking view -->
 
