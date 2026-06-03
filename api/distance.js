@@ -22,7 +22,8 @@ async function geocode(address) {
   const d = await r.json();
   if (!d.features || !d.features.length) throw new Error('Address not found');
   const f = d.features[0];
-  return { lon: f.geometry.coordinates[0], lat: f.geometry.coordinates[1], label: f.properties && f.properties.label };
+  const p = f.properties || {};
+  return { lon: f.geometry.coordinates[0], lat: f.geometry.coordinates[1], label: p.label, confidence: p.confidence, layer: p.layer, hasNumber: !!p.housenumber };
 }
 
 async function drivingMeters(from, to) {
@@ -49,6 +50,11 @@ module.exports = async function handler(req, res) {
     if (address.length < 5) { res.status(400).json({ error: 'Please enter a valid address' }); return; }
 
     const dest = await geocode(address);
+    const precise = dest.hasNumber || ['address','street','venue'].indexOf(dest.layer) !== -1;
+    if (!precise || (typeof dest.confidence === 'number' && dest.confidence < 0.5)) {
+      res.status(200).json({ ok: false, error: 'Please enter a full street address (number, street, city, state)', needAddress: true, matched: dest.label });
+      return;
+    }
     const oneWayMeters = await drivingMeters(WAREHOUSE, dest);
     const oneWayMiles = oneWayMeters / METERS_PER_MILE;
     const roundTripMiles = Math.round(oneWayMiles * 2);
