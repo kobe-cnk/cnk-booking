@@ -2896,5 +2896,38 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
   setTimeout(wireDoneButton,500); setTimeout(wireDoneButton,1200);
 })();
 </script>
+
+<script>
+(function(){
+  function isAdmin(){ try { return sessionStorage.getItem('cnk_admin_authed')==='1'; } catch(e){ return false; } }
+  function wireLogo(){
+    var logo=document.querySelector('.nav-logo');
+    if(!logo){ setTimeout(wireLogo,100); return; }
+    if(logo._cnkLogoWired) return;
+    logo._cnkLogoWired=true;
+    logo.addEventListener('click', function(e){
+      if(!isAdmin()) return; // normal behavior for customers
+      e.preventDefault();
+      // Use the back-to-admin routine (handles mid-booking: resets flow, switches view, opens dashboard)
+      if(typeof window.cnkBackToAdmin==='function'){ window.cnkBackToAdmin(); return; }
+      // fallback: switch views + open admin manually
+      try {
+        window._cnkAdminMode=false;
+        if(typeof cnkReset==='function') cnkReset();
+        var vb=document.getElementById('view-booking'); var va=document.getElementById('view-admin');
+        if(vb) vb.classList.remove('active'); if(va) va.classList.add('active');
+        if(typeof window._cnkOpenAdmin==='function') window._cnkOpenAdmin();
+        window.scrollTo(0,0);
+      } catch(err){}
+    });
+    // show it's clickable for admins
+    if(isAdmin()) logo.style.cursor='pointer';
+    // keep cursor in sync when admin status changes (e.g., after login)
+    setInterval(function(){ try { logo.style.cursor = isAdmin() ? 'pointer' : 'auto'; } catch(e){} }, 1500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',wireLogo); else wireLogo();
+  setTimeout(wireLogo,500);
+})();
+</script>
 </body>
 </html>
