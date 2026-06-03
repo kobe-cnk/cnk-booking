@@ -2195,5 +2195,95 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
 })();
 </script>
 
+
+
+<script>
+(function(){
+  // ---- Save a booking to the shared Postgres database ----
+  window.cnkDbSave = function(b){
+    try {
+      return fetch('/api/save-booking', {
+        method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(b)
+      }).then(function(r){ return r.json(); }).catch(function(e){ console.warn('DB save failed', e); return null; });
+    } catch(e){ console.warn('DB save error', e); return Promise.resolve(null); }
+  };
+
+  // ---- Wrap online booking finish: after local save, push to DB ----
+  function wrapFinish(){
+    if (typeof window.cnkFinish !== 'function'){ setTimeout(wrapFinish, 50); return; }
+    if (window._cnkFinishWrapped) return;
+    var orig = window.cnkFinish;
+    window._cnkFinishWrapped = true;
+    window.cnkFinish = function(){
+      orig.apply(this, arguments);
+      // After orig runs, the newest booking is last in localStorage
+      try {
+        var arr = JSON.parse(localStorage.getItem('cnk_bookings')||'[]');
+        var latest = arr[arr.length-1];
+        if (latest) window.cnkDbSave(latest);
+      } catch(e){}
+    };
+  }
+
+  // ---- Wrap manual booking: after local save, push to DB ----
+  function wrapManual(){
+    if (typeof window.cnkCreateManualBooking !== 'function'){ setTimeout(wrapManual, 50); return; }
+    if (window._cnkManualWrapped) return;
+    var orig = window.cnkCreateManualBooking;
+    window._cnkManualWrapped = true;
+    window.cnkCreateManualBooking = function(){
+      var before = [];
+      try { before = JSON.parse(localStorage.getItem('cnk_bookings')||'[]'); } catch(e){}
+      var beforeCount = before.length;
+      orig.apply(this, arguments);
+      try {
+        var after = JSON.parse(localStorage.getItem('cnk_bookings')||'[]');
+        if (after.length > beforeCount) { window.cnkDbSave(after[after.length-1]); }
+      } catch(e){}
+    };
+  }
+
+  // ---- Load ALL bookings from DB into localStorage, then re-render admin ----
+  window.cnkSyncFromDb = function(){
+    return fetch('/api/list-bookings?t='+Date.now(), {cache:'no-store'})
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        if (!d || !d.bookings) return;
+        // Merge DB bookings with any local-only ones, DB wins on id
+        var local = [];
+        try { local = JSON.parse(localStorage.getItem('cnk_bookings')||'[]'); } catch(e){}
+        var byId = {};
+        local.forEach(function(b){ if(b&&b.id) byId[b.id]=b; });
+        d.bookings.forEach(function(b){ if(b&&b.id) byId[b.id]=b; });
+        var merged = Object.keys(byId).map(function(k){ return byId[k]; });
+        merged.sort(function(a,b){ return (b.created||0)-(a.created||0); });
+        localStorage.setItem('cnk_bookings', JSON.stringify(merged));
+        // re-render whatever admin views exist
+        try{ if(typeof loadBookings==='function') loadBookings(); }catch(e){}
+        try{ if(typeof renderOverview==='function') renderOverview(); }catch(e){}
+        try{ if(typeof renderAllBookings==='function') renderAllBookings(); }catch(e){}
+        try{ if(typeof renderUpcoming==='function') renderUpcoming(); }catch(e){}
+        try{ if(typeof renderCalendar==='function') renderCalendar(); }catch(e){}
+      })
+      .catch(function(e){ console.warn('DB sync failed', e); });
+  };
+
+  // ---- Auto-sync when admin opens (hook the admin open) ----
+  function hookAdminOpen(){
+    if (typeof window._cnkOpenAdmin === 'function' && !window._cnkAdminSyncHooked){
+      window._cnkAdminSyncHooked = true;
+      var origOpen = window._cnkOpenAdmin;
+      window._cnkOpenAdmin = function(){ origOpen.apply(this, arguments); window.cnkSyncFromDb(); };
+    }
+    if (!window._cnkAdminSyncHooked) setTimeout(hookAdminOpen, 80);
+  }
+
+  function init(){ wrapFinish(); wrapManual(); hookAdminOpen(); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+  setTimeout(init, 300);
+})();
+</script>
+
 </body>
 </html>
