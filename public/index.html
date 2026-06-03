@@ -2285,5 +2285,151 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
 })();
 </script>
 
+
+
+<style>
+  .cnk-modal-sec { margin-top:22px; }
+  .cnk-modal-sec-title { font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:var(--gold); margin-bottom:10px; padding-bottom:6px; border-bottom:1px solid rgba(196,152,58,0.2); }
+  .cnk-mrow { display:flex; justify-content:space-between; gap:16px; padding:7px 0; font-size:13px; border-bottom:1px solid rgba(245,240,232,0.05); }
+  .cnk-mrow .ml { color:var(--cream-dim); text-transform:uppercase; font-size:10px; letter-spacing:0.08em; padding-top:2px; }
+  .cnk-mrow .mv { color:var(--cream); text-align:right; }
+  .cnk-sign { font-family:'Cormorant Garamond',serif; font-size:22px; color:var(--cream); }
+  .cnk-badge-ok { color:#5ecc88; } .cnk-badge-no { color:var(--cream-dim); }
+  .cnk-modal-actions { display:flex; gap:10px; margin-top:24px; flex-wrap:wrap; }
+  .cnk-mbtn { padding:11px 18px; border-radius:6px; font-size:12px; letter-spacing:0.08em; text-transform:uppercase; cursor:pointer; font-family:'DM Sans',sans-serif; border:1px solid transparent; transition:all 0.15s; }
+  .cnk-mbtn-edit { background:rgba(196,152,58,0.15); color:var(--gold); border-color:rgba(196,152,58,0.4); }
+  .cnk-mbtn-edit:hover { background:rgba(196,152,58,0.28); }
+  .cnk-mbtn-cancel { background:transparent; color:#e05c70; border-color:rgba(224,92,112,0.4); }
+  .cnk-mbtn-cancel:hover { background:rgba(224,92,112,0.12); }
+  .cnk-mbtn-save { background:var(--gold); color:var(--charcoal); }
+  .cnk-mbtn-save:hover { filter:brightness(1.1); }
+  .cnk-mbtn-back { background:transparent; color:var(--cream-dim); border-color:rgba(245,240,232,0.2); }
+  .cnk-edit-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:8px; }
+  .cnk-edit-grid .full { grid-column:1 / -1; }
+  .cnk-edit-grid label { display:block; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:var(--cream-dim); margin-bottom:5px; }
+  .cnk-edit-grid input, .cnk-edit-grid select, .cnk-edit-grid textarea {
+    width:100%; background:var(--charcoal-mid); border:1px solid rgba(245,240,232,0.12); border-radius:6px;
+    padding:9px 12px; color:var(--cream); font-family:'DM Sans',sans-serif; font-size:13px; box-sizing:border-box;
+  }
+</style>
+
+
+<script>
+(function(){
+  var PKG={hourly:'Hourly',halfday:'Half Day',fullday:'Full Day'};
+  function money(n){ n=Number(n)||0; return '$'+n.toFixed(2); }
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function getBookings(){ try{ return JSON.parse(localStorage.getItem('cnk_bookings')||'[]'); }catch(e){ return []; } }
+  function saveBookings(arr){ localStorage.setItem('cnk_bookings', JSON.stringify(arr)); }
+  function find(id){ return getBookings().filter(function(b){return b.id===id;})[0]; }
+  function fmtTime(t){ if(!t) return '—'; var p=String(t).split(':'); if(p.length<2) return t; var h=parseInt(p[0],10); var m=p[1]; var ap=h>=12?'PM':'AM'; var hh=h%12; if(hh===0)hh=12; return hh+':'+m+' '+ap; }
+  function fmtDate(d){ if(!d) return '—'; try{ return new Date(d+'T00:00:00').toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}); }catch(e){ return d; } }
+  function openOverlay(){ var m=document.getElementById('booking-modal'); if(m) m.classList.add('open'); }
+  function rerender(){ try{loadBookings();}catch(e){} ['renderOverview','renderAllBookings','renderUpcoming','renderCalendar'].forEach(function(fn){ try{ if(typeof window[fn]==='function') window[fn](); }catch(e){} }); }
+  function row(label, val){ return '<div class="cnk-mrow"><span class="ml">'+label+'</span><span class="mv">'+val+'</span></div>'; }
+
+  window.openModal = function(id){
+    var b = find(id); if(!b){ return; }
+    var pw = b.paperwork || {};
+    var statusBtns = ['pending','confirmed','balance_due','complete'].map(function(s){
+      var label = s==='balance_due'?'Balance Due':(s.charAt(0).toUpperCase()+s.slice(1));
+      var active = (b.status===s)?' style="background:var(--gold);color:var(--charcoal);border-color:var(--gold);"':'';
+      return '<button class="cnk-mbtn cnk-mbtn-back"'+active+' onclick="updateStatus(\''+b.id+'\',\''+s+'\')">'+label+'</button>';
+    }).join('');
+    var html = '';
+    html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:6px;">';
+    html += '<div><div style="font-family:Cormorant Garamond,serif;font-size:26px;color:var(--cream);">'+esc(b.name||'—')+'</div>';
+    html += '<div style="font-size:12px;color:var(--cream-dim);letter-spacing:0.05em;">'+esc(b.id)+' · '+esc(b.source||'')+'</div></div>';
+    html += '<button class="cnk-mbtn cnk-mbtn-back" onclick="closeModal()">✕ Close</button></div>';
+    html += '<div class="cnk-modal-actions" style="margin-top:14px;margin-bottom:6px;">'+statusBtns+'</div>';
+    html += '<div class="cnk-modal-sec"><div class="cnk-modal-sec-title">Event</div>';
+    html += row('Event Date', fmtDate(b.date))+row('Event Type', esc(b.eventType||'—'))+row('Venue / Location', esc(b.location||'—'))+row('Guests', esc(b.guests||'—'))+row('Package', esc(PKG[b.package]||b.package||'—'))+'</div>';
+    html += '<div class="cnk-modal-sec"><div class="cnk-modal-sec-title">Pricing</div>';
+    html += row('Base Price', money(b.basePrice))+row('Sales Tax (7.45%)', money(b.tax))+row('Card Fee (3%)', money(b.ccFee))+row('Total', '<strong>'+money(b.price)+'</strong>')+row('Deposit Paid', money(b.deposit))+row('Balance Remaining', money(b.balance))+'</div>';
+    html += '<div class="cnk-modal-sec"><div class="cnk-modal-sec-title">Contact</div>';
+    html += row('Email', esc(b.email||'—'))+row('Phone', esc(b.phone||'—'));
+    if (b.notes) html += row('Notes', esc(b.notes));
+    html += '</div>';
+    if (pw && (pw.signature || pw.agreedAt || pw.startTime)) {
+      html += '<div class="cnk-modal-sec"><div class="cnk-modal-sec-title">Signed Agreement &amp; Paperwork</div>';
+      html += row('Signature', '<span class="cnk-sign">'+esc(pw.signature||'—')+'</span>');
+      html += row('Signed On', pw.agreedAt ? new Date(pw.agreedAt).toLocaleString('en-US') : '—');
+      html += row('Event Start', fmtTime(pw.startTime))+row('Event End', fmtTime(pw.endTime))+row('Setup Location', esc(pw.setup||'—'))+row('Power within 25ft', esc(pw.power||'—'))+row('WiFi Available', esc(pw.wifi||'—'))+row('Outdoor Setup', esc(pw.outdoor||'—'))+row('Overlay / Theme', esc(pw.overlay||'—'))+row('Day-of Contact', esc(pw.dayContact||'—'));
+      html += row('Photo Marketing Release', pw.mediaRelease ? '<span class="cnk-badge-ok">Allowed</span>' : '<span class="cnk-badge-no">Opted out</span>');
+      html += '</div>';
+    } else {
+      html += '<div class="cnk-modal-sec"><div class="cnk-modal-sec-title">Signed Agreement &amp; Paperwork</div><div style="font-size:13px;color:var(--cream-dim);padding:8px 0;">No signed paperwork on file (manual booking or not yet completed).</div></div>';
+    }
+    html += '<div class="cnk-modal-actions">';
+    html += '<button class="cnk-mbtn cnk-mbtn-edit" onclick="editBooking(\''+b.id+'\')">✎ Edit Booking</button>';
+    html += '<button class="cnk-mbtn cnk-mbtn-cancel" onclick="cancelBooking(\''+b.id+'\')">Cancel / Delete</button>';
+    html += '</div>';
+    document.getElementById('modal-content').innerHTML = html;
+    openOverlay();
+  };
+
+  window.editBooking = function(id){
+    var b = find(id); if(!b) return;
+    var pw = b.paperwork || {};
+    function opt(v,sel){ return '<option'+(v===sel?' selected':'')+'>'+v+'</option>'; }
+    var html = '';
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">';
+    html += '<div style="font-family:Cormorant Garamond,serif;font-size:24px;color:var(--cream);">Edit · '+esc(b.id)+'</div>';
+    html += '<button class="cnk-mbtn cnk-mbtn-back" onclick="openModal(\''+b.id+'\')">✕</button></div>';
+    html += '<div class="cnk-edit-grid">';
+    html += '<div><label>Name</label><input id="eb-name" value="'+esc(b.name)+'"></div>';
+    html += '<div><label>Event Date</label><input id="eb-date" type="date" value="'+esc(b.date)+'"></div>';
+    html += '<div><label>Email</label><input id="eb-email" value="'+esc(b.email)+'"></div>';
+    html += '<div><label>Phone</label><input id="eb-phone" value="'+esc(b.phone)+'"></div>';
+    html += '<div><label>Event Type</label><input id="eb-type" value="'+esc(b.eventType)+'"></div>';
+    html += '<div><label>Guests</label><input id="eb-guests" value="'+esc(b.guests)+'"></div>';
+    html += '<div class="full"><label>Venue / Location</label><input id="eb-location" value="'+esc(b.location)+'"></div>';
+    html += '<div><label>Status</label><select id="eb-status">'+opt('pending',b.status)+opt('confirmed',b.status)+opt('balance_due',b.status)+opt('complete',b.status)+'</select></div>';
+    html += '<div><label>Balance Remaining ($)</label><input id="eb-balance" type="number" step="0.01" value="'+(Number(b.balance)||0)+'"></div>';
+    html += '<div class="full"><label>Notes</label><textarea id="eb-notes" rows="2">'+esc(b.notes)+'</textarea></div>';
+    html += '<div><label>Event Start</label><input id="eb-start" type="time" value="'+esc(pw.startTime||'')+'"></div>';
+    html += '<div><label>Event End</label><input id="eb-end" type="time" value="'+esc(pw.endTime||'')+'"></div>';
+    html += '<div class="full"><label>Setup Location</label><input id="eb-setup" value="'+esc(pw.setup||'')+'"></div>';
+    html += '<div class="full"><label>Overlay / Theme</label><input id="eb-overlay" value="'+esc(pw.overlay||'')+'"></div>';
+    html += '<div class="full"><label>Day-of Contact</label><input id="eb-contact" value="'+esc(pw.dayContact||'')+'"></div>';
+    html += '</div>';
+    html += '<div class="cnk-modal-actions">';
+    html += '<button class="cnk-mbtn cnk-mbtn-save" onclick="saveBookingEdit(\''+b.id+'\')">Save Changes</button>';
+    html += '<button class="cnk-mbtn cnk-mbtn-back" onclick="openModal(\''+b.id+'\')">Discard</button>';
+    html += '</div>';
+    document.getElementById('modal-content').innerHTML = html;
+    openOverlay();
+  };
+
+  window.saveBookingEdit = function(id){
+    var arr = getBookings();
+    var b = arr.filter(function(x){return x.id===id;})[0];
+    if(!b) return;
+    function v(eid){ var e=document.getElementById(eid); return e?e.value:''; }
+    b.name=v('eb-name'); b.date=v('eb-date'); b.email=v('eb-email'); b.phone=v('eb-phone');
+    b.eventType=v('eb-type'); b.guests=v('eb-guests'); b.location=v('eb-location');
+    b.status=v('eb-status'); b.balance=parseFloat(v('eb-balance'))||0; b.notes=v('eb-notes');
+    b.paperwork=b.paperwork||{};
+    b.paperwork.startTime=v('eb-start'); b.paperwork.endTime=v('eb-end');
+    b.paperwork.setup=v('eb-setup'); b.paperwork.overlay=v('eb-overlay'); b.paperwork.dayContact=v('eb-contact');
+    saveBookings(arr);
+    if (typeof window.cnkDbSave==='function') window.cnkDbSave(b);
+    rerender();
+    if (typeof showToast==='function'){ try{ showToast('Booking updated'); }catch(e){} }
+    window.openModal(id);
+  };
+
+  window.cancelBooking = function(id){
+    if (!confirm('Cancel and permanently delete this booking? This cannot be undone.')) return;
+    var arr = getBookings().filter(function(b){return b.id!==id;});
+    saveBookings(arr);
+    try { fetch('/api/delete-booking', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({id:id}) }).catch(function(){}); } catch(e){}
+    rerender();
+    var m=document.getElementById('booking-modal'); if(m) m.classList.remove('open');
+    if (typeof showToast==='function'){ try{ showToast('Booking deleted'); }catch(e){} }
+  };
+})();
+</script>
+
 </body>
 </html>
