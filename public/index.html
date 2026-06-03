@@ -2842,5 +2842,59 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
   setTimeout(init,400); setTimeout(init,1000);
 })();
 </script>
+
+<script>
+(function(){
+  // Go back to the admin dashboard from anywhere (no re-login).
+  window.cnkBackToAdmin = function(){
+    try { window._cnkAdminMode = false; } catch(e){}
+    try { if(typeof cnkReset==='function') cnkReset(); } catch(e){}
+    // switch views: hide booking, show admin
+    try {
+      var vb=document.getElementById('view-booking'); var va=document.getElementById('view-admin');
+      if(vb) vb.classList.remove('active'); if(va) va.classList.add('active');
+    } catch(e){}
+    // ensure authed + open dashboard (re-syncs from DB, lands on Overview)
+    try { sessionStorage.setItem('cnk_admin_authed','1'); } catch(e){}
+    try { if(typeof window._cnkOpenAdmin==='function') window._cnkOpenAdmin(); } catch(e){}
+    window.scrollTo(0,0);
+  };
+
+  // When the confirmation screen appears after an ADMIN booking, show a Back-to-Admin button.
+  // We hook cnkFinish: capture admin flag BEFORE other wrappers reset it, then inject the button.
+  function wireDoneButton(){
+    if(typeof window.cnkFinish!=='function'){ setTimeout(wireDoneButton,60); return; }
+    if(window._cnkDoneAdminWired) return;
+    window._cnkDoneAdminWired = true;
+    var orig = window.cnkFinish;
+    window.cnkFinish = function(){
+      var wasAdmin = !!window._cnkAdminMode;
+      orig.apply(this, arguments);
+      if(wasAdmin){
+        // add (once) a Back to Admin button into the confirmation screen
+        setTimeout(function(){
+          var done=document.getElementById('cnk-done');
+          if(!done) return;
+          if(document.getElementById('cnk-back-admin-btn')) return;
+          var btn=document.createElement('button');
+          btn.id='cnk-back-admin-btn';
+          btn.type='button';
+          btn.className='cnk-pay-btn';
+          btn.style.cssText='margin-top:12px;background:rgba(196,152,58,0.18);color:var(--gold);border:1px solid rgba(196,152,58,0.45);';
+          btn.textContent='← Back to Admin Dashboard';
+          btn.addEventListener('click', window.cnkBackToAdmin);
+          // place it near the existing "Book Another Event" button
+          var another=[...done.querySelectorAll('button')].filter(function(b){return /book another/i.test(b.textContent);})[0];
+          if(another && another.parentNode){ another.parentNode.insertBefore(btn, another.nextSibling); }
+          else { done.appendChild(btn); }
+        }, 80);
+      }
+    };
+  }
+
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',wireDoneButton); else wireDoneButton();
+  setTimeout(wireDoneButton,500); setTimeout(wireDoneButton,1200);
+})();
+</script>
 </body>
 </html>
