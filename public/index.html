@@ -2273,7 +2273,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
     if (typeof window._cnkOpenAdmin === 'function' && !window._cnkAdminSyncHooked){
       window._cnkAdminSyncHooked = true;
       var origOpen = window._cnkOpenAdmin;
-      window._cnkOpenAdmin = function(){ origOpen.apply(this, arguments); window.cnkSyncFromDb(); };
+      window._cnkOpenAdmin = function(){ origOpen.apply(this, arguments); try{ ["admin-overview","admin-calendar","admin-bookings","admin-upcoming","admin-newbooking"].forEach(function(id){ var el=document.getElementById(id); if(el) el.classList.remove("active"); }); var ov=document.getElementById("admin-overview"); if(ov) ov.classList.add("active"); document.querySelectorAll(".sidebar-btn").forEach(function(b){ b.classList.toggle("active", /overview/i.test(b.textContent)); }); }catch(e){} window.cnkSyncFromDb(); };
     }
     if (!window._cnkAdminSyncHooked) setTimeout(hookAdminOpen, 80);
   }
