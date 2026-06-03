@@ -3179,8 +3179,10 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
       if(table && table.previousElementSibling!==label){ cal.insertBefore(table, grid); }
       // rebuild the month list as ALL upcoming bookings sorted by date (soonest first)
       if(table){
-        var today=new Date(); today.setHours(0,0,0,0);
-        var upcoming=arr.filter(function(b){ var d=new Date(b.date+'T00:00:00'); return d>=today; })
+        var dayCells=[...cal.querySelectorAll('.cal-day')].map(function(d){var m=(d.getAttribute('onclick')||'').match(/calDayClick\('([0-9\-]+)'\)/);return m?m[1]:null;}).filter(Boolean);
+        var midDate=dayCells[Math.floor(dayCells.length/2)]||'';
+        var ym=midDate.substring(0,7); // 'YYYY-MM' of the displayed month
+        var upcoming=arr.filter(function(b){ return (b.date||'').substring(0,7)===ym; })
           .sort(function(a,b){ return new Date(a.date)-new Date(b.date); });
         if(upcoming.length){
           var rows=upcoming.map(function(b){
@@ -3194,7 +3196,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
           }).join('');
           table.innerHTML='<div style="border:1px solid rgba(255,255,255,0.08);border-radius:8px;overflow:hidden;">'+rows+'</div>';
           [...table.querySelectorAll('.cnk-cal-row')].forEach(function(r){ r.addEventListener('click', function(){ if(typeof window.openModal==='function') window.openModal(r.getAttribute('data-id')); }); });
-          label.textContent='Upcoming Bookings (soonest first)';
+          label.textContent='Bookings This Month (soonest first)';
         }
       }
     }
