@@ -6,7 +6,7 @@
 const ORS_KEY = process.env.ORS_API_KEY;
 
 // CNK warehouse: 19 N 900 W, American Fork, UT 84003 (geocoded once; lon,lat order for ORS)
-const WAREHOUSE = { lon: -111.811, lat: 40.3838 };
+const WAREHOUSE = { lon: -111.822529, lat: 40.377802 };
 
 const INCLUDED_MILES = 50;       // round-trip miles included
 const PER_MILE = 1.25;           // $ per mile beyond included
