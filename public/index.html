@@ -3377,6 +3377,21 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
       }
     }
 
+    // 1c) show Final Payment Due date (14 days before event) when a balance remains
+    if(b && Number(b.balance)>0.005 && b.date && !mc.querySelector('[data-cnk-finaldue-row]')){
+      try{
+        var ev=new Date(b.date+'T00:00:00'); var due=new Date(ev.getTime()); due.setDate(due.getDate()-14);
+        var dueStr=due.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
+        var brows=[...mc.querySelectorAll('.cnk-mrow')];
+        var balRow=brows.find(function(rw){ var l=rw.querySelector('.ml'); return l && /balance/i.test(l.textContent); });
+        if(balRow){
+          var fr=document.createElement('div'); fr.className='cnk-mrow'; fr.setAttribute('data-cnk-finaldue-row','1');
+          fr.innerHTML='<span class="ml" style="color:#e0a05c;">Final Payment Due</span><span class="mv" style="color:#e0a05c;">'+dueStr+'</span>';
+          balRow.parentNode.insertBefore(fr, balRow.nextSibling);
+        }
+      }catch(e){}
+    }
+
     // 2) add "Review & Download Agreement" button in the paperwork section (once)
     if(b && !mc.querySelector('[data-cnk-agree-btn]')){
       // find the Signed Agreement section title
@@ -3400,7 +3415,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
     var clauses=[
       ['1. Parties & Equipment','CNK Booths LLC ("Company") agrees to provide photo booth rental services to the Client named below for the event described herein.'],
       ['2. Rental Period','The rental period and event timing are as specified below. Additional hours are billed at $125/hour.'],
-      ['3. Payment','A 50% deposit reserves the date. The remaining balance is due before the event. Prices include applicable sales tax; card payments include a 3% processing fee.'],
+      ['3. Payment','A 50% deposit reserves the date. The remaining balance is due in full no later than fourteen (14) days before the event date. Prices include applicable sales tax; card payments include a 3% processing fee.'],
       ['4. Delivery & Travel','Delivery within 50 miles round-trip is included. Beyond that, travel is billed at $1.25 per mile, or a custom agreed amount as noted.'],
       ['5. Setup & Space','Client must provide adequate space, a level surface, and access to a standard power outlet within 15 feet, unless otherwise arranged.'],
       ['6. Cancellation','Deposits are non-refundable within 30 days of the event. Cancellations outside that window may be refunded at the Company\u2019s discretion.'],
@@ -3436,7 +3451,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
       +(Number(b.ccFee)>0?row('Card fee (3%)', mMoney(b.ccFee)):'')
       +(Number(b.deliveryFee)>0?row('Delivery'+(b.deliveryMiles?(' ('+b.deliveryMiles+' mi RT)'):''), mMoney(b.deliveryFee)):'')
       +(Number(b.discount)>0?row('Discount', '-'+mMoney(b.discount)):'')
-      +row('Total', mMoney(b.price))+row('Paid', mMoney(b.deposit))+row('Balance due', mMoney(b.balance))
+      +row('Total', mMoney(b.price))+row('Paid', mMoney(b.deposit))+row('Balance due', mMoney(b.balance))+(b.date&&Number(b.balance)>0.005?(function(){var ev=new Date(b.date+'T00:00:00');var du=new Date(ev.getTime());du.setDate(du.getDate()-14);return row('Final payment due', du.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}));})():'')
       +'</table>'
       +'<h2>Terms & Conditions</h2>'
       +clauses.map(function(c){return '<div class="clause"><b>'+mEsc(c[0])+'</b>'+mEsc(c[1])+'</div>';}).join('')
