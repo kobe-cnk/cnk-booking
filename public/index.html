@@ -3108,5 +3108,344 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
   setTimeout(deriveStatusFinish,600);
 })();
 </script>
+
+<script>
+(function(){
+
+  // ===== Overview: add Deposits Collected + Future to Collect cards =====
+  function money(n){ n=Number(n)||0; return '$'+n.toFixed(2); }
+  function activeBookings(){ var a=[]; try{ a=(typeof loadBookings==='function')?loadBookings():JSON.parse(localStorage.getItem('cnk_bookings')||'[]'); }catch(e){} return a.filter(function(b){ return (b.status||'')!=='cancelled'; }); }
+  function wrapOverview(){
+    if(typeof window.renderOverview!=='function'){ setTimeout(wrapOverview,60); return; }
+    if(window._cnkOvWrapped) return; window._cnkOvWrapped=true;
+    var orig=window.renderOverview;
+    window.renderOverview=function(){
+      orig.apply(this,arguments);
+      try{
+        var grid=document.getElementById('stats-grid'); if(!grid) return;
+        // remove any prior added cards to avoid dupes
+        [...grid.querySelectorAll('[data-cnk-extra]')].forEach(function(e){e.remove();});
+        var arr=activeBookings();
+        var collected=arr.reduce(function(s,b){return s+(Number(b.deposit)||0);},0);
+        var future=arr.reduce(function(s,b){return s+(Number(b.balance)||0);},0);
+        function card(label,val,sub,cls){ var d=document.createElement('div'); d.className='stat-card '+(cls||''); d.setAttribute('data-cnk-extra','1'); d.innerHTML='<div class="stat-label">'+label+'</div><div class="stat-value">'+val+'</div><div class="stat-sub">'+sub+'</div>'; return d; }
+        grid.appendChild(card('Deposits Collected', money(collected), 'Paid to date', 'stat-gold'));
+        grid.appendChild(card('Future to Collect', money(future), 'Outstanding balances', 'stat-red'));
+      }catch(e){}
+    };
+  }
+  wrapOverview(); setTimeout(wrapOverview,500);
+
+
+  // ===== Calendar: list rentals in each day cell + month list on top, sorted soonest->furthest =====
+  function calMoney(n){ n=Number(n)||0; return '$'+n.toFixed(2); }
+  function calActive(){ var a=[]; try{ a=(typeof loadBookings==='function')?loadBookings():JSON.parse(localStorage.getItem('cnk_bookings')||'[]'); }catch(e){} return a.filter(function(b){ return (b.status||'')!=='cancelled' && b.date; }); }
+  function calLabel(b){ return (b.name||'Booking'); }
+  function enhanceCalendar(){
+    var cal=document.getElementById('admin-calendar'); if(!cal) return;
+    var arr=calActive();
+    // index bookings by date string YYYY-MM-DD
+    var byDate={}; arr.forEach(function(b){ (byDate[b.date]=byDate[b.date]||[]).push(b); });
+    // 1) inject rentals into each day cell
+    [...cal.querySelectorAll('.cal-day')].forEach(function(cell){
+      var oc=cell.getAttribute('onclick')||'';
+      var m=oc.match(/calDayClick\('([0-9\-]+)'\)/); if(!m) return;
+      var date=m[1];
+      // clear prior injected list
+      [...cell.querySelectorAll('[data-cnk-ev]')].forEach(function(e){e.remove();});
+      var list=byDate[date]; if(!list||!list.length) return;
+      cell.style.position='relative'; cell.style.minHeight='62px'; cell.style.verticalAlign='top';
+      var wrap=document.createElement('div'); wrap.setAttribute('data-cnk-ev','1');
+      wrap.style.cssText='margin-top:2px;display:flex;flex-direction:column;gap:2px;';
+      list.slice(0,3).forEach(function(b){
+        var tag=document.createElement('div');
+        tag.textContent=calLabel(b);
+        tag.title=calLabel(b)+' — '+(b.package||'')+' ('+calMoney(b.price)+')';
+        tag.style.cssText='font-size:9.5px;line-height:1.25;background:rgba(196,152,58,0.22);color:var(--gold,#c4983a);border-radius:3px;padding:1px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;';
+        tag.addEventListener('click', function(ev){ ev.stopPropagation(); if(typeof window.openModal==='function') window.openModal(b.id); });
+        wrap.appendChild(tag);
+      });
+      if(list.length>3){ var more=document.createElement('div'); more.textContent='+'+(list.length-3)+' more'; more.style.cssText='font-size:9px;color:var(--cream-dim,#9a8);'; wrap.appendChild(more); }
+      cell.appendChild(wrap);
+    });
+    // 2) move "Bookings This Month" label+table to top (after header) and fill sorted soonest->furthest
+    var header=cal.querySelector('.admin-header');
+    var label=[...cal.querySelectorAll('.section-label')].find(function(d){return /this month/i.test(d.textContent)||/upcoming bookings/i.test(d.textContent);});
+    var grid=cal.querySelector('.calendar-section');
+    if(header && label && grid){
+      var table=label.nextElementSibling && label.nextElementSibling.classList.contains('table-wrapper') ? label.nextElementSibling : cal.querySelector('.table-wrapper');
+      // reorder so label+table sit right after header, before grid (idempotent each render)
+      if(label.previousElementSibling!==header){ cal.insertBefore(label, grid); if(table) cal.insertBefore(table, label.nextSibling); }
+      if(table && table.previousElementSibling!==label){ cal.insertBefore(table, grid); }
+      // rebuild the month list as ALL upcoming bookings sorted by date (soonest first)
+      if(table){
+        var today=new Date(); today.setHours(0,0,0,0);
+        var upcoming=arr.filter(function(b){ var d=new Date(b.date+'T00:00:00'); return d>=today; })
+          .sort(function(a,b){ return new Date(a.date)-new Date(b.date); });
+        if(upcoming.length){
+          var rows=upcoming.map(function(b){
+            var d=new Date(b.date+'T00:00:00');
+            var ds=d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
+            return '<div class="cnk-cal-row" data-id="'+b.id+'" style="display:flex;justify-content:space-between;gap:12px;padding:9px 12px;border-bottom:1px solid rgba(255,255,255,0.06);cursor:pointer;align-items:center;">'
+              +'<span style="color:var(--cream,#e8e0d0);font-size:13px;min-width:150px;">'+ds+'</span>'
+              +'<span style="color:var(--cream,#e8e0d0);font-weight:600;flex:1;">'+(b.name||'')+'</span>'
+              +'<span style="color:var(--cream-dim,#9a8);font-size:12px;">'+(b.package||'')+'</span>'
+              +'<span style="color:var(--gold,#c4983a);font-size:12px;min-width:80px;text-align:right;">'+calMoney(b.balance)+' due</span></div>';
+          }).join('');
+          table.innerHTML='<div style="border:1px solid rgba(255,255,255,0.08);border-radius:8px;overflow:hidden;">'+rows+'</div>';
+          [...table.querySelectorAll('.cnk-cal-row')].forEach(function(r){ r.addEventListener('click', function(){ if(typeof window.openModal==='function') window.openModal(r.getAttribute('data-id')); }); });
+          label.textContent='Upcoming Bookings (soonest first)';
+        }
+      }
+    }
+  }
+  function wrapCalendar(){
+    if(typeof window.renderCalendar!=='function'){ setTimeout(wrapCalendar,60); return; }
+    if(window._cnkCalWrapped) return; window._cnkCalWrapped=true;
+    var orig=window.renderCalendar;
+    window.renderCalendar=function(){ orig.apply(this,arguments); setTimeout(enhanceCalendar,20); };
+  }
+  wrapCalendar(); setTimeout(wrapCalendar,500);
+
+
+  // ===== All Bookings: add Edit button + sortable column headers =====
+  window._cnkSort = window._cnkSort || { col:null, dir:1 };
+  function enhanceAllBookings(){
+    var v=document.getElementById('admin-bookings'); if(!v) return;
+    var table=v.querySelector('table'); if(!table) return;
+    // 1) add Edit button between Charge Balance and Cancel in each row
+    [...table.querySelectorAll('tbody tr')].forEach(function(tr){
+      if(tr.querySelector('[data-cnk-edit]')) return;
+      var cancelBtn=[...tr.querySelectorAll('button')].find(function(b){return /cancel/i.test(b.textContent);});
+      if(!cancelBtn) return;
+      var oc=cancelBtn.getAttribute('onclick')||'';
+      var m=oc.match(/cancelBooking\('([^']+)'\)/); if(!m) return;
+      var id=m[1];
+      var edit=document.createElement('button');
+      edit.setAttribute('data-cnk-edit','1');
+      edit.className=cancelBtn.className;
+      edit.textContent='Edit';
+      edit.addEventListener('click', function(e){ e.stopPropagation(); if(typeof window.editBooking==='function') window.editBooking(id); });
+      cancelBtn.parentNode.insertBefore(edit, cancelBtn);
+    });
+    // 2) sortable headers
+    var ths=[...table.querySelectorAll('thead th, thead td')];
+    ths.forEach(function(th, idx){
+      if(th._cnkSortable) return; th._cnkSortable=true;
+      if(/action/i.test(th.textContent)) return; // don't sort the actions column
+      th.style.cursor='pointer'; th.style.userSelect='none';
+      th.title='Click to sort';
+      var baseLabel=th.textContent.trim();
+      th.addEventListener('click', function(){
+        if(window._cnkSort.col===idx){ window._cnkSort.dir*=-1; } else { window._cnkSort.col=idx; window._cnkSort.dir=1; }
+        applySort(table);
+        // update arrows
+        ths.forEach(function(h){ var b=h.getAttribute('data-base')||h.textContent.replace(/[▲▼]\s*$/,'').trim(); h.setAttribute('data-base',b); h.textContent=b; });
+        th.setAttribute('data-base', baseLabel);
+        th.textContent=baseLabel+(window._cnkSort.dir>0?'  ▲':'  ▼');
+      });
+    });
+    if(window._cnkSort.col!==null) applySort(table);
+  }
+  function applySort(table){
+    var col=window._cnkSort.col, dir=window._cnkSort.dir;
+    if(col===null) return;
+    var tbody=table.querySelector('tbody'); if(!tbody) return;
+    var rows=[...tbody.querySelectorAll('tr')];
+    rows.sort(function(a,b){
+      var ax=(a.children[col]?a.children[col].textContent.trim():'');
+      var bx=(b.children[col]?b.children[col].textContent.trim():'');
+      // try numeric / currency
+      var an=parseFloat(ax.replace(/[^0-9.\-]/g,'')), bn=parseFloat(bx.replace(/[^0-9.\-]/g,''));
+      var isNum=ax.match(/[0-9]/)&&bx.match(/[0-9]/)&&!isNaN(an)&&!isNaN(bn)&&(/^[\s$,.0-9\-]+$/.test(ax)||/^[\s$,.0-9\-]+$/.test(bx));
+      // date column?
+      var ad=Date.parse(ax), bd=Date.parse(bx);
+      if(!isNaN(ad)&&!isNaN(bd)&&ax.match(/[A-Za-z0-9]/)&&(/\d{4}|\d{1,2}\/\d{1,2}/.test(ax))){ return (ad-bd)*dir; }
+      if(isNum){ return (an-bn)*dir; }
+      return ax.localeCompare(bx)*dir;
+    });
+    rows.forEach(function(r){ tbody.appendChild(r); });
+  }
+  function wrapAllBookings(){
+    if(typeof window.renderAllBookings!=='function'){ setTimeout(wrapAllBookings,60); return; }
+    if(window._cnkAbWrapped) return; window._cnkAbWrapped=true;
+    var orig=window.renderAllBookings;
+    window.renderAllBookings=function(){ orig.apply(this,arguments); setTimeout(enhanceAllBookings,20); };
+  }
+  wrapAllBookings(); setTimeout(wrapAllBookings,500);
+
+
+  // ===== Capture Square paymentId on charges, and Cancel-with-refund =====
+  // Wrap fetch to record the paymentId returned by /api/charge onto the latest booking.
+  function installPayIdCapture(){
+    if(window._cnkPayIdCapture) return; window._cnkPayIdCapture=true;
+    var of=window.fetch;
+    window.fetch=function(url,opts){
+      var p=of.call(this,url,opts);
+      try{
+        if(typeof url==='string' && url.indexOf('/api/charge')!==-1){
+          p.then(function(r){ return r.clone().json().then(function(j){
+            if(j && (j.paymentId||j.payment_id)){
+              var pid=j.paymentId||j.payment_id;
+              // tag the most recently created/updated booking that doesn't have a payment id yet, or the one being charged
+              try{
+                var arr=JSON.parse(localStorage.getItem('cnk_bookings')||'[]');
+                // prefer a booking whose id is referenced in the charge body
+                var bid=null; try{ bid=JSON.parse(opts.body).bookingId; }catch(e){}
+                var idx=-1;
+                if(bid) idx=arr.findIndex(function(b){return b.id===bid;});
+                if(idx===-1) idx=arr.length-1;
+                if(idx>=0){ arr[idx].squarePaymentId=pid; localStorage.setItem('cnk_bookings',JSON.stringify(arr)); if(typeof window.cnkDbSave==='function') window.cnkDbSave(arr[idx]); }
+              }catch(e){}
+            }
+          }).catch(function(){}); }).catch(function(){});
+        }
+      }catch(e){}
+      return p;
+    };
+  }
+
+  // Override cancelBooking: confirm -> refund (if card payment) -> remove
+  function installCancel(){
+    var orig=window.cancelBooking;
+    window.cancelBooking=async function(id){
+      var arr=[]; try{ arr=JSON.parse(localStorage.getItem('cnk_bookings')||'[]'); }catch(e){}
+      var b=arr.filter(function(x){return x.id===id;})[0]||{};
+      var paid=Number(b.deposit)||0;
+      var pid=b.squarePaymentId;
+      var name=b.name||id;
+      var msg='Cancel the booking for '+name+' ('+id+')?';
+      if(pid && paid>0){ msg+='\n\nThis will REFUND $'+paid.toFixed(2)+' to their card via Square, then remove the booking. This cannot be undone.'; }
+      else if(paid>0){ msg+='\n\n$'+paid.toFixed(2)+' was collected by '+(b.paymentMethod||b.source||'a non-card method')+'. No automatic refund can be issued — you will need to refund that manually. The booking will be removed.'; }
+      else { msg+='\n\nNo payment was collected. The booking will be removed.'; }
+      if(!window.confirm(msg)) return;
+      // process refund first if we have a square payment id
+      if(pid && paid>0){
+        try{
+          var rr=await fetch('/api/refund',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({paymentId:pid, amount:Math.round(paid*100), reason:'Booking '+id+' cancelled'})});
+          var rj=await rr.json();
+          if(!rj.ok){ if(!window.confirm('Refund FAILED: '+(rj.error||'unknown')+'\n\nDo you still want to remove the booking? (You may need to refund manually in Square.)')) return; }
+          else { window.alert('Refunded $'+(rj.amount/100).toFixed(2)+' to the card (Square status: '+(rj.status||'PENDING')+'). Removing the booking now.'); }
+        }catch(e){ if(!window.confirm('Refund request errored: '+e+'\n\nRemove the booking anyway?')) return; }
+      }
+      // now remove (mirror original behavior): delete from DB + localStorage + rerender + close modal
+      try{ await fetch('/api/delete-booking',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:id})}); }catch(e){}
+      try{ var a2=JSON.parse(localStorage.getItem('cnk_bookings')||'[]').filter(function(x){return x.id!==id;}); localStorage.setItem('cnk_bookings',JSON.stringify(a2)); }catch(e){}
+      ['renderOverview','renderAllBookings','renderUpcoming','renderCalendar'].forEach(function(fn){ try{ if(typeof window[fn]==='function') window[fn](); }catch(e){} });
+      try{ var modal=document.getElementById('booking-modal'); if(modal) modal.classList.remove('open'); }catch(e){}
+    };
+  }
+  function initCancelRefund(){ installPayIdCapture(); if(typeof window.cancelBooking==='function'){ installCancel(); } else { setTimeout(initCancelRefund,80); } }
+  initCancelRefund(); setTimeout(initCancelRefund,600);
+
+
+  // ===== Modal: show Delivery in pricing + Review/Download rental agreement =====
+  function mMoney(n){ n=Number(n)||0; return '$'+n.toFixed(2); }
+  function mEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function mGetBooking(id){ try{ return (JSON.parse(localStorage.getItem('cnk_bookings')||'[]')).filter(function(x){return x.id===id;})[0]; }catch(e){ return null; } }
+
+  function enhanceModal(){
+    var mc=document.getElementById('modal-content'); if(!mc) return;
+    // figure out which booking is open (from an action button)
+    var id=null;
+    var anyBtn=[...mc.querySelectorAll('button')].map(function(b){return b.getAttribute('onclick')||'';}).join(' ');
+    var m=anyBtn.match(/(?:editBooking|openModal|cancelBooking|chargeBalance|cnkCollectBalance)\('([^']+)'\)/);
+    if(m) id=m[1];
+    var b=id?mGetBooking(id):null;
+
+    // 1) inject Delivery row into pricing (after Card Fee / before Total) if deliveryFee>0 and not already shown
+    if(b && Number(b.deliveryFee)>0 && !mc.querySelector('[data-cnk-deliv-row]')){
+      var rows=[...mc.querySelectorAll('.cnk-mrow')];
+      var totalRow=rows.find(function(r){ var l=r.querySelector('.ml'); return l && /^total$/i.test(l.textContent.trim()); });
+      if(totalRow){
+        var dr=document.createElement('div'); dr.className='cnk-mrow'; dr.setAttribute('data-cnk-deliv-row','1');
+        dr.innerHTML='<span class="ml">Delivery'+(b.deliveryMiles?(' ('+b.deliveryMiles+' mi RT)'):'')+'</span><span class="mv">'+mMoney(b.deliveryFee)+'</span>';
+        totalRow.parentNode.insertBefore(dr, totalRow);
+      }
+    }
+
+    // 2) add "Review & Download Agreement" button in the paperwork section (once)
+    if(b && !mc.querySelector('[data-cnk-agree-btn]')){
+      // find the Signed Agreement section title
+      var secTitle=[...mc.querySelectorAll('.cnk-modal-sec-title, [class*="sec-title"]')].find(function(e){return /agreement|paperwork/i.test(e.textContent);});
+      var host=secTitle?secTitle.parentElement:mc;
+      var btn=document.createElement('button');
+      btn.setAttribute('data-cnk-agree-btn','1');
+      btn.className='cnk-mbtn cnk-mbtn-save';
+      btn.style.marginTop='10px';
+      btn.textContent='Review & Download Agreement';
+      btn.addEventListener('click', function(){ openAgreement(b.id); });
+      host.appendChild(btn);
+    }
+  }
+
+  window.openAgreement = function(id){
+    var b=mGetBooking(id); if(!b){ alert('Booking not found.'); return; }
+    var pw=b.paperwork||{};
+    var pkgName={hourly:'Hourly',halfday:'Half Day',fullday:'Full Day'}[b.package]||b.package||'';
+    function row(k,v){ return '<tr><td style="padding:5px 14px 5px 0;color:#666;white-space:nowrap;vertical-align:top;">'+mEsc(k)+'</td><td style="padding:5px 0;color:#111;font-weight:600;">'+mEsc(v||'—')+'</td></tr>'; }
+    var clauses=[
+      ['1. Parties & Equipment','CNK Booths LLC ("Company") agrees to provide photo booth rental services to the Client named below for the event described herein.'],
+      ['2. Rental Period','The rental period and event timing are as specified below. Additional hours are billed at $125/hour.'],
+      ['3. Payment','A 50% deposit reserves the date. The remaining balance is due before the event. Prices include applicable sales tax; card payments include a 3% processing fee.'],
+      ['4. Delivery & Travel','Delivery within 50 miles round-trip is included. Beyond that, travel is billed at $1.25 per mile, or a custom agreed amount as noted.'],
+      ['5. Setup & Space','Client must provide adequate space, a level surface, and access to a standard power outlet within 15 feet, unless otherwise arranged.'],
+      ['6. Cancellation','Deposits are non-refundable within 30 days of the event. Cancellations outside that window may be refunded at the Company\u2019s discretion.'],
+      ['7. Damage','Client is responsible for any damage to the booth or equipment caused by guests during the event.'],
+      ['8. Media Release','If agreed, the Company may use photos taken at the event for promotional purposes.'],
+      ['9. Liability','The Company\u2019s liability is limited to the total amount paid for the rental. The Company is not liable for circumstances beyond its control.'],
+      ['10. Weather (Outdoor)','For outdoor events, Client must provide shelter/shade for the booth. The Company may decline setup in unsafe conditions.'],
+      ['11. Force Majeure','Neither party is liable for failure to perform due to events beyond reasonable control.'],
+      ['12. Governing Law','This agreement is governed by the laws of the State of Utah, with venue in the courts of Utah County, Utah.']
+    ];
+    var html='<!doctype html><html><head><meta charset="utf-8"><title>Rental Agreement — '+mEsc(b.name)+' ('+mEsc(b.id)+')</title>'
+      +'<style>body{font-family:Georgia,serif;max-width:760px;margin:32px auto;padding:0 24px;color:#1a1a1a;line-height:1.5;}'
+      +'h1{font-size:24px;color:#b8893a;margin-bottom:2px;}h2{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#888;margin:24px 0 8px;border-bottom:1px solid #ddd;padding-bottom:4px;}'
+      +'table{border-collapse:collapse;font-size:14px;}.clause{margin:10px 0;font-size:13.5px;}.clause b{display:block;margin-bottom:2px;color:#222;}'
+      +'.sign{margin-top:28px;padding-top:14px;border-top:2px solid #222;}.muted{color:#777;font-size:12px;}'
+      +'@media print{.noprint{display:none;}body{margin:0;}}'
+      +'.btn{background:#b8893a;color:#fff;border:none;padding:10px 18px;border-radius:6px;font-size:14px;cursor:pointer;font-family:Arial;}'
+      +'</style></head><body>'
+      +'<div class="noprint" style="text-align:right;margin-bottom:12px;"><button class="btn" onclick="window.print()">Download / Print (Save as PDF)</button></div>'
+      +'<h1>CNK Booths LLC — Photo Booth Rental Agreement</h1>'
+      +'<div class="muted">Reference '+mEsc(b.id)+' · Generated '+new Date().toLocaleDateString()+'</div>'
+      +'<h2>Client & Event</h2><table>'
+      +row('Client', b.name)+row('Email', b.email)+row('Phone', b.phone)
+      +row('Event date', b.date)+row('Event type', b.eventType)+row('Location', b.location)
+      +row('Guests', b.guests)+row('Package', pkgName)
+      +row('Start / End', (pw.startTime||'—')+' – '+(pw.endTime||'—'))
+      +row('Setup', pw.setup)+row('Day-of contact', pw.dayContact)
+      +row('Power / Wi-Fi', (pw.power||'—')+' / '+(pw.wifi||'—'))+row('Outdoor', pw.outdoor)
+      +row('Media release', pw.mediaRelease?'Yes — granted':'No')
+      +'</table>'
+      +'<h2>Pricing</h2><table>'
+      +row('Base price', mMoney(b.basePrice))+row('Sales tax', mMoney(b.tax))
+      +(Number(b.ccFee)>0?row('Card fee (3%)', mMoney(b.ccFee)):'')
+      +(Number(b.deliveryFee)>0?row('Delivery'+(b.deliveryMiles?(' ('+b.deliveryMiles+' mi RT)'):''), mMoney(b.deliveryFee)):'')
+      +(Number(b.discount)>0?row('Discount', '-'+mMoney(b.discount)):'')
+      +row('Total', mMoney(b.price))+row('Paid', mMoney(b.deposit))+row('Balance due', mMoney(b.balance))
+      +'</table>'
+      +'<h2>Terms & Conditions</h2>'
+      +clauses.map(function(c){return '<div class="clause"><b>'+mEsc(c[0])+'</b>'+mEsc(c[1])+'</div>';}).join('')
+      +'<div class="sign"><table>'
+      +row('Signed by', pw.signature)
+      +row('Agreed at', pw.agreedAt?new Date(pw.agreedAt).toLocaleString():'—')
+      +'</table><p class="muted">Electronically agreed via the CNK Booths booking system.</p></div>'
+      +'</body></html>';
+    var w=window.open('','_blank');
+    if(!w){ alert('Please allow pop-ups to view the agreement.'); return; }
+    w.document.open(); w.document.write(html); w.document.close();
+  };
+
+  function wrapOpenModal(){
+    if(typeof window.openModal!=='function'){ setTimeout(wrapOpenModal,60); return; }
+    if(window._cnkModalEnhanceWrapped) return; window._cnkModalEnhanceWrapped=true;
+    var orig=window.openModal;
+    window.openModal=function(){ orig.apply(this,arguments); setTimeout(enhanceModal,40); };
+  }
+  wrapOpenModal(); setTimeout(wrapOpenModal,600);
+
+})();
+</script>
 </body>
 </html>
