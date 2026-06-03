@@ -1216,7 +1216,7 @@ async function submitBooking() {
 
   // Send nonce + amount to backend to charge via Square Payments API
   try {
-    const response = await fetch('/.netlify/functions/charge', {
+    const response = await fetch('/api/charge', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
