@@ -2543,48 +2543,54 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
   function getDelivery(){ return (window._cnkState && Number(window._cnkState.delivery)) || 0; }
   function deliveryDepositCents(){ return Math.round(getDelivery()*DEPOSIT_RATE*100); }
 
-  // ---- Add address field + calc UI into step 1, right after the venue field ----
-  function injectAddressUI(){
+  // ---- Status line under the venue field (auto, no button) ----
+  function injectStatus(){
     if(document.getElementById('cnk-deliv-wrap')) return;
     var venue=document.getElementById('cnk-venue');
-    if(!venue){ setTimeout(injectAddressUI,100); return; }
+    if(!venue){ setTimeout(injectStatus,100); return; }
     var group=venue.closest('.form-group');
-    if(!group){ setTimeout(injectAddressUI,100); return; }
+    if(!group){ setTimeout(injectStatus,100); return; }
     var wrap=document.createElement('div');
     wrap.className='form-group form-full';
     wrap.id='cnk-deliv-wrap';
-    wrap.innerHTML=''
-      + '<label class="form-label">Delivery Distance</label>'
-      + '<div style="font-size:12.5px;color:var(--cream-dim);line-height:1.5;margin-bottom:8px;">Delivery within 50 miles round-trip is included. Beyond that, it is $1.25/mile. Enter the venue address above, then tap Calculate.</div>'
-      + '<button type="button" id="cnk-deliv-btn" style="background:rgba(196,152,58,0.15);color:var(--gold);border:1px solid rgba(196,152,58,0.4);border-radius:6px;padding:10px 16px;font-size:13px;letter-spacing:0.05em;cursor:pointer;font-family:DM Sans,sans-serif;">Calculate Delivery Fee</button>'
-      + '<div id="cnk-deliv-result" style="margin-top:10px;font-size:13px;color:var(--cream);"></div>';
+    wrap.innerHTML='<div style="font-size:12px;color:var(--cream-dim);line-height:1.5;">Delivery within 50 miles round-trip is included; beyond that it is $1.25/mile, calculated automatically from your venue address.</div><div id="cnk-deliv-result" style="margin-top:8px;font-size:13px;"></div>';
     group.parentNode.insertBefore(wrap, group.nextSibling);
-    document.getElementById('cnk-deliv-btn').addEventListener('click', calcDelivery);
+    // auto-calc when they finish with the venue field
+    venue.addEventListener('blur', function(){ autoCalc(); });
+    venue.addEventListener('change', function(){ autoCalc(); });
   }
 
-  function calcDelivery(){
+  var lastAddr='';
+  // Returns a promise that resolves when delivery is computed for the current address.
+  function autoCalc(force){
     var venue=document.getElementById('cnk-venue');
     var addr=venue?venue.value.trim():'';
     var res=document.getElementById('cnk-deliv-result');
-    if(addr.length<5){ res.innerHTML='<span style="color:#e0a05c;">Please enter the venue address above first.</span>'; return; }
-    res.innerHTML='<span style="color:var(--cream-dim);">Calculating distance…</span>';
-    fetch('/api/distance',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({address:addr})})
+    if(addr.length<5){ if(res) res.innerHTML=''; if(window._cnkState){window._cnkState.delivery=0;window._cnkState.deliveryMiles=null;} lastAddr=''; return Promise.resolve(); }
+    if(!force && addr===lastAddr){ return Promise.resolve(); } // already computed for this address
+    lastAddr=addr;
+    if(res) res.innerHTML='<span style="color:var(--cream-dim);">Calculating delivery distance…</span>';
+    return fetch('/api/distance',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({address:addr})})
       .then(function(r){return r.json();})
       .then(function(d){
-        if(!d || !d.ok){ res.innerHTML='<span style="color:#e0a05c;">'+((d&&d.error)||'Could not find that address')+'. Please enter a full street address.</span>'; if(window._cnkState) window._cnkState.delivery=0; return; }
+        if(!d || !d.ok){
+          if(res) res.innerHTML='<span style="color:#e0a05c;">Could not locate that address for delivery. Please enter a full street address, city, and state.</span>';
+          if(window._cnkState){window._cnkState.delivery=0;window._cnkState.deliveryMiles=null;}
+          lastAddr=''; // allow retry
+          return;
+        }
         if(window._cnkState){ window._cnkState.delivery=d.fee; window._cnkState.deliveryMiles=d.roundTripMiles; window._cnkState.deliveryAddr=d.address; }
+        if(!res) return;
         if(d.fee>0){
-          res.innerHTML='<div style="padding:10px 12px;background:rgba(196,152,58,0.08);border:1px solid rgba(196,152,58,0.25);border-radius:6px;">'
-            +'<strong style="color:var(--gold);">Delivery fee: '+money(d.fee)+'</strong><br>'
-            +'<span style="color:var(--cream-dim);font-size:12px;">'+d.roundTripMiles+' mi round-trip · '+d.billableMiles+' billable mi beyond the 50 included</span></div>';
+          res.innerHTML='<div style="padding:10px 12px;background:rgba(196,152,58,0.08);border:1px solid rgba(196,152,58,0.25);border-radius:6px;"><strong style="color:var(--gold);">Delivery fee: '+money(d.fee)+'</strong><br><span style="color:var(--cream-dim);font-size:12px;">'+d.roundTripMiles+' mi round-trip · '+d.billableMiles+' billable mi beyond the 50 included</span></div>';
         } else {
           res.innerHTML='<div style="padding:10px 12px;background:rgba(94,204,136,0.08);border:1px solid rgba(94,204,136,0.25);border-radius:6px;color:#5ecc88;">Within the included range — no delivery fee ('+d.roundTripMiles+' mi round-trip).</div>';
         }
       })
-      .catch(function(){ res.innerHTML='<span style="color:#e0a05c;">Distance lookup failed, please try again.</span>'; });
+      .catch(function(){ if(res) res.innerHTML='<span style="color:#e0a05c;">Delivery lookup failed; it will be confirmed before payment.</span>'; lastAddr=''; });
   }
 
-  // ---- Patch the step-2 summary to show delivery + fold into total/deposit/balance ----
+  // ---- Patch the step-2 summary ----
   function patchSummary(){
     var d=getDelivery();
     var totalEl=document.getElementById('cnk-sum-total');
@@ -2592,13 +2598,10 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
     var balEl=document.getElementById('cnk-sum-balance');
     var payEl=document.getElementById('cnk-pay-amt');
     if(!totalEl||!depEl||!balEl) return;
-    // Read the base numbers the existing code rendered
     function num(el){ return el?(parseFloat(el.textContent.replace(/[^0-9.]/g,''))||0):0; }
-    var baseTotal=num(totalEl), baseDep=num(depEl), baseBal=num(balEl);
-    // Remove any prior delivery row we added, to avoid stacking
     var old=document.getElementById('cnk-sum-deliv-row'); if(old) old.remove();
+    var baseTotal=num(totalEl), baseDep=num(depEl), baseBal=num(balEl);
     if(d>0){
-      // insert a delivery row before the total row
       var totalRow=totalEl.closest('.pb-total-row')||totalEl.parentNode;
       var row=document.createElement('div');
       row.id='cnk-sum-deliv-row';
@@ -2613,20 +2616,28 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
     }
   }
 
+  // ---- Wrap cnkToPayment: ensure delivery is computed BEFORE showing payment ----
   function wrapToPayment(){
     if(typeof window.cnkToPayment!=='function'){ setTimeout(wrapToPayment,60); return; }
     if(window._cnkToPaymentWrapped) return;
     window._cnkToPaymentWrapped=true;
     var orig=window.cnkToPayment;
     window.cnkToPayment=function(){
-      var rv=orig.apply(this,arguments);
-      // after original renders the summary, patch in delivery
+      var self=this, args=arguments;
+      var venue=document.getElementById('cnk-venue');
+      var addr=venue?venue.value.trim():'';
+      // If address present but delivery not yet computed for it, compute first, THEN proceed.
+      if(addr.length>=5 && addr!==lastAddr){
+        autoCalc(true).then(function(){ orig.apply(self,args); setTimeout(patchSummary,30); });
+        return;
+      }
+      var rv=orig.apply(self,args);
       setTimeout(patchSummary,30);
       return rv;
     };
   }
 
-  // ---- Intercept the charge to add the delivery deposit delta (cents) ----
+  // ---- Intercept charge to add the delivery deposit delta (cents) ----
   function installChargeIntercept(){
     if(window._cnkChargeIntercepted) return;
     window._cnkChargeIntercepted=true;
@@ -2635,20 +2646,14 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
       try{
         if(typeof url==='string' && url.indexOf('/api/charge')!==-1 && opts && opts.body){
           var extra=deliveryDepositCents();
-          if(extra>0){
-            var body=JSON.parse(opts.body);
-            if(typeof body.amount==='number'){
-              body.amount=body.amount+extra;
-              opts=Object.assign({},opts,{body:JSON.stringify(body)});
-            }
-          }
+          if(extra>0){ var body=JSON.parse(opts.body); if(typeof body.amount==='number'){ body.amount=body.amount+extra; opts=Object.assign({},opts,{body:JSON.stringify(body)}); } }
         }
       }catch(e){}
       return origFetch.call(this,url,opts);
     };
   }
 
-  // ---- Save delivery onto the booking (cnkFinish already pushes latest to DB) ----
+  // ---- Save delivery onto the booking ----
   function wrapFinishForDelivery(){
     if(typeof window.cnkFinish!=='function'){ setTimeout(wrapFinishForDelivery,60); return; }
     if(window._cnkFinishDelivWrapped) return;
@@ -2677,7 +2682,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
     };
   }
 
-  function init(){ injectAddressUI(); wrapToPayment(); installChargeIntercept(); wrapFinishForDelivery(); }
+  function init(){ injectStatus(); wrapToPayment(); installChargeIntercept(); wrapFinishForDelivery(); }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
   setTimeout(init,400); setTimeout(init,1000);
 })();
