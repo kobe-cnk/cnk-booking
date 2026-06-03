@@ -3460,5 +3460,93 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
 
 })();
 </script>
+
+<script>
+(function(){
+  function emMoney(n){ n=Number(n)||0; return n.toFixed(2); }
+  function emGet(id){ var e=document.getElementById(id); return e?parseFloat(e.value)||0:0; }
+  function emBooking(id){ try{ return (JSON.parse(localStorage.getItem('cnk_bookings')||'[]')).filter(function(x){return x.id===id;})[0]; }catch(e){ return null; } }
+
+  function injectMoneyFields(id){
+    var b=emBooking(id); if(!b) return;
+    var grid=document.querySelector('.cnk-edit-grid'); if(!grid) return;
+    if(grid.querySelector('#eb-price')) return; // already injected
+    // base (price minus delivery, before discount) is implicit; we expose editable Total, Paid, Discount, Delivery.
+    function field(id,label,val,full){
+      var d=document.createElement('div'); if(full) d.className='full';
+      d.innerHTML='<label>'+label+'</label><input id="'+id+'" type="number" step="0.01" value="'+val+'">';
+      return d;
+    }
+    // section heading
+    var head=document.createElement('div'); head.className='full'; head.setAttribute('data-cnk-money-head','1');
+    head.innerHTML='<div style="margin-top:6px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.1);color:var(--gold,#c4983a);font-size:12px;letter-spacing:.06em;text-transform:uppercase;">Pricing &amp; Payment</div>';
+    var actions=grid.querySelector('.cnk-modal-actions');
+    function place(el){ if(actions && actions.parentNode){ actions.parentNode.insertBefore(el, actions); } else { grid.appendChild(el); } }
+    place(head);
+    place(field('eb-price','Total Price ($)', emMoney(b.price), false));
+    place(field('eb-deposit','Amount Paid ($)', emMoney(b.deposit), false));
+    place(field('eb-discount','Discount ($)', emMoney(b.discount), false));
+    place(field('eb-delivery','Delivery Fee ($)', emMoney(b.deliveryFee), false));
+    // make balance auto-update from price - paid when those change (balance still hand-editable)
+    function recalc(){
+      var price=emGet('eb-price'), paid=emGet('eb-deposit');
+      var balEl=document.getElementById('eb-balance');
+      if(balEl) balEl.value=Math.max(0,(price-paid)).toFixed(2);
+    }
+    ['eb-price','eb-deposit'].forEach(function(fid){ var el=document.getElementById(fid); if(el) el.addEventListener('input', recalc); });
+    // hide/repurpose the miles field note: keep miles for auto-calc, but delivery $ overrides on save
+    var milesEl=document.getElementById('eb-miles');
+    if(milesEl){
+      // when miles change and produce a calc, push the computed fee into the delivery $ field
+      milesEl.addEventListener('input', function(){
+        var mi=parseFloat(milesEl.value)||0; var billable=Math.max(0,mi-50); var fee=billable*1.25;
+        var dEl=document.getElementById('eb-delivery'); if(dEl){ dEl.value=fee.toFixed(2); }
+      });
+    }
+  }
+
+  function wrapEdit(){
+    if(typeof window.editBooking!=='function'){ setTimeout(wrapEdit,60); return; }
+    if(window._cnkEditMoneyWrapped) return; window._cnkEditMoneyWrapped=true;
+    var orig=window.editBooking;
+    window.editBooking=function(id){ orig.apply(this,arguments); setTimeout(function(){ injectMoneyFields(id); }, 40); };
+  }
+  function wrapSave(){
+    if(typeof window.saveBookingEdit!=='function'){ setTimeout(wrapSave,60); return; }
+    if(window._cnkSaveMoneyWrapped) return; window._cnkSaveMoneyWrapped=true;
+    var orig=window.saveBookingEdit;
+    window.saveBookingEdit=function(id){
+      // capture money fields BEFORE the original runs (original may rebuild/close the form)
+      var hasFields=!!document.getElementById('eb-price');
+      var price=emGet('eb-price'), paid=emGet('eb-deposit'), disc=emGet('eb-discount'), deliv=emGet('eb-delivery');
+      var balField=document.getElementById('eb-balance'); var balVal=balField?(parseFloat(balField.value)||0):null;
+      orig.apply(this,arguments); // runs existing save (name/date/status/balance/miles, DB save)
+      if(!hasFields) return;
+      // now apply our money fields on top and re-save
+      setTimeout(function(){
+        try{
+          var arr=JSON.parse(localStorage.getItem('cnk_bookings')||'[]');
+          var i=arr.findIndex(function(x){return x.id===id;});
+          if(i<0) return;
+          var b=arr[i];
+          b.price=price;
+          b.deposit=paid; b.amountPaid=paid;
+          b.discount=disc;
+          b.deliveryFee=deliv;
+          // balance: use the (possibly auto-updated) balance field value
+          b.balance=(balVal!=null)?balVal:Math.max(0,price-paid);
+          // keep status consistent with balance unless already 'complete'/'cancelled'
+          if(b.status!=='complete' && b.status!=='cancelled'){ b.status=(Number(b.balance)>0.005)?'balance_due':'confirmed'; }
+          arr[i]=b;
+          localStorage.setItem('cnk_bookings',JSON.stringify(arr));
+          if(typeof window.cnkDbSave==='function') window.cnkDbSave(b);
+          ['renderOverview','renderAllBookings','renderUpcoming','renderCalendar'].forEach(function(fn){ try{ if(typeof window[fn]==='function') window[fn](); }catch(e){} });
+        }catch(e){}
+      }, 60);
+    };
+  }
+  wrapEdit(); wrapSave(); setTimeout(function(){ wrapEdit(); wrapSave(); }, 600);
+})();
+</script>
 </body>
 </html>
