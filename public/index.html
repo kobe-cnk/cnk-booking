@@ -2687,5 +2687,160 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
 })();
 </script>
 
+
+<script>
+(function(){
+  function money(n){ n=Number(n)||0; return '$'+n.toFixed(2); }
+  function val(id){ var e=document.getElementById(id); return e?e.value.trim():''; }
+  function num(el){ return el?(parseFloat(el.textContent.replace(/[^0-9.]/g,''))||0):0; }
+  function getDiscount(){ var e=document.getElementById('cnk-adm-discount'); return e?Math.max(0,parseFloat(e.value)||0):0; }
+
+  // ---- Launch the customer flow in ADMIN mode ----
+  window.cnkStartAdminBooking = function(){
+    window._cnkAdminMode = true;
+    try { if(typeof cnkReset==='function') cnkReset(); } catch(e){}
+    try { var va=document.getElementById('view-admin'); var vb=document.getElementById('view-booking'); if(va) va.classList.remove('active'); if(vb) vb.classList.add('active'); } catch(e){}
+    try { if(typeof cnkGoStep==='function') cnkGoStep(1); } catch(e){}
+    window.scrollTo(0,0);
+  };
+
+  // Make the admin "New Booking" sidebar button launch the step-by-step flow.
+  function wireAdminNewBooking(){
+    if(typeof window.showAdminView!=='function'){ setTimeout(wireAdminNewBooking,80); return; }
+    if(window._cnkAdminNBWired) return;
+    window._cnkAdminNBWired = true;
+    var orig = window.showAdminView;
+    window.showAdminView = function(view){
+      if(view==='newbooking'){ window.cnkStartAdminBooking(); return; }
+      return orig.apply(this, arguments);
+    };
+  }
+
+  // ---- Swap the payment step UI when in admin mode ----
+  function buildAdminPayPanel(){
+    if(document.getElementById('cnk-adm-pay')) return document.getElementById('cnk-adm-pay');
+    var card = document.getElementById('cnk-card');
+    var wrapper = card ? card.closest('.form-wrapper') : null;
+    if(!wrapper) return null;
+    var panel = document.createElement('div');
+    panel.id='cnk-adm-pay';
+    panel.innerHTML=''
+      + '<div class="form-group form-full"><label class="form-label">Discount (optional, $ off the total)</label><input type="number" id="cnk-adm-discount" class="form-input" min="0" step="0.01" value="0" placeholder="0.00"></div>'
+      + '<div class="form-group"><label class="form-label">Payment Method</label><select id="cnk-adm-method" class="form-input"><option>Cash</option><option>Venmo</option><option>Zelle</option><option>Check</option><option>Card (in person)</option><option>Bank transfer</option><option>Other</option></select></div>'
+      + '<div class="form-group"><label class="form-label">Amount Collected Now ($)</label><input type="number" id="cnk-adm-paid" class="form-input" min="0" step="0.01" placeholder="0.00"></div>'
+      + '<div class="form-group form-full"><label class="form-label">Payment Note (optional)</label><input type="text" id="cnk-adm-paynote" class="form-input" placeholder="e.g. Venmo @handle, check #1234"></div>'
+      + '<button type="button" id="cnk-adm-record" class="cnk-pay-btn" style="margin-top:8px;">Continue to Paperwork →</button>';
+    wrapper.appendChild(panel);
+    document.getElementById('cnk-adm-discount').addEventListener('input', patchAdminSummary);
+    document.getElementById('cnk-adm-record').addEventListener('click', function(){
+      // proceed to paperwork step
+      if(typeof cnkGoStep==='function') cnkGoStep(3);
+    });
+    return panel;
+  }
+
+  // Recompute summary applying discount (admin). Runs after the delivery patch.
+  window._cnkBaseTotal=null;
+  window.patchAdminSummary = function(){
+    if(!window._cnkAdminMode) return;
+    var totalEl=document.getElementById('cnk-sum-total');
+    var depEl=document.getElementById('cnk-sum-deposit');
+    var balEl=document.getElementById('cnk-sum-balance');
+    if(!totalEl) return;
+    // Capture the delivery-inclusive base total ONCE (before discount), so repeated edits don't compound.
+    var oldRow=document.getElementById('cnk-sum-disc-row');
+    if(window._cnkBaseTotal==null){ window._cnkBaseTotal=num(totalEl); }
+    var base=window._cnkBaseTotal;
+    var disc=getDiscount();
+    if(oldRow) oldRow.remove();
+    var finalTotal=Math.max(0, base-disc);
+    if(disc>0){
+      var totalRow=totalEl.closest('.pb-total-row')||totalEl.parentNode;
+      var row=document.createElement('div'); row.id='cnk-sum-disc-row'; row.className='pb-row';
+      row.innerHTML='<span class="pb-label">Discount</span><span class="pb-val">-'+money(disc)+'</span>';
+      totalRow.parentNode.insertBefore(row, totalRow);
+    }
+    totalEl.textContent=money(finalTotal);
+    var paid=parseFloat((document.getElementById('cnk-adm-paid')||{}).value)||0;
+    if(depEl) depEl.textContent=money(paid);
+    if(balEl) balEl.textContent=money(Math.max(0,finalTotal-paid));
+  };
+
+  function enterAdminPaymentUI(){
+    if(!window._cnkAdminMode) return;
+    window._cnkBaseTotal=null; // recapture base each time we enter payment
+    // hide square card group + the original pay button
+    var card=document.getElementById('cnk-card');
+    if(card){ var g=card.closest('.form-group'); if(g) g.style.display='none'; }
+    var payBtn=document.getElementById('cnk-pay-btn');
+    if(payBtn) payBtn.style.display='none';
+    // change deposit label wording handled in summary; build admin panel
+    buildAdminPayPanel();
+    // recompute deposit label text to "Collected now"
+    var depLabel=document.querySelector('#cnk-sum-deposit') ? document.querySelector('#cnk-sum-deposit').closest('.pb-row').querySelector('.pb-label') : null;
+    if(depLabel) depLabel.textContent='Collected now';
+    // wire paid field live
+    var paidEl=document.getElementById('cnk-adm-paid');
+    if(paidEl && !paidEl._wired){ paidEl._wired=true; paidEl.addEventListener('input', patchAdminSummary); }
+    setTimeout(patchAdminSummary,30);
+  }
+
+  // Hook cnkToPayment to enter admin UI after the (delivery-patched) summary renders
+  function wrapToPaymentAdmin(){
+    if(typeof window.cnkToPayment!=='function'){ setTimeout(wrapToPaymentAdmin,60); return; }
+    if(window._cnkAdminPayWrapped) return;
+    window._cnkAdminPayWrapped=true;
+    var orig=window.cnkToPayment;
+    window.cnkToPayment=function(){
+      var rv=orig.apply(this,arguments);
+      if(window._cnkAdminMode) setTimeout(enterAdminPaymentUI,60);
+      return rv;
+    };
+  }
+
+  // ---- Record the booking (admin, no card) by wrapping cnkFinish ----
+  function wrapFinishAdmin(){
+    if(typeof window.cnkFinish!=='function'){ setTimeout(wrapFinishAdmin,60); return; }
+    if(window._cnkFinishAdminWrapped) return;
+    window._cnkFinishAdminWrapped=true;
+    var orig=window.cnkFinish;
+    window.cnkFinish=function(){
+      orig.apply(this,arguments); // builds + saves the booking (incl. paperwork, delivery via other wrapper)
+      if(!window._cnkAdminMode) return;
+      try{
+        var arr=JSON.parse(localStorage.getItem('cnk_bookings')||'[]');
+        if(!arr.length) return;
+        var b=arr[arr.length-1];
+        var method=val('cnk-adm-method')||'Cash';
+        var disc=getDiscount();
+        var paid=parseFloat(val('cnk-adm-paid'))||0;
+        var note=val('cnk-adm-paynote');
+        // apply discount to price
+        if(disc>0){ b.discount=disc; b.price=Math.max(0,(Number(b.price)||0)-disc); }
+        // manual payment: no card fee, deposit = amount collected, balance = remainder
+        b.ccFee=0;
+        b.deposit=paid;
+        b.balance=Math.max(0,(Number(b.price)||0)-paid);
+        b.source='Manual ('+method+')';
+        b.paymentMethod=method;
+        b.amountPaid=paid;
+        var extra=[];
+        if(disc>0) extra.push('Discount '+money(disc));
+        extra.push(method+' '+money(paid)+(note?(' · '+note):''));
+        b.notes=(b.notes?b.notes+' ':'')+'['+extra.join(' · ')+']';
+        arr[arr.length-1]=b;
+        localStorage.setItem('cnk_bookings',JSON.stringify(arr));
+        if(typeof window.cnkDbSave==='function') window.cnkDbSave(b);
+      }catch(e){}
+      // reset admin mode after finishing
+      window._cnkAdminMode=false; window._cnkBaseTotal=null;
+    };
+  }
+
+  function init(){ wireAdminNewBooking(); wrapToPaymentAdmin(); wrapFinishAdmin(); }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
+  setTimeout(init,400); setTimeout(init,1000);
+})();
+</script>
 </body>
 </html>
