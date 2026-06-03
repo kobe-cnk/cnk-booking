@@ -720,7 +720,7 @@
               <option>Nonprofit / Charity</option><option>Other</option>
             </select>
           </div>
-          <div class="form-group form-full"><label class="form-label">Event Address</label><input class="form-input" id="cnk-venue" placeholder="Full street address, city, state, ZIP (e.g. 123 S Main St, Provo, UT 84601)"></div>
+          <div class="form-group form-full"><label class="form-label">Street Address</label><input class="form-input" id="cnk-addr-street" placeholder="123 S Main St"></div><div class="form-group"><label class="form-label">City</label><input class="form-input" id="cnk-addr-city" placeholder="Provo"></div><div class="form-group"><label class="form-label">State</label><input class="form-input" id="cnk-addr-state" placeholder="UT" maxlength="2"></div><div class="form-group"><label class="form-label">ZIP Code</label><input class="form-input" id="cnk-addr-zip" placeholder="84601" inputmode="numeric" maxlength="5"></div><div class="form-group"></div><input type="hidden" id="cnk-venue">
           <div class="form-group form-full"><label class="form-label">Expected Guest Count</label><input class="form-input" id="cnk-guests" placeholder="e.g. 150"></div>
           <div class="form-group form-full"><label class="form-label">Special Requests or Notes</label><textarea class="form-textarea" id="cnk-notes" placeholder="Custom overlay design, specific setup requirements, themed props, etc."></textarea></div>
           <div class="form-group form-full"><label class="form-label">How did you hear about us?</label>
@@ -2544,11 +2544,12 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
   function deliveryDepositCents(){ return Math.round(getDelivery()*DEPOSIT_RATE*100); }
 
   // ---- Status line under the venue field (auto, no button) ----
+  function cnkBuildAddr(){ function v(id){ var e=document.getElementById(id); return e?e.value.trim():''; } var street=v('cnk-addr-street'), city=v('cnk-addr-city'), state=v('cnk-addr-state'), zip=v('cnk-addr-zip'); var parts=[]; if(street) parts.push(street); if(city) parts.push(city); var sz=[state,zip].filter(Boolean).join(' '); if(sz) parts.push(sz); var full=parts.join(', '); var hidden=document.getElementById('cnk-venue'); if(hidden) hidden.value=full; return { full:full, complete: !!(street&&city&&state&&zip) }; }
   function injectStatus(){
     if(document.getElementById('cnk-deliv-wrap')) return;
-    var venue=document.getElementById('cnk-venue');
-    if(!venue){ setTimeout(injectStatus,100); return; }
-    var group=venue.closest('.form-group');
+    var zip=document.getElementById('cnk-addr-zip');
+    if(!zip){ setTimeout(injectStatus,100); return; }
+    var group=zip.closest('.form-group');
     if(!group){ setTimeout(injectStatus,100); return; }
     var wrap=document.createElement('div');
     wrap.className='form-group form-full';
@@ -2556,17 +2557,16 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
     wrap.innerHTML='<div style="font-size:12px;color:var(--cream-dim);line-height:1.5;">Delivery within 50 miles round-trip is included; beyond that it is $1.25/mile, calculated automatically from the address above.</div><div id="cnk-deliv-result" style="margin-top:8px;font-size:13px;"></div>';
     group.parentNode.insertBefore(wrap, group.nextSibling);
     // auto-calc when they finish with the venue field
-    venue.addEventListener('blur', function(){ autoCalc(); });
-    venue.addEventListener('change', function(){ autoCalc(); });
+    ['cnk-addr-street','cnk-addr-city','cnk-addr-state','cnk-addr-zip'].forEach(function(id){ var el=document.getElementById(id); if(el){ el.addEventListener('input', cnkBuildAddr); el.addEventListener('blur', function(){ cnkBuildAddr(); autoCalc(); }); el.addEventListener('change', function(){ cnkBuildAddr(); autoCalc(); }); } });
   }
 
   var lastAddr='';
   // Returns a promise that resolves when delivery is computed for the current address.
   function autoCalc(force){
-    var venue=document.getElementById('cnk-venue');
-    var addr=venue?venue.value.trim():'';
+    var built=cnkBuildAddr();
+    var addr=built.full;
     var res=document.getElementById('cnk-deliv-result');
-    if(addr.length<5){ if(res) res.innerHTML=''; if(window._cnkState){window._cnkState.delivery=0;window._cnkState.deliveryMiles=null;} lastAddr=''; return Promise.resolve(); }
+    if(!built.complete){ if(res) res.innerHTML=''; if(window._cnkState){window._cnkState.delivery=0;window._cnkState.deliveryMiles=null;} lastAddr=''; return Promise.resolve(); }
     if(!force && addr===lastAddr){ return Promise.resolve(); } // already computed for this address
     lastAddr=addr;
     if(res) res.innerHTML='<span style="color:var(--cream-dim);">Calculating delivery distance…</span>';
@@ -2574,7 +2574,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
       .then(function(r){return r.json();})
       .then(function(d){
         if(!d || !d.ok){
-          if(res) res.innerHTML='<span style="color:#e0a05c;">'+((d&&d.error)||'Could not locate that address')+'. Please enter a full street address, city, and state.</span>';
+          if(res) res.innerHTML='<span style="color:#e0a05c;">'+((d&&d.error)||'Could not locate that address. Please check the street, city, state, and ZIP.')+'</span>';
           if(window._cnkState){window._cnkState.delivery=0;window._cnkState.deliveryMiles=null;}
           lastAddr=''; // allow retry
           return;
@@ -2624,15 +2624,14 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
     var orig=window.cnkToPayment;
     window.cnkToPayment=function(){
       var self=this, args=arguments;
-      var venue=document.getElementById('cnk-venue');
-      var addr=venue?venue.value.trim():'';
-      // If address present but delivery not yet computed for it, compute first, THEN proceed.
-      if(addr.length>=5 && addr!==lastAddr){
-        autoCalc(true).then(function(){ orig.apply(self,args); setTimeout(patchSummary,30); });
-        return;
-      }
+      var built=cnkBuildAddr();
+      // Always proceed immediately so the customer is never blocked.
       var rv=orig.apply(self,args);
       setTimeout(patchSummary,30);
+      // If a complete address hasn't been priced yet, compute in the background and re-patch.
+      if(built.complete && built.full!==lastAddr){
+        autoCalc(true).then(function(){ setTimeout(patchSummary,20); });
+      }
       return rv;
     };
   }
