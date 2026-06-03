@@ -2368,6 +2368,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
     openOverlay();
   };
 
+  window.cnkEbDeliveryCalc=function(){ var e=document.getElementById('eb-miles'); var m=e?(parseFloat(e.value)||0):0; var billable=Math.max(0,m-50); var fee=Math.round(billable*1.25*100)/100; var d=document.getElementById('eb-delivery-calc'); if(d) d.textContent='Delivery fee: $'+fee.toFixed(2)+' ('+billable+' billable mi)'; };
   window.editBooking = function(id){
     var b = find(id); if(!b) return;
     var pw = b.paperwork || {};
@@ -2392,6 +2393,8 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
     html += '<div class="full"><label>Setup Location</label><input id="eb-setup" value="'+esc(pw.setup||'')+'"></div>';
     html += '<div class="full"><label>Overlay / Theme</label><input id="eb-overlay" value="'+esc(pw.overlay||'')+'"></div>';
     html += '<div class="full"><label>Day-of Contact</label><input id="eb-contact" value="'+esc(pw.dayContact||'')+'"></div>';
+    html += '<div class="full"><label>Round-Trip Distance (miles) — first 50 mi free, then $1.25/mi</label><input id="eb-miles" type="number" min="0" step="1" value="'+(Number(b.deliveryMiles)||0)+'" oninput="cnkEbDeliveryCalc()"></div>';
+    html += '<div class="full"><div id="eb-delivery-calc" style="font-size:12px;color:var(--cream-dim);margin-top:-6px;">Current delivery fee: $'+(Number(b.deliveryFee)||0).toFixed(2)+'</div></div';
     html += '</div>';
     html += '<div class="cnk-modal-actions">';
     html += '<button class="cnk-mbtn cnk-mbtn-save" onclick="saveBookingEdit(\''+b.id+'\')">Save Changes</button>';
@@ -2409,6 +2412,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
     b.name=v('eb-name'); b.date=v('eb-date'); b.email=v('eb-email'); b.phone=v('eb-phone');
     b.eventType=v('eb-type'); b.guests=v('eb-guests'); b.location=v('eb-location');
     b.status=v('eb-status'); b.balance=parseFloat(v('eb-balance'))||0; b.notes=v('eb-notes');
+    var ebMiles=parseFloat(v('eb-miles'))||0; var ebBillable=Math.max(0,ebMiles-50); var ebFee=Math.round(ebBillable*1.25*100)/100; var prevFee=Number(b.deliveryFee)||0; b.deliveryMiles=ebMiles; b.deliveryFee=ebFee; b.price=(Number(b.price)||0)-prevFee+ebFee; if(Number(b.balance)>0){} 
     b.paperwork=b.paperwork||{};
     b.paperwork.startTime=v('eb-start'); b.paperwork.endTime=v('eb-end');
     b.paperwork.setup=v('eb-setup'); b.paperwork.overlay=v('eb-overlay'); b.paperwork.dayContact=v('eb-contact');
@@ -2467,20 +2471,20 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
     };
   }
   function injectDeliveryField(){
-    if(document.getElementById('mb-delivery')) return;
+    if(document.getElementById('mb-miles')) return;
     var totalEl=document.getElementById('mb-total');
     if(!totalEl){ setTimeout(injectDeliveryField,80); return; }
     var grid=document.querySelector('#admin-newbooking .form-grid');
     if(grid){
       var wrap=document.createElement('div');
       wrap.className='form-group form-full';
-      wrap.innerHTML='<label class="form-label">Delivery Fee (only if event is beyond 50 miles total · $1.25/mi each way)</label><input type="number" id="mb-delivery" class="form-input" value="0" min="0" step="0.01" placeholder="0.00">';
+      wrap.innerHTML='<label class="form-label">Round-Trip Distance (miles) — first 50 mi included, then $1.25/mi</label><input type="number" id="mb-miles" class="form-input" value="0" min="0" step="1" placeholder="e.g. 80"><div id="mb-delivery-calc" style="margin-top:6px;font-size:12px;color:var(--cream-dim);">Delivery fee: $0.00 <span style="opacity:0.7;">(0 billable mi)</span></div>';
       grid.appendChild(wrap);
-      var el=document.getElementById('mb-delivery');
-      if(el) el.addEventListener('input', function(){ if(typeof cnkMbRecalc==='function') cnkMbRecalc(); });
+      var el=document.getElementById('mb-miles');
+      if(el) el.addEventListener('input', function(){ if(typeof updateDeliveryCalc==='function') updateDeliveryCalc(); if(typeof cnkMbRecalc==='function') cnkMbRecalc(); });
     }
   }
-  function getDelivery(){ var e=document.getElementById('mb-delivery'); return e?(parseFloat(e.value)||0):0; }
+  function getMiles(){ var e=document.getElementById('mb-miles'); return e?(parseFloat(e.value)||0):0; } function getDelivery(){ var m=getMiles(); var billable=Math.max(0,m-50); return Math.round(billable*1.25*100)/100; } function updateDeliveryCalc(){ var m=getMiles(); var billable=Math.max(0,m-50); var fee=Math.round(billable*1.25*100)/100; var el=document.getElementById('mb-delivery-calc'); if(el) el.innerHTML='Delivery fee: $'+fee.toFixed(2)+' <span style="opacity:0.7;">('+billable+' billable mi)</span>'; }
   function wrapRecalc(){
     if(typeof window.cnkMbRecalc!=='function'){ setTimeout(wrapRecalc,60); return; }
     if(window._cnkRecalcWrapped) return;
@@ -2512,8 +2516,8 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
           var arr=JSON.parse(localStorage.getItem('cnk_bookings')||'[]');
           if(arr.length>beforeCount){
             var b=arr[arr.length-1];
-            b.deliveryFee=d;
-            b.notes=(b.notes?b.notes+' ':'')+'[Delivery fee: $'+d.toFixed(2)+']';
+            b.deliveryFee=d; b.deliveryMiles=getMiles();
+            b.notes=(b.notes?b.notes+' ':'')+'[Delivery: '+getMiles()+' mi round-trip, fee $'+d.toFixed(2)+']';
             arr[arr.length-1]=b;
             localStorage.setItem('cnk_bookings',JSON.stringify(arr));
             if(typeof window.cnkDbSave==='function') window.cnkDbSave(b);
@@ -2521,7 +2525,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
           }
         }catch(e){}
       }
-      var el=document.getElementById('mb-delivery'); if(el) el.value='0';
+      var el=document.getElementById('mb-miles'); if(el) el.value='0'; if(typeof updateDeliveryCalc==='function') updateDeliveryCalc();
     };
   }
   function init(){ relocateNewBooking(); wrapShowAdminView(); injectDeliveryField(); wrapRecalc(); wrapCreate(); }
