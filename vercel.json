@@ -2,11 +2,11 @@
   "rewrites": [
     {
       "source": "/cnk-admin-x7k2m9",
-      "destination": "/public/index.html"
+      "destination": "/index.html"
     },
     {
       "source": "/(.*)",
-      "destination": "/public/index.html"
+      "destination": "/index.html"
     }
   ],
   "headers": [
