@@ -3703,5 +3703,35 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
 })();
 
 </script>
+
+<script>
+
+(function(){
+  if(window.__cnkEditBtn) return; window.__cnkEditBtn=true;
+  function idFrom(btn){ if(!btn) return null; var oc=(btn.getAttribute&&btn.getAttribute('onclick'))||''; var m=oc.match(/\(\s*['"]([^'"]+)['"]/); return m?m[1]:null; }
+  function enhance(){
+    var rows=document.querySelectorAll('tr');
+    rows.forEach(function(tr){
+      if(tr.querySelector('.cnk-edit-btn')) return;
+      var btns=tr.querySelectorAll('button,a'); if(!btns.length) return;
+      var cancelBtn=null, chargeBtn=null, viewBtn=null;
+      btns.forEach(function(b){ var t=(b.textContent||'').trim().toLowerCase(); if(t==='cancel') cancelBtn=b; else if(t.indexOf('charge')===0) chargeBtn=b; else if(t==='view') viewBtn=b; });
+      if(!cancelBtn) return;
+      var id=idFrom(cancelBtn)||idFrom(chargeBtn)||idFrom(viewBtn); if(!id) return;
+      var tmpl=chargeBtn||viewBtn||cancelBtn;
+      var e=document.createElement(tmpl.tagName.toLowerCase());
+      e.className=(tmpl.className||'')+' cnk-edit-btn';
+      if(tmpl.getAttribute('style')) e.setAttribute('style', tmpl.getAttribute('style'));
+      e.textContent='Edit'; if(e.tagName==='BUTTON') e.type='button';
+      e.addEventListener('click', function(ev){ ev.preventDefault(); ev.stopPropagation(); if(typeof editBooking==='function') editBooking(id); else if(typeof openModal==='function') openModal(id); });
+      cancelBtn.parentNode.insertBefore(e, cancelBtn);
+    });
+  }
+  var mo=new MutationObserver(function(){ try{ enhance(); }catch(e){} });
+  function start(){ try{ enhance(); }catch(e){} try{ mo.observe(document.body,{childList:true,subtree:true}); }catch(e){} }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', start); else start();
+})();
+
+</script>
 </body>
 </html>
