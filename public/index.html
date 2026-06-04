@@ -2563,7 +2563,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
     if(!force && addr===lastAddr){ return Promise.resolve(); } // already computed for this address
     lastAddr=addr;
     if(res) res.innerHTML='<span style="color:var(--cream-dim);">Calculating delivery distance…</span>';
-    return fetch('/api/distance',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({address:addr})})
+    return fetch('/api/distance',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({address:addr, cityFallback: (window.__cnkCityFallback?window.__cnkCityFallback():"")})})
       .then(function(r){return r.json();})
       .then(function(d){
         if(!d || !d.ok){
@@ -3587,6 +3587,10 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
     return list;
   };
 })();
+</script>
+
+<script>
+(function(){ if(window.__cnkCityFallback) return; window.__cnkCityFallback=function(){ var g=function(id){var e=document.getElementById(id); return e?(e.value||'').trim():'';}; return [g('cnk-addr-city'),g('cnk-addr-state'),g('cnk-addr-zip')].filter(Boolean).join(', '); }; })();
 </script>
 </body>
 </html>
