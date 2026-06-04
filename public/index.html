@@ -1460,6 +1460,16 @@ async function submitBooking() {
     }
 
     // Payment successful — save booking
+    // Build delivery fee into the saved booking totals (delivery is known after the address lookup; mirrors the order-summary math). Also fixes the legacy balance calc.
+    var __dlvSave = (window._cnkState && Number(window._cnkState.delivery)) || 0;
+    if (selectedPricing && __dlvSave > 0) {
+      var __sub = (selectedPricing.base||0) + (selectedPricing.extra||0);
+      selectedPricing.cc = (__sub + selectedPricing.tax + __dlvSave) * CC_FEE;
+      selectedPricing.total = __sub + selectedPricing.tax + __dlvSave + selectedPricing.cc;
+      selectedPricing.deposit = ((window.cnkFullPayNow && window.cnkFullPayNow()) ? selectedPricing.total : selectedPricing.total/2);
+      selectedPricing.balance = selectedPricing.total - selectedPricing.deposit;
+      selectedPricing.delivery = __dlvSave;
+    }
     const booking = {
       id: bookingId,
       name: fname + ' ' + lname, email, phone, date,
