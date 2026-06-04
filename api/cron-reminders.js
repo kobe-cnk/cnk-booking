@@ -66,6 +66,18 @@ module.exports = async function handler(req, res) {
         const ok = await sendEmail(b);
         if (ok) {
           b.finalReminderSent = new Date().toISOString();
+        try { var _to=(b.email||'').trim(); if(process.env.RESEND_API_KEY && _to && _to.indexOf('@')!==-1){ var _first=(b.name||'there').split(' ')[0]; var _html='<div style="font-family:Arial,sans-serif;max-width:560px;"><h2 style="color:#b8893a;">Your CNK Booths Event is 2 Weeks Away!</h2><p>Hi '+_first+', your photo booth rental on <strong>'+(b.date||'')+'</strong> is coming up. Per your rental agreement, the remaining balance is due now (no later than 14 days before your event).</p><p style="font-size:15px;">Balance due: <strong>
+          await sql`UPDATE bookings SET data = ${JSON.stringify(b)}::jsonb WHERE id = ${b.id}`;
+          sent++; details.push(b.id);
+        }
+      }
+    }
+    res.status(200).json({ ok:true, target, sent, details });
+  } catch (e) {
+    res.status(200).json({ ok:false, error: String(e && e.message || e) });
+  }
+};
++(Number(b.balance)||0).toFixed(2)+'</strong></p><p>Reply to this email or call (801) 857-5457 to take care of your balance. Thank you!</p><p style="font-size:12px;color:#aaa;">CNK Booths, Photo Booth Rentals, Utah</p></div>'; await fetch('https://api.resend.com/emails',{method:'POST',headers:{'Authorization':'Bearer '+process.env.RESEND_API_KEY,'Content-Type':'application/json'},body:JSON.stringify({from:(process.env.RESEND_FROM||'CNK Booths <onboarding@resend.dev>'),to:[_to],reply_to:'photos@cnkbooths.com',subject:'Your CNK Booths balance is due - event on '+(b.date||''),html:_html})}); b.clientReminderSent=new Date().toISOString(); } } catch(_e){}
           await sql`UPDATE bookings SET data = ${JSON.stringify(b)}::jsonb WHERE id = ${b.id}`;
           sent++; details.push(b.id);
         }
