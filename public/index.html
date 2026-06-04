@@ -3787,5 +3787,25 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
 })();
 
 </script>
+
+<script>
+
+(function(){
+  if(window.__cnkModalDelivery) return; window.__cnkModalDelivery=true;
+  function findB(id){ try{ var l=(typeof loadBookings==='function'?loadBookings():[])||[]; return l.find(function(b){return String(b.id)===String(id);}); }catch(e){ return null; } }
+  function money(n){ n=Number(n)||0; return '$'+n.toFixed(2); }
+  function populate(id){
+    var b=findB(id); if(!b) return;
+    var miles=Number(b.deliveryMiles); if(isNaN(miles)) miles=null;
+    var fee=Number(b.deliveryFee)||0;
+    var milesEl=document.getElementById('mb-miles'); if(milesEl && miles!=null && (milesEl.value===''||Number(milesEl.value)===0)) milesEl.value=miles;
+    var calcEl=document.getElementById('mb-delivery-calc');
+    if(calcEl){ var billable=(miles!=null)?Math.max(0,miles-50):null; calcEl.innerHTML='Delivery fee: '+money(fee)+(miles!=null?(' <span style="opacity:.7;">('+miles+' mi round-trip'+(billable!=null?(', '+billable+' billable mi'):'')+')</span>'):' <span style="opacity:.7;">(set manually)</span>'); }
+  }
+  var _open=window.openModal;
+  window.openModal=function(id){ var r=_open?_open.apply(this,arguments):undefined; var theId=id||window._cnkModalId; setTimeout(function(){ try{ populate(theId); }catch(e){} },140); setTimeout(function(){ try{ populate(theId); }catch(e){} },600); return r; };
+})();
+
+</script>
 </body>
 </html>
