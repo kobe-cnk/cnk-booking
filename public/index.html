@@ -3615,5 +3615,93 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
   setInterval(note, 700);
 })();
 </script>
+
+<script>
+
+(function(){
+  if(window.__cnkSign) return; window.__cnkSign=true;
+  var API_SEND='/api/send-agreement', API_GET='/api/get-agreement', API_SIGN='/api/sign-agreement';
+  function findBooking(id){ try{ var list=(typeof loadBookings==='function'?loadBookings():[])||[]; return list.find(function(b){return String(b.id)===String(id);}); }catch(e){ return null; } }
+  var _open = window.openModal;
+  window.openModal = function(id){ window._cnkModalId=id; var r=_open?_open.apply(this,arguments):undefined; try{ setTimeout(function(){ injectAgreementUI(id); },60);}catch(e){} return r; };
+  function injectAgreementUI(id){
+    var mc=document.getElementById('modal-content'); if(!mc) return;
+    var sec=document.getElementById('cnk-agree-sec');
+    if(!sec){
+      sec=document.createElement('div'); sec.id='cnk-agree-sec';
+      sec.style.cssText='margin:16px 0;padding:12px;border:1px solid #eee;border-radius:8px;background:#fafafa;';
+      sec.innerHTML='<div style="font-weight:600;margin-bottom:8px;">Rental Agreement</div><div id="cnk-agree-status" style="font-size:13px;color:#555;margin-bottom:8px;">-</div><button type="button" id="cnk-agree-send" style="background:#b8893a;color:#fff;border:none;padding:8px 14px;border-radius:6px;cursor:pointer;font-weight:600;">Send agreement to client to sign</button><div id="cnk-agree-link" style="font-size:12px;color:#555;margin-top:8px;word-break:break-all;"></div>';
+      mc.appendChild(sec);
+      document.getElementById('cnk-agree-send').addEventListener('click', function(){ sendAgreement(window._cnkModalId); });
+    }
+    refreshAgreeStatus(id);
+  }
+  function refreshAgreeStatus(id){
+    var b=findBooking(id); var st=document.getElementById('cnk-agree-status'); var btn=document.getElementById('cnk-agree-send'); if(!st) return;
+    var s=(b&&b.signStatus)||'notsent';
+    if(s==='signed'){ st.innerHTML='Signed by client'+((b.paperwork&&b.paperwork.signature)?(' ('+b.paperwork.signature+')'):''); if(btn) btn.textContent='Resend agreement'; }
+    else if(s==='awaiting'){ st.innerHTML='Sent - awaiting client signature'; if(btn) btn.textContent='Resend agreement'; }
+    else { st.innerHTML='Not sent yet'; if(btn) btn.textContent='Send agreement to client to sign'; }
+  }
+  async function sendAgreement(id){
+    var btn=document.getElementById('cnk-agree-send'), link=document.getElementById('cnk-agree-link');
+    if(!id){ alert('Open a booking first.'); return; }
+    if(btn){ btn.disabled=true; btn.textContent='Sending...'; }
+    try{
+      var r=await fetch(API_SEND,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:id})});
+      var jj=await r.json();
+      if(jj&&jj.ok){
+        if(link){ link.innerHTML='Signing link (copy/share if the email did not arrive):<br><a href="'+jj.link+'" target="_blank">'+jj.link+'</a>'+(jj.emailed?'<br><span style="color:#16a34a;">Emailed to client.</span>':'<br><span style="color:#b45309;">Email not sent'+(jj.emailError?(' ('+jj.emailError+')'):'')+' - share the link above.</span>'); }
+        try{ var list=loadBookings(); var bb=list.find(function(x){return String(x.id)===String(id);}); if(bb){ bb.signStatus='awaiting'; if(typeof saveBookings==='function') saveBookings(list); } }catch(e){}
+        refreshAgreeStatus(id);
+      } else { alert('Could not send: '+((jj&&jj.error)||'unknown error')); }
+    }catch(e){ alert('Error: '+e); }
+    if(btn){ btn.disabled=false; }
+  }
+  function getParam(n){ return new URLSearchParams(location.search).get(n); }
+  var token=getParam('sign');
+  if(token){ renderSignPage(token); }
+  var _pad={drawing:false,has:false,ctx:null,canvas:null};
+  async function renderSignPage(token){
+    var ov=document.createElement('div'); ov.id='cnk-sign-overlay';
+    ov.style.cssText='position:fixed;inset:0;background:#fff;z-index:999999;overflow:auto;font-family:Arial,sans-serif;padding:24px;';
+    ov.innerHTML='<div style="max-width:640px;margin:0 auto;"><h2 style="color:#b8893a;">Loading your agreement...</h2></div>';
+    document.body.appendChild(ov); var box=ov.firstChild;
+    function row(k,v){ return '<div style="display:flex;justify-content:space-between;padding:3px 0;"><span style="color:#888;">'+k+'</span><span style="font-weight:600;">'+(v==null?'':v)+'</span></div>'; }
+    try{
+      var r=await fetch(API_GET+'?token='+encodeURIComponent(token)); var jj=await r.json();
+      if(!jj||!jj.ok){ box.innerHTML='<h2 style="color:#b8893a;">Agreement</h2><p>'+((jj&&jj.error)||'This link is no longer valid.')+'</p>'; return; }
+      var b=jj.booking; var money=function(n){ n=Number(n)||0; return '$'+n.toFixed(2); }; var already=b.signStatus==='signed';
+      box.innerHTML='<h2 style="color:#b8893a;margin-bottom:4px;">CNK Booths Rental Agreement</h2><p style="color:#666;font-size:14px;margin-top:0;">'+(b.name||'')+(b.date?(' - '+b.date):'')+'</p><div style="border:1px solid #eee;border-radius:8px;padding:14px;font-size:14px;line-height:1.5;">'+row('Reference',b.id)+row('Event date',b.date)+(b.venueName?row('Venue',b.venueName):'')+(b.location?row('Location',b.location):'')+row('Package',b.package)+row('Total',money(b.price))+row('Paid',money(b.deposit))+row('Balance due',money(b.balance))+'</div><p style="font-size:13px;color:#555;margin-top:14px;">By signing below you agree to the CNK Booths rental terms, including the cancellation and final-payment policy (final balance due no later than 14 days before your event).</p>'+(already?('<p style="color:#16a34a;font-weight:600;font-size:16px;">This agreement has already been signed'+(b.signedName?(' by '+b.signedName):'')+'. Thank you!</p>'):('<label style="display:block;font-size:13px;font-weight:600;margin:14px 0 4px;">Type your full legal name</label><input id="cnk-sign-name" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;font-size:15px;box-sizing:border-box;" placeholder="Full name"><label style="display:block;font-size:13px;font-weight:600;margin:14px 0 4px;">Draw your signature</label><canvas id="cnk-sign-pad" width="600" height="180" style="width:100%;max-width:600px;height:180px;border:1px dashed #b8893a;border-radius:8px;touch-action:none;background:#fff;"></canvas><div><button type="button" id="cnk-sign-clear" style="margin-top:6px;background:#eee;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;">Clear</button></div><label style="display:flex;gap:8px;align-items:flex-start;font-size:13px;margin:14px 0;"><input type="checkbox" id="cnk-sign-media"> <span>I grant CNK Booths permission to use event photos for promotional purposes (optional).</span></label><button type="button" id="cnk-sign-submit" style="background:#b8893a;color:#fff;border:none;padding:12px 22px;border-radius:6px;cursor:pointer;font-weight:600;font-size:15px;">Sign and Submit</button><div id="cnk-sign-msg" style="margin-top:10px;font-size:14px;"></div>'));
+      if(!already){ setupPad(); document.getElementById('cnk-sign-submit').addEventListener('click', function(){ submitSign(token); }); }
+    }catch(e){ box.innerHTML='<h2>Agreement</h2><p>Something went wrong loading this agreement. Please try again later.</p>'; }
+  }
+  function setupPad(){
+    var c=document.getElementById('cnk-sign-pad'); if(!c) return; var ctx=c.getContext('2d');
+    ctx.lineWidth=2.2; ctx.lineCap='round'; ctx.strokeStyle='#1f2937'; _pad.ctx=ctx; _pad.canvas=c;
+    function pos(e){ var rc=c.getBoundingClientRect(); var t=e.touches&&e.touches[0]; var x=(t?t.clientX:e.clientX)-rc.left; var y=(t?t.clientY:e.clientY)-rc.top; return {x:x*(c.width/rc.width), y:y*(c.height/rc.height)}; }
+    function down(e){ e.preventDefault(); _pad.drawing=true; _pad.has=true; var p=pos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); }
+    function move(e){ if(!_pad.drawing) return; e.preventDefault(); var p=pos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); }
+    function up(){ _pad.drawing=false; }
+    c.addEventListener('mousedown',down); c.addEventListener('mousemove',move); window.addEventListener('mouseup',up);
+    c.addEventListener('touchstart',down,{passive:false}); c.addEventListener('touchmove',move,{passive:false}); c.addEventListener('touchend',up);
+    document.getElementById('cnk-sign-clear').addEventListener('click', function(){ ctx.clearRect(0,0,c.width,c.height); _pad.has=false; });
+  }
+  async function submitSign(token){
+    var msg=document.getElementById('cnk-sign-msg'); var nm=(document.getElementById('cnk-sign-name')||{}).value||'';
+    if(!nm.trim()){ msg.style.color='#c0392b'; msg.textContent='Please type your full name.'; return; }
+    if(!_pad.has){ msg.style.color='#c0392b'; msg.textContent='Please draw your signature.'; return; }
+    var img=_pad.canvas.toDataURL('image/png'); var media=(document.getElementById('cnk-sign-media')||{}).checked||false;
+    var btn=document.getElementById('cnk-sign-submit'); if(btn){ btn.disabled=true; btn.textContent='Submitting...'; }
+    try{
+      var r=await fetch(API_SIGN,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:token,name:nm.trim(),signatureImg:img,mediaRelease:media})});
+      var jj=await r.json();
+      if(jj&&jj.ok){ document.getElementById('cnk-sign-overlay').firstChild.innerHTML='<h2 style="color:#16a34a;">Thank you, '+nm.trim()+'!</h2><p style="font-size:15px;">Your rental agreement has been signed. CNK Booths has been notified. You can close this page.</p>'; }
+      else { msg.style.color='#c0392b'; msg.textContent=(jj&&jj.error)||'Could not submit. Please try again.'; if(btn){ btn.disabled=false; btn.textContent='Sign and Submit'; } }
+    }catch(e){ msg.style.color='#c0392b'; msg.textContent='Error submitting. Please try again.'; if(btn){ btn.disabled=false; btn.textContent='Sign and Submit'; } }
+  }
+})();
+
+</script>
 </body>
 </html>
