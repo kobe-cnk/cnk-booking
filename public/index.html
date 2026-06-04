@@ -895,7 +895,7 @@
     var tax = sub*TAX;
     var cc = (sub+tax)*CC;
     var total = sub+tax+cc;
-    var deposit = total*DEP;
+    var deposit = total*((window.cnkFullPayNow&&window.cnkFullPayNow())?1:DEP);
     return { base:base, addonCost:addonCost, sub:sub, tax:tax, cc:cc, total:total, deposit:deposit, balance:total-deposit };
   }
 
@@ -1195,7 +1195,7 @@ function seedDemo() {
     const tax = base * SALES_TAX;
     const cc = (base + tax) * CC_FEE;
     const total = base + tax + cc;
-    return { basePrice: base, tax, ccFee: cc, price: total, deposit: total/2, balance: total/2 };
+    return { basePrice: base, tax, ccFee: cc, price: total, deposit: ((window.cnkFullPayNow&&window.cnkFullPayNow())?total:total/2), balance: total/2 };
   }
   const demos = [
     { id:'CNK-100291', name:'Sarah Mitchell', email:'sarah@example.com', phone:'(801) 555-0191', date:'2026-06-14', package:'fullday', ...demoPrice(699), status:'confirmed', eventType:'Wedding', location:'Grand America Hotel, SLC', guests:'100 – 250 guests', notes:'Champagne-themed overlay, gold props', source:'Wedding Planner', created: Date.now()-7*86400000 },
@@ -1268,7 +1268,7 @@ function calcPricing(pkg, extraHrs) {
   const tax = subtotal * SALES_TAX;
   const cc = (subtotal + tax) * CC_FEE;
   const total = subtotal + tax + cc;
-  const deposit = total / 2;
+  const deposit = ((window.cnkFullPayNow&&window.cnkFullPayNow())?total:total/2);
   const balance = total / 2;
   return { base, extra, addHours: extraHrs || 0, tax, cc, total, deposit, balance };
 }
@@ -3604,6 +3604,15 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
   function go(){ hideStaffLogin(); if(onSecret()){ if(location.hash!=='#admin'){ location.hash='#admin'; } else { try{ window.dispatchEvent(new HashChangeEvent('hashchange')); }catch(e){} } } else { blockAdminHash(); } }
   if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', go); } else { go(); }
   setTimeout(hideStaffLogin, 400); setTimeout(hideStaffLogin, 1200);
+})();
+</script>
+
+<script>
+(function(){
+  if(window.__cnkFullPay) return; window.__cnkFullPay=true;
+  window.cnkFullPayNow=function(){ try{ var el=document.getElementById('cnk-date'); var ds=el?(el.value||'').trim():''; if(!ds) return false; var ev=new Date(ds+'T00:00:00'); if(isNaN(ev)) return false; var now=new Date(); now.setHours(0,0,0,0); var d=(ev-now)/86400000; return d<=14; }catch(e){ return false; } };
+  function note(){ try{ var btn=document.getElementById('cnk-pay-btn'); if(!btn) return; var n=document.getElementById('cnk-fullpay-note'); var due=window.cnkFullPayNow(); if(due){ if(!n){ n=document.createElement('div'); n.id='cnk-fullpay-note'; n.style.cssText='margin:10px 0;padding:10px 12px;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;color:#9a3412;font-size:13px;line-height:1.4;'; n.textContent='Your event is within 14 days, so the full amount is due today (no deposit/balance split).'; btn.parentNode.insertBefore(n, btn); } n.style.display=''; } else if(n){ n.style.display='none'; } }catch(e){} }
+  setInterval(note, 700);
 })();
 </script>
 </body>
