@@ -3609,7 +3609,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
   var SECRET='/cnk-admin-x7k2m9';
   function onSecret(){ return location.pathname.replace(/\/+$/,'')===SECRET; }
   function hideStaffLogin(){ if(onSecret()) return; try{ Array.prototype.slice.call(document.querySelectorAll('a,button,[onclick]')).forEach(function(el){ var t=(el.textContent||'').trim().toLowerCase(); var oc=(el.getAttribute&&el.getAttribute('onclick')||'')+''; if(t==='staff login'||t==='admin login'||/openAdmin|_cnkOpenAdmin|showLogin/.test(oc)){ el.style.display='none'; } }); }catch(e){} }
-  function blockAdminHash(){ if(!onSecret() && /^#admin/.test(location.hash)){ try{ history.replaceState(null,'','/'); }catch(e){} try{ location.hash=''; }catch(e){} } }
+  function blockAdminHash(){ if(onSecret()) return; function hideAdmin(){ var ov=document.getElementById('admin-login-overlay'); if(ov){ ov.style.display='none'; if(ov.classList){ ov.classList.remove('active'); ov.classList.remove('open'); ov.classList.remove('show'); } } var av=document.getElementById('view-admin'); if(av) av.style.display='none'; } if(/^#admin/.test(location.hash)){ try{ history.replaceState(null,'','/'); }catch(e){} try{ location.hash=''; }catch(e){} } hideAdmin(); setTimeout(hideAdmin,60); setTimeout(hideAdmin,250); }
   window.addEventListener('hashchange', blockAdminHash);
   function go(){ hideStaffLogin(); if(onSecret()){ if(location.hash!=='#admin'){ location.hash='#admin'; } else { try{ window.dispatchEvent(new HashChangeEvent('hashchange')); }catch(e){} } } else { blockAdminHash(); } }
   if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', go); } else { go(); }
