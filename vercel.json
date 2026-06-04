@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/cnk-admin-x7k2m9",
+      "destination": "/public/index.html"
+    },
+    {
       "source": "/(.*)",
       "destination": "/public/index.html"
     }
