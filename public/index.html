@@ -1594,7 +1594,7 @@ function renderCalendar() {
   const bookings = loadBookings();
   const boothCount = getBoothCount();
   const bookingsByDate = {};
-  bookings.filter(b => b.status !== 'complete').forEach(b => {
+  bookings.filter(function(_cb){return !_cb||(_cb.status!=='cancelled');}).filter(b => b.status !== 'complete').forEach(b => {
     bookingsByDate[b.date] = (bookingsByDate[b.date] || 0) + 1;
   });
 
@@ -1622,7 +1622,7 @@ function renderCalendar() {
 
   // This month's bookings
   const monthStr = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}`;
-  const monthBookings = bookings.filter(b => b.date.startsWith(monthStr));
+  const monthBookings = bookings.filter(function(_cb){return !_cb||(_cb.status!=='cancelled');}).filter(b => b.date.startsWith(monthStr));
   document.getElementById('cal-month-bookings').innerHTML = monthBookings.length
     ? renderTable(monthBookings, true)
     : `<div class="empty-state"><div class="big">◻</div><p>No bookings this month</p></div>`;
@@ -3561,6 +3561,25 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
     };
   }
   wrapEdit(); wrapSave(); setTimeout(function(){ wrapEdit(); wrapSave(); }, 600);
+})();
+</script>
+
+<script>
+(function(){
+  if(window.__cnkSoftCancel) return; window.__cnkSoftCancel=true;
+  window.cancelBooking = async function(id){
+    if(!confirm('Cancel this booking?\n\nThe record is kept and marked Cancelled, the date is freed, and a refund is attempted if a card payment was collected.')) return;
+    var list = (typeof loadBookings==='function' ? (loadBookings()||[]) : []);
+    var b = list.find(function(x){ return String(x.id)===String(id); });
+    if(!b){ alert('Booking not found.'); return; }
+    var pid = b.paymentId || b.squarePaymentId || (b.payment && b.payment.id);
+    if(pid){ try{ await fetch('/api/refund',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({paymentId:pid, reason:'Booking cancelled'})}); }catch(e){} }
+    b.status='cancelled'; b.cancelledAt=new Date().toISOString();
+    try{ if(typeof saveBookings==='function') saveBookings(list); }catch(e){}
+    try{ await fetch('/api/save-booking',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}); }catch(e){}
+    ['renderAllBookings','renderOverview','renderCalendar','renderUpcoming','renderStatusFilters','filterBookings'].forEach(function(n){ try{ if(typeof window[n]==='function') window[n](); }catch(e){} });
+    alert('Booking cancelled. The date is now free and the record is kept (marked Cancelled).');
+  };
 })();
 </script>
 </body>
