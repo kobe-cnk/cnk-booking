@@ -3592,5 +3592,19 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
 <script>
 (function(){ if(window.__cnkCityFallback) return; window.__cnkCityFallback=function(){ var g=function(id){var e=document.getElementById(id); return e?(e.value||'').trim():'';}; return [g('cnk-addr-city'),g('cnk-addr-state'),g('cnk-addr-zip')].filter(Boolean).join(', '); }; })();
 </script>
+
+<script>
+(function(){
+  if(window.__cnkAdminGate) return; window.__cnkAdminGate=true;
+  var SECRET='/cnk-admin-x7k2m9';
+  function onSecret(){ return location.pathname.replace(/\/+$/,'')===SECRET; }
+  function hideStaffLogin(){ if(onSecret()) return; try{ Array.prototype.slice.call(document.querySelectorAll('a,button,[onclick]')).forEach(function(el){ var t=(el.textContent||'').trim().toLowerCase(); var oc=(el.getAttribute&&el.getAttribute('onclick')||'')+''; if(t==='staff login'||t==='admin login'||/openAdmin|_cnkOpenAdmin|showLogin/.test(oc)){ el.style.display='none'; } }); }catch(e){} }
+  function blockAdminHash(){ if(!onSecret() && /^#admin/.test(location.hash)){ try{ history.replaceState(null,'','/'); }catch(e){} try{ location.hash=''; }catch(e){} } }
+  window.addEventListener('hashchange', blockAdminHash);
+  function go(){ hideStaffLogin(); if(onSecret()){ if(location.hash!=='#admin'){ location.hash='#admin'; } else { try{ window.dispatchEvent(new HashChangeEvent('hashchange')); }catch(e){} } } else { blockAdminHash(); } }
+  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', go); } else { go(); }
+  setTimeout(hideStaffLogin, 400); setTimeout(hideStaffLogin, 1200);
+})();
+</script>
 </body>
 </html>
