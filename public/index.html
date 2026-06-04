@@ -720,7 +720,7 @@
               <option>Nonprofit / Charity</option><option>Other</option>
             </select>
           </div>
-          <div class="form-group form-full"><label class="form-label">Street Address</label><input class="form-input" id="cnk-addr-street" placeholder="123 S Main St"></div><div class="form-group"><label class="form-label">City</label><input class="form-input" id="cnk-addr-city" placeholder="Provo"></div><div class="form-group"><label class="form-label">State</label><input class="form-input" id="cnk-addr-state" placeholder="UT" maxlength="2"></div><div class="form-group"><label class="form-label">ZIP Code</label><input class="form-input" id="cnk-addr-zip" placeholder="84601" inputmode="numeric" maxlength="5"></div><div class="form-group"></div><input type="hidden" id="cnk-venue">
+          <div class="form-group form-full"><label class="form-label">Venue Name <span style="color:#999;font-weight:400;">(optional)</span></label><input class="form-input" id="cnk-venue-name" placeholder="e.g., Grand America Hotel"></div><div class="form-group form-full"><label class="form-label">Street Address</label><input class="form-input" id="cnk-addr-street" placeholder="123 S Main St"></div><div class="form-group"><label class="form-label">City</label><input class="form-input" id="cnk-addr-city" placeholder="Provo"></div><div class="form-group"><label class="form-label">State</label><input class="form-input" id="cnk-addr-state" placeholder="UT" maxlength="2"></div><div class="form-group"><label class="form-label">ZIP Code</label><input class="form-input" id="cnk-addr-zip" placeholder="84601" inputmode="numeric" maxlength="5"></div><div class="form-group"></div><input type="hidden" id="cnk-venue">
           <div class="form-group form-full"><label class="form-label">Expected Guest Count</label><input class="form-input" id="cnk-guests" placeholder="e.g. 150"></div>
           <div class="form-group form-full"><label class="form-label">Special Requests or Notes</label><textarea class="form-textarea" id="cnk-notes" placeholder="Custom overlay design, specific setup requirements, themed props, etc."></textarea></div>
           <div class="form-group form-full"><label class="form-label">How did you hear about us?</label>
@@ -1001,7 +1001,7 @@
       id:id, name:(val('cnk-first')+' '+val('cnk-last')).trim(), email:val('cnk-email'), phone:val('cnk-phone'),
       date:val('cnk-date'), package:state.pkg, basePrice:c.base, tax:c.tax, ccFee:c.cc, price:c.total,
       deposit:c.deposit, balance:c.balance, status:((Number(c.balance)>0.005)?'balance_due':'confirmed'), eventType:val('cnk-type'),
-      location:val('cnk-venue'), guests:val('cnk-guests'), notes:val('cnk-notes'),
+      location:val('cnk-venue'), venueName:val('cnk-venue-name'), guests:val('cnk-guests'), notes:val('cnk-notes'),
       source:val('cnk-source')||'Online Booking', created:Date.now(), paperwork:paperwork
     };
     bookings.push(booking); localStorage.setItem('cnk_bookings', JSON.stringify(bookings));
