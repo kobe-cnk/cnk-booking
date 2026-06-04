@@ -2584,7 +2584,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
   }
 
   // ---- Patch the step-2 summary ----
-  function patchSummary(){
+  function patchSummary(){ return; /* delivery now handled in calc()+fillSummary; legacy block disabled to prevent double-count */
     var d=getDelivery();
     var totalEl=document.getElementById('cnk-sum-total');
     var depEl=document.getElementById('cnk-sum-deposit');
