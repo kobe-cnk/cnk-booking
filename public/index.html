@@ -994,7 +994,7 @@
     var paperwork={
       startTime:val('cnk-pw-start'), endTime:val('cnk-pw-end'), setup:val('cnk-pw-setup'),
       power:val('cnk-pw-power'), wifi:val('cnk-pw-wifi'), outdoor:val('cnk-pw-outdoor'), overlay:val('cnk-pw-overlay'), dayContact:val('cnk-pw-contact'),
-      mediaRelease:document.getElementById('cnk-pw-media').checked, signature:val('cnk-pw-sign'),
+      mediaRelease:document.getElementById('cnk-pw-media').checked, signature:val('cnk-pw-sign'), signatureImg:(window.cnkPwSig?window.cnkPwSig():''),
       agreedAt:new Date().toISOString()
     };
     var booking={
@@ -3730,6 +3730,43 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
   var mo=new MutationObserver(function(){ try{ enhance(); }catch(e){} });
   function start(){ try{ enhance(); }catch(e){} try{ mo.observe(document.body,{childList:true,subtree:true}); }catch(e){} }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', start); else start();
+})();
+
+</script>
+
+<script>
+
+(function(){
+  if(window.__cnkPwPad) return; window.__cnkPwPad=true;
+  var pad={drawing:false,has:false,ctx:null,canvas:null};
+  window.cnkPwSig=function(){ try{ return pad.has?pad.canvas.toDataURL('image/png'):''; }catch(e){ return ''; } };
+  function hideGroup(id){ var el=document.getElementById(id); if(el){ var g=(el.closest&&el.closest('.form-group'))||el.parentNode; if(g) g.style.display='none'; } }
+  function build(){
+    ['cnk-pw-setup','cnk-pw-overlay','cnk-pw-contact'].forEach(hideGroup);
+    var s=document.getElementById('cnk-pw-sign'); if(!s) return;
+    if(!document.getElementById('cnk-pw-sign-pad')){
+      var grp=(s.closest&&s.closest('.form-group'))||s.parentNode;
+      try{ var lbl=grp.querySelector('label'); if(lbl) lbl.textContent='Printed Name'; s.placeholder='Type full name'; }catch(e){}
+      var w=document.createElement('div'); w.className='form-group form-full'; w.id='cnk-pw-sign-wrap';
+      w.innerHTML='<label class="form-label">Signature (draw with finger or mouse)</label><canvas id="cnk-pw-sign-pad" width="600" height="160" style="width:100%;max-width:600px;height:160px;border:1px dashed #b8893a;border-radius:8px;touch-action:none;background:#fff;display:block;"></canvas><button type="button" id="cnk-pw-sign-clear" style="margin-top:6px;background:#eee;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;">Clear</button>';
+      if(grp.nextSibling) grp.parentNode.insertBefore(w, grp.nextSibling); else grp.parentNode.appendChild(w);
+    }
+    setup();
+  }
+  function setup(){
+    var c=document.getElementById('cnk-pw-sign-pad'); if(!c||c.__wired) return; c.__wired=true; var ctx=c.getContext('2d');
+    ctx.lineWidth=2.2; ctx.lineCap='round'; ctx.strokeStyle='#1f2937'; pad.ctx=ctx; pad.canvas=c;
+    function pos(e){ var r=c.getBoundingClientRect(); var t=e.touches&&e.touches[0]; var x=(t?t.clientX:e.clientX)-r.left; var y=(t?t.clientY:e.clientY)-r.top; return {x:x*(c.width/r.width),y:y*(c.height/r.height)}; }
+    function down(e){ e.preventDefault(); pad.drawing=true; pad.has=true; var p=pos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); }
+    function move(e){ if(!pad.drawing) return; e.preventDefault(); var p=pos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); }
+    function up(){ pad.drawing=false; }
+    c.addEventListener('mousedown',down); c.addEventListener('mousemove',move); window.addEventListener('mouseup',up);
+    c.addEventListener('touchstart',down,{passive:false}); c.addEventListener('touchmove',move,{passive:false}); c.addEventListener('touchend',up);
+    var cl=document.getElementById('cnk-pw-sign-clear'); if(cl) cl.addEventListener('click', function(){ ctx.clearRect(0,0,c.width,c.height); pad.has=false; });
+  }
+  var mo=new MutationObserver(function(){ try{ build(); }catch(e){} });
+  function start(){ try{ build(); }catch(e){} try{ mo.observe(document.body,{childList:true,subtree:true}); }catch(e){} }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',start); else start();
 })();
 
 </script>
