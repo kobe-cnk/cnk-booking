@@ -3770,5 +3770,22 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
 })();
 
 </script>
+
+<script>
+
+(function(){
+  if(window.__cnkInstantSave) return; window.__cnkInstantSave=true;
+  function refreshAll(){ ['renderAllBookings','renderOverview','renderCalendar','renderUpcoming','renderStatusFilters','filterBookings'].forEach(function(n){ try{ if(typeof window[n]==='function') window[n](); }catch(e){} }); }
+  function closeEditor(){ try{ var ov=document.getElementById('eb-overlay'); if(ov){ ov.style.display='none'; if(ov.classList){ ov.classList.remove('active'); ov.classList.remove('open'); ov.classList.remove('show'); } } }catch(e){} try{ if(typeof closeModal==='function') closeModal(); }catch(e){} }
+  function wrap(){
+    var _save=window.saveBookingEdit;
+    if(typeof _save!=='function' || _save.__cnkWrapped) return false;
+    var w=function(){ var r; try{ r=_save.apply(this, arguments); }catch(e){} try{ refreshAll(); closeEditor(); }catch(e){} setTimeout(function(){ try{ refreshAll(); }catch(e){} }, 250); return r; };
+    w.__cnkWrapped=true; window.saveBookingEdit=w; return true;
+  }
+  if(!wrap()){ var tries=0; var iv=setInterval(function(){ tries++; if(wrap()||tries>40) clearInterval(iv); }, 150); }
+})();
+
+</script>
 </body>
 </html>
