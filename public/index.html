@@ -1641,7 +1641,7 @@ function renderAllBookings() {
 
 function renderStatusFilters() {
   const statuses = ['all','pending','confirmed','balance_due','complete'];
-  const labels = { all:'All', pending:'Pending', confirmed:'Confirmed', balance_due:'Balance Due', complete:'Complete' };
+  const labels = { all:'All', balance_due:'Balance Due', paid:'Paid', completed:'Completed', cancelled:'Cancelled' };
   document.getElementById('status-filters').innerHTML = statuses.map(s =>
     `<button class="filter-btn ${s===activeFilter?'active':''}" onclick="setFilter('${s}')">${labels[s]}</button>`
   ).join('');
@@ -1683,10 +1683,10 @@ function renderUpcoming() {
 function renderTable(bookings, showActions) {
   const pkgLabel = { hourly:'Hourly', halfday:'Half Day', fullday:'Full Day' };
   const statusBadge = {
-    pending: '<span class="badge badge-pending">Pending</span>',
-    confirmed: '<span class="badge badge-confirmed">Confirmed</span>',
+    paid: '<span class="badge badge-confirmed">Paid</span>',
     balance_due: '<span class="badge badge-balance">Balance Due</span>',
-    complete: '<span class="badge badge-complete">Complete</span>',
+    completed: '<span class="badge badge-complete">Completed</span>',
+    cancelled: '<span class="badge" style="background:#e5e7eb;color:#6b7280;">Cancelled</span>',
   };
   return `<table>
     <thead><tr>
@@ -1888,9 +1888,10 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
       <div class="form-group">
         <label class="form-label">Status</label>
         <select id="mb-status" class="form-select">
-          <option value="confirmed">Confirmed</option>
-          <option value="pending">Pending</option>
-          <option value="complete">Complete</option>
+          <option value="balance_due">Balance Due</option>
+          <option value="paid">Paid</option>
+          <option value="completed">Completed</option>
+          <option value="cancelled">Cancelled</option>
         </select>
       </div>
       <div class="form-group form-full">
@@ -3571,6 +3572,19 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
     try{ await fetch('/api/save-booking',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}); }catch(e){}
     ['renderAllBookings','renderOverview','renderCalendar','renderUpcoming','renderStatusFilters','filterBookings'].forEach(function(n){ try{ if(typeof window[n]==='function') window[n](); }catch(e){} });
     alert('Booking cancelled. The date is now free and the record is kept (marked Cancelled).');
+  };
+})();
+</script>
+
+<script>
+(function(){
+  if(window.__cnkStatusCanon) return; window.__cnkStatusCanon=true;
+  var _load = window.loadBookings;
+  if(typeof _load!=='function') return;
+  window.loadBookings = function(){
+    var list = _load() || [];
+    try{ list.forEach(function(b){ if(!b) return; var s=(b.status||'').toString().toLowerCase(); var bal=Number(b.balance)||0; if(s==='cancelled') b.status='cancelled'; else if(s==='complete'||s==='completed') b.status='completed'; else b.status = (bal>0.005?'balance_due':'paid'); }); }catch(e){}
+    return list;
   };
 })();
 </script>
