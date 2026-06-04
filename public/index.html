@@ -905,7 +905,7 @@
     document.getElementById('cnk-hourly-ctrl').style.display = (pkg==='hourly') ? 'block' : 'none';
     refreshAddon();
   };
-  window.cnkHours=function(d){ state.hours=Math.max(1,Math.min(3,state.hours+d)); document.getElementById('cnk-hours').textContent=state.hours; };
+  window.cnkHours=function(d){ state.hours=Math.max(1,Math.min(3,(Number(state.hours)||1)+d)); var el=document.getElementById('cnk-hours'); if(el) el.textContent=state.hours; };
   window.cnkAddon=function(d){ state.addon=Math.max(0,state.addon+d); refreshAddon(); };
   function refreshAddon(){
     document.getElementById('cnk-addon').textContent=state.addon;
