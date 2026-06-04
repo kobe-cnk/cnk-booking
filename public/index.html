@@ -749,7 +749,7 @@
           <div class="pb-title">Order Summary</div>
           <div class="pb-row"><span class="pb-label" id="cnk-sum-pkg">Package</span><span class="pb-val" id="cnk-sum-base">$0</span></div>
           <div class="pb-row" id="cnk-sum-addon-row" style="display:none;"><span class="pb-label" id="cnk-sum-addon-label">Extra hours</span><span class="pb-val" id="cnk-sum-addon">$0</span></div>
-          <div class="pb-row"><span class="pb-label">Sales tax (7.45%)</span><span class="pb-val" id="cnk-sum-tax">$0</span></div>
+          <div class="pb-row" id="cnk-sum-delivery-row" style="display:none;"><span class="pb-label">Delivery</span><span class="pb-val" id="cnk-sum-delivery">$0</span></div><div class="pb-row"><span class="pb-label">Sales tax (7.45%)</span><span class="pb-val" id="cnk-sum-tax">$0</span></div>
           <div class="pb-row"><span class="pb-label">Card processing (3%)</span><span class="pb-val" id="cnk-sum-cc">$0</span></div>
           <div class="pb-divider"></div>
           <div class="pb-row pb-total-row"><span class="pb-label">Total</span><span class="pb-total" id="cnk-sum-total">$0</span></div>
@@ -893,10 +893,10 @@
     var addonCost = Math.max(0,state.addon)*HOUR;
     var sub = base + addonCost;
     var tax = sub*TAX;
-    var cc = (sub+tax)*CC;
-    var total = sub+tax+cc;
+    var __d=(window._cnkState&&Number(window._cnkState.delivery))||0; var cc = (sub+tax+__d)*CC;
+    var total = sub+tax+__d+cc;
     var deposit = total*((window.cnkFullPayNow&&window.cnkFullPayNow())?1:DEP);
-    return { base:base, addonCost:addonCost, sub:sub, tax:tax, cc:cc, total:total, deposit:deposit, balance:total-deposit };
+    return { base:base, addonCost:addonCost, sub:sub, tax:tax, cc:cc, total:total, deposit:deposit, balance:total-deposit, delivery:__d };
   }
 
   window.cnkPick=function(pkg){
@@ -933,7 +933,7 @@
     if(state.addon>0){ ar.style.display='flex'; document.getElementById('cnk-sum-addon-label').textContent='Extra hours ('+state.addon+' × $125)'; document.getElementById('cnk-sum-addon').textContent=money(c.addonCost); }
     else ar.style.display='none';
     document.getElementById('cnk-sum-tax').textContent=money(c.tax);
-    document.getElementById('cnk-sum-cc').textContent=money(c.cc);
+    document.getElementById('cnk-sum-cc').textContent=money(c.cc); var __dr=document.getElementById('cnk-sum-delivery-row'),__de=document.getElementById('cnk-sum-delivery'); if(__de)__de.textContent=money(c.delivery||0); if(__dr)__dr.style.display=((c.delivery||0)>0)?'flex':'none';
     document.getElementById('cnk-sum-total').textContent=money(c.total);
     document.getElementById('cnk-sum-deposit').textContent=money(c.deposit);
     document.getElementById('cnk-sum-balance').textContent=money(c.balance);
