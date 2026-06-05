@@ -3804,21 +3804,23 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
 <script>
 (function(){
   if(window.__cnkAddonHourly) return; window.__cnkAddonHourly=true;
+  function currentPkg(){
+    var sel=document.querySelector('.package-card.selected');
+    if(sel){ var btns=sel.querySelectorAll('button'); for(var i=0;i<btns.length;i++){ var t=(btns[i].textContent||'').toLowerCase(); if(t.indexOf('select')>=0){ if(t.indexOf('half day')>=0) return 'halfday'; if(t.indexOf('full day')>=0) return 'fullday'; if(t.indexOf('hourly')>=0) return 'hourly'; } } }
+    return window.__cnkPkgSel||null;
+  }
   function sync(){
     var bars=document.querySelectorAll('.addon-hours-bar'); if(!bars.length) return;
-    var half=document.getElementById('pkg-halfday'); var full=document.getElementById('pkg-fullday');
-    var show=(half&&half.classList.contains('selected'))||(full&&full.classList.contains('selected'));
+    var p=currentPkg(); var show=(p==='halfday'||p==='fullday');
     bars.forEach(function(b){ b.style.display=show?'':'none'; });
   }
   function wire(){
-    ['pkg-hourly','pkg-halfday','pkg-fullday'].forEach(function(id){
-      var el=document.getElementById(id);
-      if(el&&!el.__cnkAddonObs){ el.__cnkAddonObs=true; try{ new MutationObserver(sync).observe(el,{attributes:true,attributeFilter:['class']}); }catch(e){} }
-    });
+    var cards=document.querySelectorAll('.package-card');
+    cards.forEach(function(el){ if(!el.__cnkAddonObs){ el.__cnkAddonObs=true; try{ new MutationObserver(sync).observe(el,{attributes:true,attributeFilter:['class']}); }catch(e){} } });
     sync();
   }
+  document.addEventListener('click',function(e){ var b=e.target&&e.target.closest?e.target.closest('button'):null; if(b){ var t=(b.textContent||'').toLowerCase(); if(t.indexOf('select hourly')>=0) window.__cnkPkgSel='hourly'; else if(t.indexOf('select half day')>=0) window.__cnkPkgSel='halfday'; else if(t.indexOf('select full day')>=0) window.__cnkPkgSel='fullday'; } setTimeout(sync,60); },true);
   if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded',wire); } else { wire(); }
-  document.addEventListener('click',function(){ setTimeout(sync,60); },true);
   setTimeout(wire,1200); setTimeout(wire,3000);
 })();
 </script>
