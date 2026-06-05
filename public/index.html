@@ -3929,5 +3929,36 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
   setInterval(enhance, 700);
 })();
 </script>
+
+<script>
+(function(){
+  if(window.__cnkHourPopup) return; window.__cnkHourPopup=true;
+  var PRICES={1:125,2:250,3:375};
+  function ensurePopup(){
+    if(document.getElementById('cnk-hours-popup')) return;
+    var ov=document.createElement('div'); ov.id='cnk-hours-popup';
+    ov.style.cssText='position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.72);';
+    var box=document.createElement('div');
+    box.style.cssText='background:#161616;border:1px solid rgba(196,152,58,0.45);border-radius:14px;padding:26px 30px;max-width:380px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.6);';
+    var html='<div style="font-family:Georgia,serif;font-size:22px;color:#c4983a;margin-bottom:6px;">How many hours?</div>';
+    html+='<div style="font-size:13px;color:#bbb;margin-bottom:20px;">Hourly bookings can be up to 3 hours ($125/hr).</div>';
+    html+='<div style="display:flex;flex-direction:column;gap:12px;">';
+    [1,2,3].forEach(function(n){ html+='<button type="button" data-h="'+n+'" style="padding:14px;border-radius:10px;border:1px solid rgba(196,152,58,0.5);background:transparent;color:#f0e6d2;font-size:15px;cursor:pointer;">'+n+(n===1?String.fromCharCode(160)+'hour':String.fromCharCode(160)+'hours')+' - $'+PRICES[n]+'</button>'; });
+    html+='</div><div style="margin-top:16px;"><a href="#" id="cnk-hours-cancel" style="color:#888;font-size:12px;">Cancel</a></div>';
+    box.innerHTML=html; ov.appendChild(box); document.body.appendChild(ov);
+    ov.addEventListener('click', function(e){ if(e.target===ov) closePopup(); });
+    box.querySelectorAll('button[data-h]').forEach(function(b){ b.addEventListener('click', function(){ setHours(parseInt(b.getAttribute('data-h'),10)); closePopup(); }); b.addEventListener('mouseenter',function(){ b.style.background='rgba(196,152,58,0.9)'; b.style.color='#161616'; }); b.addEventListener('mouseleave',function(){ b.style.background='transparent'; b.style.color='#f0e6d2'; }); });
+    var c=document.getElementById('cnk-hours-cancel'); if(c) c.addEventListener('click', function(e){ e.preventDefault(); closePopup(); });
+  }
+  function openPopup(){ ensurePopup(); var p=document.getElementById('cnk-hours-popup'); if(p) p.style.display='flex'; }
+  function closePopup(){ var p=document.getElementById('cnk-hours-popup'); if(p) p.style.display='none'; }
+  function curHours(){ var s=document.getElementById('cnk-hours'); return parseInt(s?s.textContent:'1',10)||1; }
+  function setHours(t){ t=Math.max(1,Math.min(3,t||1)); var now=curHours(); var d=t-now; if(typeof cnkHours==='function' && d!==0) cnkHours(d); var dd=document.getElementById('cnk-hours-select'); if(dd) dd.value=String(t); updateBtn(); }
+  function updateBtn(){ var b=document.getElementById('cnk-hours-openbtn'); if(b) b.textContent=curHours()+(curHours()===1?' hour':' hours')+' - tap to change'; }
+  function wireCard(){ var ctrl=document.getElementById('cnk-hourly-ctrl'); if(!ctrl) return; var dd=document.getElementById('cnk-hours-select'); if(dd) dd.style.display='none'; if(!document.getElementById('cnk-hours-openbtn')){ var btn=document.createElement('button'); btn.type='button'; btn.id='cnk-hours-openbtn'; btn.style.cssText='display:block;margin:10px auto 0;padding:13px 18px;border-radius:10px;border:1px solid rgba(196,152,58,0.6);background:rgba(196,152,58,0.14);color:#f0e6d2;font-size:14px;font-weight:600;cursor:pointer;width:100%;max-width:260px;'; btn.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); openPopup(); }); ctrl.appendChild(btn); } updateBtn(); }
+  document.addEventListener('click', function(e){ var b=e.target&&e.target.closest?e.target.closest('button'):null; if(b && /select hourly/i.test(b.textContent||'')){ setTimeout(function(){ wireCard(); openPopup(); }, 280); } setTimeout(wireCard, 200); }, true);
+  setInterval(wireCard, 900);
+})();
+</script>
 </body>
 </html>
