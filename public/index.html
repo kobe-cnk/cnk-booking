@@ -3800,5 +3800,27 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
 })();
 
 </script>
+
+<script>
+(function(){
+  if(window.__cnkAddonHourly) return; window.__cnkAddonHourly=true;
+  function sync(){
+    var bars=document.querySelectorAll('.addon-hours-bar'); if(!bars.length) return;
+    var half=document.getElementById('pkg-halfday'); var full=document.getElementById('pkg-fullday');
+    var show=(half&&half.classList.contains('selected'))||(full&&full.classList.contains('selected'));
+    bars.forEach(function(b){ b.style.display=show?'':'none'; });
+  }
+  function wire(){
+    ['pkg-hourly','pkg-halfday','pkg-fullday'].forEach(function(id){
+      var el=document.getElementById(id);
+      if(el&&!el.__cnkAddonObs){ el.__cnkAddonObs=true; try{ new MutationObserver(sync).observe(el,{attributes:true,attributeFilter:['class']}); }catch(e){} }
+    });
+    sync();
+  }
+  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded',wire); } else { wire(); }
+  document.addEventListener('click',function(){ setTimeout(sync,60); },true);
+  setTimeout(wire,1200); setTimeout(wire,3000);
+})();
+</script>
 </body>
 </html>
