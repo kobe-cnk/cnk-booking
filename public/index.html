@@ -3960,5 +3960,29 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
   setInterval(wireCard, 900);
 })();
 </script>
+
+<script>
+(function(){
+  if(window.__cnkSoftCancel4) return; window.__cnkSoftCancel4=true;
+  var soft = async function(id){
+    var b=null;
+    try{ var lj=await fetch('/api/list-bookings?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json();}); b=(lj.bookings||[]).filter(function(x){return String(x.id)===String(id);})[0]; }catch(e){}
+    if(!b){ try{ b=JSON.parse(localStorage.getItem('cnk_bookings')||'[]').filter(function(x){return String(x.id)===String(id);})[0]; }catch(e){} }
+    if(!b){ alert('Booking not found.'); return; }
+    var collected=Number(b.amountPaid!=null?b.amountPaid:(b.deposit||0))||0;
+    var name=b.name||id;
+    if(b.status==='cancelled'){ alert(name+' is already cancelled.'); return; }
+    var msg='Cancel the booking for '+name+' ('+id+')?'+String.fromCharCode(10)+String.fromCharCode(10)+'The deposit of $'+collected.toFixed(2)+' is non-refundable and stays in Total Collected.'+String.fromCharCode(10)+'The remaining balance will be set to $0 (not collected in the future).'+String.fromCharCode(10)+'The booking will be marked Cancelled and kept on record.';
+    if(!window.confirm(msg)) return;
+    b.status='cancelled'; b.balance=0; b.amountCollected=collected; b.cancelledAt=new Date().toISOString();
+    try{ var sv=await fetch('/api/save-booking',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}); var sj=await sv.json(); if(!sj.ok){ alert('Failed to save cancellation.'); return; } }catch(e){ alert('Failed to save cancellation: '+e); return; }
+    try{ var ls=JSON.parse(localStorage.getItem('cnk_bookings')||'[]'); var found=false; ls=ls.map(function(x){ if(String(x.id)===String(id)){ found=true; x.status='cancelled'; x.balance=0; x.amountCollected=collected; } return x; }); if(!found) ls.push(b); localStorage.setItem('cnk_bookings',JSON.stringify(ls)); }catch(e){}
+    ['renderOverview','renderAllBookings','renderUpcoming','renderCalendar','renderStatusFilters','filterBookings'].forEach(function(fn){ try{ if(typeof window[fn]==='function') window[fn](); }catch(e){} });
+    try{ var modal=document.getElementById('booking-modal'); if(modal){ modal.classList.remove('open'); } }catch(e){}
+    alert('Booking cancelled. $'+collected.toFixed(2)+' kept as collected (deposit non-refundable). Balance set to $0.');
+  };
+  try{ Object.defineProperty(window,'cancelBooking',{ configurable:true, get:function(){ return soft; }, set:function(v){} }); }catch(e){ window.cancelBooking=soft; }
+})();
+</script>
 </body>
 </html>
