@@ -28,7 +28,7 @@ module.exports = async function handler(req, res) {
     await sql`UPDATE bookings SET data = ${JSON.stringify(b)}::jsonb WHERE id = ${b.id}`;
     try {
       if (process.env.RESEND_API_KEY) {
-        const adminTo = process.env.CNK_ADMIN_EMAIL || 'frmnkb@gmail.com';
+        const adminTo = process.env.CNK_ADMIN_EMAIL || 'photos@cnkbooths.com';
         const money = (x) => '$' + (Number(x)||0).toFixed(2);
         const html = '<div style="font-family:Arial,sans-serif;max-width:560px;">'
           + '<h2 style="color:#b8893a;">Rental Agreement Signed</h2>'
