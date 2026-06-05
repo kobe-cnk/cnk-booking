@@ -4010,7 +4010,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
   async function sync(){
     try{
       var r=await fetch('/api/list-bookings?t='+Date.now(),{cache:'no-store'});
-      var j=await r.json(); var arr=(j&&j.bookings)||[];
+      var j=await r.json(); var arr=(j&&j.bookings)||[]; try{ var __set=arr.filter(function(x){return x&&x.id==='__BOOTH_SETTINGS__';})[0]; if(__set&&__set.boothCount){ localStorage.setItem('cnk_booth_count', String(parseInt(__set.boothCount,10)||1)); var __bd=document.getElementById('booth-count-display'); if(__bd) __bd.textContent=(parseInt(__set.boothCount,10)||1); } arr=arr.filter(function(x){return x&&x.id!=='__BOOTH_SETTINGS__';}); }catch(e){}
       if(arr && arr.length){
         localStorage.setItem('cnk_bookings', JSON.stringify(arr));
         synced=true;
@@ -4034,7 +4034,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
   function ymd(y,m,d){ return y+'-'+pad(m+1)+'-'+pad(d); }
   function getBooth(){ try{ if(typeof getBoothCount==='function'){ var b=getBoothCount(); if(b) return b; } }catch(e){} try{ return parseInt(localStorage.getItem('cnk_booth_count')||'1',10)||1; }catch(e){} return 1; }
   function todayStr(){ var t=new Date(); return ymd(t.getFullYear(), t.getMonth(), t.getDate()); }
-  function loadData(cb){ boothCount=getBooth(); fetch('/api/list-bookings?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json();}).then(function(j){ counts={}; (j.bookings||[]).forEach(function(b){ if(!b||!b.date) return; var s=String(b.status||'').toLowerCase(); if(s==='cancelled'||s==='complete'||s==='completed') return; counts[b.date]=(counts[b.date]||0)+1; }); if(cb) cb(); }).catch(function(){ if(cb) cb(); }); }
+  function loadData(cb){ boothCount=getBooth(); fetch('/api/list-bookings?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json();}).then(function(j){ counts={}; (j.bookings||[]).forEach(function(b){ if(b&&b.id==='__BOOTH_SETTINGS__'){ if(b.boothCount){ boothCount=parseInt(b.boothCount,10)||boothCount; } return; } if(!b||!b.date) return; var s=String(b.status||'').toLowerCase(); if(s==='cancelled'||s==='complete'||s==='completed') return; counts[b.date]=(counts[b.date]||0)+1; }); if(cb) cb(); }).catch(function(){ if(cb) cb(); }); }
   function blockState(ds){ var t=todayStr(); if(ds<FIRST||ds<t) return 'unavailable'; if((counts[ds]||0)>=boothCount) return 'booked'; return ''; }
   function ensureWrap(){ var input=document.getElementById('cnk-date'); if(!input) return null; var w=document.getElementById('cnk-cal'); if(w) return w; input.style.display='none'; w=document.createElement('div'); w.id='cnk-cal'; w.style.cssText='margin-top:6px;background:#252522;border:1px solid rgba(196,152,58,0.25);border-radius:10px;padding:14px;max-width:380px;'; input.parentNode.insertBefore(w, input.nextSibling); return w; }
   function pick(ds){ var input=document.getElementById('cnk-date'); if(input){ input.value=ds; try{ input.dispatchEvent(new Event('input',{bubbles:true})); input.dispatchEvent(new Event('change',{bubbles:true})); }catch(e){} } render(); }
@@ -4088,6 +4088,15 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
   document.addEventListener('keydown', function(e){ if(e.key==='Escape') hide(); }, true);
   window.addEventListener('scroll', function(){ if(box && box.style.display==='block') place(); }, true);
   window.addEventListener('resize', function(){ if(box && box.style.display==='block') place(); });
+})();
+</script>
+
+<script>
+(function(){
+  if(window.__cnkBoothSync) return; window.__cnkBoothSync=true;
+  function curBooth(){ try{ if(typeof getBoothCount==='function'){ var b=getBoothCount(); if(b) return b; } }catch(e){} try{ return parseInt(localStorage.getItem('cnk_booth_count')||'1',10)||1; }catch(e){} return 1; }
+  function saveBooth(){ try{ fetch('/api/save-booking',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ id:'__BOOTH_SETTINGS__', boothCount: curBooth(), _settings:true, status:'setting' })}); }catch(e){} }
+  document.addEventListener('click', function(e){ var b=e.target&&e.target.closest?e.target.closest('.booth-count-btn'):null; if(b){ setTimeout(saveBooth, 220); } }, true);
 })();
 </script>
 </body>
