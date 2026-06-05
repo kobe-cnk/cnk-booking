@@ -35,6 +35,17 @@ async function drivingMiles(destCoords) {
 }
 
 module.exports = async function handler(req, res) {
+  if (req.method === 'GET' && req.query && (req.query.ac || req.query.autocomplete)) {
+    try {
+      var __t = String((req.query.text || req.query.q || '')).trim();
+      if (__t.length < 3) { res.status(200).json({ ok: true, suggestions: [] }); return; }
+      if (!ORS_KEY) { res.status(200).json({ ok: true, suggestions: [] }); return; }
+      var __u = 'https://api.openrouteservice.org/geocode/autocomplete?api_key=' + encodeURIComponent(ORS_KEY) + '&text=' + encodeURIComponent(__t) + '&focus.point.lon=-111.822529&focus.point.lat=40.377802&size=6';
+      var __r = await fetch(__u); var __j = await __r.json(); var __f = (__j && __j.features) || [];
+      var __s = __f.map(function(f){ var p=f.properties||{}; var gg=(f.geometry&&f.geometry.coordinates)||[]; var hn=p.housenumber||''; var st=p.street||''; var l1=(hn&&st)?(hn+' '+st):(st||p.name||''); return { label:p.label||'', street:l1, city:p.locality||p.localadmin||p.county||'', state:p.region_a||p.region||'', zip:p.postalcode||'', lon:gg[0], lat:gg[1] }; }).filter(function(x){ return x.label; });
+      res.status(200).json({ ok: true, suggestions: __s }); return;
+    } catch (__e) { res.status(200).json({ ok: true, suggestions: [], error: String(__e) }); return; }
+  }
   if (req.method !== 'POST') { res.status(405).json({ error: 'Method not allowed' }); return; }
   if (!ORS_KEY) { res.status(200).json({ ok: false, error: 'Distance service not configured' }); return; }
   try {
