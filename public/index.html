@@ -4015,5 +4015,25 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
   setInterval(apply, 2000);
 })();
 </script>
+
+<script>
+(function(){
+  if(window.__cnkServerSync) return; window.__cnkServerSync=true;
+  var synced=false;
+  async function sync(){
+    try{
+      var r=await fetch('/api/list-bookings?t='+Date.now(),{cache:'no-store'});
+      var j=await r.json(); var arr=(j&&j.bookings)||[];
+      if(arr && arr.length){
+        localStorage.setItem('cnk_bookings', JSON.stringify(arr));
+        synced=true;
+        ['renderOverview','renderAllBookings','renderUpcoming','renderCalendar','renderStatusFilters','filterBookings'].forEach(function(fn){ try{ if(typeof window[fn]==='function') window[fn](); }catch(e){} });
+      }
+    }catch(e){}
+  }
+  if(document.readyState==='complete'){ setTimeout(sync,600); } else { window.addEventListener('load', function(){ setTimeout(sync,600); }); }
+  document.addEventListener('click', function(e){ var b=e.target&&e.target.closest?e.target.closest('button'):null; if(b && /sign in/i.test(b.textContent||'')){ setTimeout(sync, 900); setTimeout(sync, 2000); } }, true);
+})();
+</script>
 </body>
 </html>
