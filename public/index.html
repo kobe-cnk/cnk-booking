@@ -3835,5 +3835,30 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
   document.addEventListener('change',function(e){ if(e.target&&e.target.id==='cnk-date'){ if(e.target.value && e.target.value<FIRST){ alert('We are currently booking events starting July 20, 2026 and later. Please choose a later date.'); e.target.value=''; } } },true);
   document.addEventListener('click',function(e){ var b=e.target&&e.target.closest?e.target.closest('button'):null; if(!b) return; var t=(b.textContent||'').toLowerCase(); if(t.indexOf('continue')>=0){ var d=document.getElementById('cnk-date'); if(d && d.value && d.value<FIRST){ e.preventDefault(); e.stopPropagation(); alert('We are currently booking events starting July 20, 2026 and later. Please choose a date on or after July 20.'); } } },true);
 })();
-</script></body>
+</script>
+<script>
+(function(){
+  if(window.__cnkHourDropdown) return; window.__cnkHourDropdown=true;
+  function build(){
+    var ctrl=document.getElementById('cnk-hourly-ctrl'); if(!ctrl) return;
+    if(!document.getElementById('cnk-hours-select')){
+      var stepperRow=null; var divs=ctrl.querySelectorAll('div');
+      for(var i=0;i<divs.length;i++){ if(divs[i].querySelector('button.addon-btn') && divs[i].querySelector('#cnk-hours')){ stepperRow=divs[i]; break; } }
+      var sel=document.createElement('select'); sel.id='cnk-hours-select'; sel.className='form-input';
+      sel.style.cssText='max-width:220px;margin:0 auto;display:block;text-align:center;';
+      [1,2,3].forEach(function(n){ var o=document.createElement('option'); o.value=String(n); o.textContent=n+(n===1?' hour':' hours'); sel.appendChild(o); });
+      var cur=parseInt((document.getElementById('cnk-hours')||{}).textContent,10)||1; sel.value=String(Math.min(3,Math.max(1,cur)));
+      sel.addEventListener('click',function(e){ e.stopPropagation(); });
+      sel.addEventListener('change',function(e){ e.stopPropagation(); var target=parseInt(sel.value,10)||1; var now=parseInt((document.getElementById('cnk-hours')||{}).textContent,10)||1; var delta=target-now; if(typeof cnkHours==='function'){ if(delta===0){ cnkHours(1); cnkHours(-1); } else { cnkHours(delta); } } });
+      if(stepperRow){ stepperRow.style.display='none'; stepperRow.parentElement.insertBefore(sel, stepperRow); } else { ctrl.appendChild(sel); }
+    }
+    var s=document.getElementById('cnk-hours-select'), sp=document.getElementById('cnk-hours');
+    if(s&&sp){ var v=parseInt(sp.textContent,10)||1; v=Math.min(3,Math.max(1,v)); if(String(v)!==s.value) s.value=String(v); }
+  }
+  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded',build); } else { build(); }
+  document.addEventListener('click',function(){ setTimeout(build,80); },true);
+  setTimeout(build,1200); setTimeout(build,3000);
+})();
+</script>
+</body>
 </html>
