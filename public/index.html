@@ -4075,15 +4075,15 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
 <script>
 (function(){
   if(window.__cnkAddrAuto) return; window.__cnkAddrAuto=true;
-  var box=null, timer=null;
+  var box=null, timer=null, suppress=false;
   function ensureBox(){ if(box) return box; box=document.createElement('div'); box.id='cnk-addr-sugg'; box.style.cssText='position:fixed;z-index:100000;background:#1A1A18;border:1px solid rgba(196,152,58,0.4);border-radius:8px;max-height:240px;overflow:auto;display:none;box-shadow:0 12px 34px rgba(0,0,0,0.55);'; document.body.appendChild(box); return box; }
   function place(){ var inp=document.getElementById('cnk-addr-street'); if(!inp||!box) return; var r=inp.getBoundingClientRect(); box.style.left=r.left+'px'; box.style.top=(r.bottom+4)+'px'; box.style.width=Math.max(220,r.width)+'px'; }
   function hide(){ if(box) box.style.display='none'; }
   function setF(id,v){ var e=document.getElementById(id); if(e && v!=null && v!==''){ e.value=v; e.dispatchEvent(new Event('input',{bubbles:true})); e.dispatchEvent(new Event('change',{bubbles:true})); } }
-  function fill(s){ setF('cnk-addr-street', s.street||s.label); setF('cnk-addr-city', s.city); setF('cnk-addr-state', s.state); setF('cnk-addr-zip', s.zip); ['cnk-addr-street','cnk-addr-zip','cnk-addr-city'].forEach(function(id){ var e=document.getElementById(id); if(e) e.dispatchEvent(new Event('blur',{bubbles:true})); }); hide(); }
+  function fill(s){ suppress=true; setF('cnk-addr-street', s.street||s.label); setF('cnk-addr-city', s.city); setF('cnk-addr-state', s.state); setF('cnk-addr-zip', s.zip); ['cnk-addr-street','cnk-addr-zip','cnk-addr-city'].forEach(function(id){ var e=document.getElementById(id); if(e) e.dispatchEvent(new Event('blur',{bubbles:true})); }); hide(); setTimeout(function(){ suppress=false; }, 700); }
   function render(list){ ensureBox(); box.innerHTML=''; if(!list||!list.length){ hide(); return; } list.forEach(function(s){ var row=document.createElement('div'); row.textContent=s.label; row.style.cssText='padding:10px 12px;color:#F5F0E8;font-size:13px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.06);'; row.addEventListener('mouseenter',function(){ row.style.background='rgba(196,152,58,0.18)'; }); row.addEventListener('mouseleave',function(){ row.style.background='transparent'; }); row.addEventListener('mousedown',function(e){ e.preventDefault(); fill(s); }); box.appendChild(row); }); place(); box.style.display='block'; }
   function query(text){ fetch('/api/distance?ac=1&text='+encodeURIComponent(text)).then(function(r){return r.json();}).then(function(j){ render((j&&j.suggestions)||[]); }).catch(function(){ hide(); }); }
-  document.addEventListener('input', function(e){ var t=e.target; if(!t||t.id!=='cnk-addr-street') return; var v=(t.value||'').trim(); if(timer) clearTimeout(timer); if(v.length<3){ hide(); return; } timer=setTimeout(function(){ query(v); }, 320); }, true);
+  document.addEventListener('input', function(e){ var t=e.target; if(!t||t.id!=='cnk-addr-street') return; if(suppress) return; var v=(t.value||'').trim(); if(timer) clearTimeout(timer); if(v.length<3){ hide(); return; } timer=setTimeout(function(){ query(v); }, 320); }, true);
   document.addEventListener('click', function(e){ if(box && e.target!==document.getElementById('cnk-addr-street') && !box.contains(e.target)) hide(); }, true);
   document.addEventListener('keydown', function(e){ if(e.key==='Escape') hide(); }, true);
   window.addEventListener('scroll', function(){ if(box && box.style.display==='block') place(); }, true);
