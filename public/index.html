@@ -2412,10 +2412,23 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
     var b = arr.filter(function(x){return x.id===id;})[0];
     if(!b) return;
     function v(eid){ var e=document.getElementById(eid); return e?e.value:''; }
+    function num(eid){ var e=document.getElementById(eid); if(!e) return null; var n=parseFloat(e.value); return isNaN(n)?null:n; }
     b.name=v('eb-name'); b.date=v('eb-date'); b.email=v('eb-email'); b.phone=v('eb-phone');
     b.eventType=v('eb-type'); b.guests=v('eb-guests'); b.location=v('eb-location');
-    b.status=v('eb-status'); b.balance=parseFloat(v('eb-balance'))||0; b.notes=v('eb-notes');
-    var ebMiles=parseFloat(v('eb-miles'))||0; var ebBillable=Math.max(0,ebMiles-50); var ebFee=Math.round(ebBillable*1.25*100)/100; var prevFee=Number(b.deliveryFee)||0; b.deliveryMiles=ebMiles; b.deliveryFee=ebFee; b.price=(Number(b.price)||0)-prevFee+ebFee; b.balance=Math.max(0,(Number(b.balance)||0)-prevFee+ebFee); 
+    b.status=v('eb-status'); b.notes=v('eb-notes');
+    var base=Number(b.basePrice)||0; var extra=Number(b.extraCost)||0;
+    var tax=Number(b.tax); if(isNaN(tax)) tax=(base+extra)*0.0745;
+    var delivery=num('eb-delivery'); if(delivery===null) delivery=Number(b.deliveryFee)||0;
+    var discount=num('eb-discount'); if(discount===null) discount=Number(b.discount)||0;
+    var milesV=num('eb-miles'); if(milesV!==null) b.deliveryMiles=milesV;
+    var hadCard=(Number(b.ccFee)||0)>0;
+    var preCc=base+extra+tax+delivery-discount;
+    var cc=hadCard? Math.round(preCc*0.03*100)/100 : 0;
+    var total=Math.round((preCc+cc)*100)/100;
+    var paid=num('eb-deposit'); if(paid===null) paid=Number(b.amountPaid!=null?b.amountPaid:b.deposit)||0;
+    b.deliveryFee=delivery; b.discount=discount; b.ccFee=cc; b.price=total; b.amountPaid=paid;
+    b.balance=Math.max(0, Math.round((total-paid)*100)/100);
+    b.deliveryInQuote=true;
     b.paperwork=b.paperwork||{};
     b.paperwork.startTime=v('eb-start'); b.paperwork.endTime=v('eb-end');
     b.paperwork.setup=v('eb-setup'); b.paperwork.overlay=v('eb-overlay'); b.paperwork.dayContact=v('eb-contact');
@@ -3520,18 +3533,24 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
     place(field('eb-delivery','Delivery Fee ($)', emMoney(b.deliveryFee), false));
     // make balance auto-update from price - paid when those change (balance still hand-editable)
     function recalc(){
-      var price=emGet('eb-price'), paid=emGet('eb-deposit');
-      var balEl=document.getElementById('eb-balance');
-      if(balEl) balEl.value=Math.max(0,(price-paid)).toFixed(2);
+      var base=Number(b.basePrice)||0, extra=Number(b.extraCost)||0;
+      var tax=Number(b.tax); if(isNaN(tax)) tax=(base+extra)*0.0745;
+      var delivery=emGet('eb-delivery'), discount=emGet('eb-discount');
+      var hadCard=(Number(b.ccFee)||0)>0;
+      var cc=hadCard? Math.round((base+extra+tax+delivery-discount)*0.03*100)/100 : 0;
+      var total=Math.round((base+extra+tax+delivery-discount+cc)*100)/100;
+      var priceEl=document.getElementById('eb-price'); if(priceEl) priceEl.value=total.toFixed(2);
+      var paid=emGet('eb-deposit');
+      var balEl=document.getElementById('eb-balance'); if(balEl) balEl.value=Math.max(0,Math.round((total-paid)*100)/100).toFixed(2);
     }
-    ['eb-price','eb-deposit'].forEach(function(fid){ var el=document.getElementById(fid); if(el) el.addEventListener('input', recalc); });
+    ['eb-deposit','eb-discount','eb-delivery'].forEach(function(fid){ var el=document.getElementById(fid); if(el) el.addEventListener('input', recalc); }); if(el) el.addEventListener('input', recalc); });
     // hide/repurpose the miles field note: keep miles for auto-calc, but delivery $ overrides on save
     var milesEl=document.getElementById('eb-miles');
     if(milesEl){
       // when miles change and produce a calc, push the computed fee into the delivery $ field
       milesEl.addEventListener('input', function(){
         var mi=parseFloat(milesEl.value)||0; var billable=Math.max(0,mi-50); var fee=billable*1.25;
-        var dEl=document.getElementById('eb-delivery'); if(dEl){ dEl.value=fee.toFixed(2); }
+        var dEl=document.getElementById('eb-delivery'); if(dEl){ dEl.value=fee.toFixed(2); } if(typeof recalc==='function'){ recalc(); }
       });
     }
   }
