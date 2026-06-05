@@ -1650,7 +1650,7 @@ function renderAllBookings() {
 }
 
 function renderStatusFilters() {
-  const statuses = ['all','pending','confirmed','balance_due','complete'];
+  const statuses = ['all','balance_due','paid','completed','cancelled'];
   const labels = { all:'All', balance_due:'Balance Due', paid:'Paid', completed:'Completed', cancelled:'Cancelled' };
   document.getElementById('status-filters').innerHTML = statuses.map(s =>
     `<button class="filter-btn ${s===activeFilter?'active':''}" onclick="setFilter('${s}')">${labels[s]}</button>`
