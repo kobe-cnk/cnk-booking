@@ -3924,7 +3924,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
 <script>
 (function(){
   if(window.__cnkEditMoney2) return; window.__cnkEditMoney2=true;
-  function bid(){ var btns=document.querySelectorAll('button'); for(var i=0;i<btns.length;i++){ var oc=btns[i].getAttribute&&btns[i].getAttribute('onclick'); if(oc&&/saveBookingEdit|openModal/.test(oc)){ var m=oc.match(/CNK-[A-Za-z0-9_-]+/); if(m) return m[0]; } } return null; }
+  function bid(){ if(window.__cnkEditingId) return window.__cnkEditingId; var btns=document.querySelectorAll('button'); for(var i=0;i<btns.length;i++){ var oc=btns[i].getAttribute&&btns[i].getAttribute('onclick'); if(oc&&/saveBookingEdit/.test(oc)){ var m=oc.match(/CNK-[A-Za-z0-9_-]+/); if(m) return m[0]; } } return null; }
   function getB(id){ try{ return JSON.parse(localStorage.getItem('cnk_bookings')||'[]').filter(function(x){return String(x.id)===String(id);})[0]; }catch(e){ return null; } }
   function mkCell(id,label,val,full,ro){ var d=document.createElement('div'); if(full) d.className='full'; var l=document.createElement('label'); l.textContent=label; var inp=document.createElement('input'); inp.id=id; inp.type='number'; inp.step='0.01'; inp.value=(val!=null?val:''); if(ro) inp.readOnly=true; d.appendChild(l); d.appendChild(inp); return d; }
   function recompute(){ var id=bid(); var b=id?getB(id):null; if(!b) return; var base=Number(b.basePrice)||0, extra=Number(b.extraCost)||0; var tax=Number(b.tax); if(isNaN(tax)) tax=(base+extra)*0.0745; var dEl=document.getElementById('eb-delivery'), discEl=document.getElementById('eb-discount'); var delivery=dEl?(parseFloat(dEl.value)||0):(Number(b.deliveryFee)||0); var discount=discEl?(parseFloat(discEl.value)||0):(Number(b.discount)||0); var hadCard=(Number(b.ccFee)||0)>0; var cc=hadCard?Math.round((base+extra+tax+delivery-discount)*0.03*100)/100:0; var total=Math.round((base+extra+tax+delivery-discount+cc)*100)/100; var pEl=document.getElementById('eb-deposit'); var paid=pEl?(parseFloat(pEl.value)||0):(Number(b.amountPaid!=null?b.amountPaid:b.deposit)||0); var tEl=document.getElementById('eb-total-disp'); if(tEl) tEl.value=total.toFixed(2); var balEl=document.getElementById('eb-balance'); if(balEl) balEl.value=Math.max(0,Math.round((total-paid)*100)/100).toFixed(2); }
@@ -4097,6 +4097,14 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
   function curBooth(){ try{ if(typeof getBoothCount==='function'){ var b=getBoothCount(); if(b) return b; } }catch(e){} try{ return parseInt(localStorage.getItem('cnk_booth_count')||'1',10)||1; }catch(e){} return 1; }
   function saveBooth(){ try{ fetch('/api/save-booking',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ id:'__BOOTH_SETTINGS__', boothCount: curBooth(), _settings:true, status:'setting' })}); }catch(e){} }
   document.addEventListener('click', function(e){ var b=e.target&&e.target.closest?e.target.closest('.booth-count-btn'):null; if(b){ setTimeout(saveBooth, 220); } }, true);
+})();
+</script>
+
+<script>
+(function(){
+  if(window.__cnkEditWrap) return; window.__cnkEditWrap=true;
+  function wrap(){ try{ if(typeof window.editBooking==='function' && !window.editBooking.__cnkWrapped){ var orig=window.editBooking; window.editBooking=function(id){ try{ window.__cnkEditingId=id; }catch(e){} return orig.apply(this, arguments); }; window.editBooking.__cnkWrapped=true; } }catch(e){} }
+  wrap(); setTimeout(wrap,800); setTimeout(wrap,2500);
 })();
 </script>
 </body>
