@@ -3859,13 +3859,17 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
 <script>
 (function(){
   if(window.__cnkMinDate) return; window.__cnkMinDate=true;
-  var FIRST='2026-07-20'; /* booths arrive Jul 15; first bookable date. Change here to reopen earlier dates. */
+  var FIRST='2026-07-20';
   window.CNK_FIRST_BOOKABLE=FIRST;
-  function apply(){ var d=document.getElementById('cnk-date'); if(d){ d.min=FIRST; if(d.value && d.value<FIRST){ d.value=''; try{ d.dispatchEvent(new Event('change',{bubbles:true})); }catch(e){} } } }
-  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded',apply); } else { apply(); }
-  setTimeout(apply,800); setTimeout(apply,2500);
-  document.addEventListener('change',function(e){ if(e.target&&e.target.id==='cnk-date'){ if(e.target.value && e.target.value<FIRST){ alert('We are currently booking events starting July 20, 2026 and later. Please choose a later date.'); e.target.value=''; } } },true);
-  document.addEventListener('click',function(e){ var b=e.target&&e.target.closest?e.target.closest('button'):null; if(!b) return; var t=(b.textContent||'').toLowerCase(); if(t.indexOf('continue')>=0){ var d=document.getElementById('cnk-date'); if(d && d.value && d.value<FIRST){ e.preventDefault(); e.stopPropagation(); alert('We are currently booking events starting July 20, 2026 and later. Please choose a date on or after July 20.'); } } },true);
+  function msgEl(){ var d=document.getElementById('cnk-date'); if(!d) return null; var m=document.getElementById('cnk-date-msg'); if(!m){ m=document.createElement('div'); m.id='cnk-date-msg'; m.style.cssText='display:none;margin-top:6px;color:#e06a5a;font-size:13px;font-weight:600;'; if(d.parentNode) d.parentNode.insertBefore(m, d.nextSibling); } return m; }
+  function bad(d){ return !!(d && d.value && d.value < FIRST); }
+  function check(){ var d=document.getElementById('cnk-date'); if(!d) return; d.min=FIRST; var m=msgEl(); if(bad(d)){ d.style.borderColor='#c0392b'; d.style.background='rgba(192,57,43,0.12)'; if(m){ m.textContent='That date isn\u2019t available \u2014 we\u2019re booking July 20, 2026 and later. Please choose a later date.'; m.style.display='block'; } d.setAttribute('data-cnk-bad','1'); } else { d.style.borderColor=''; d.style.background=''; if(m){ m.style.display='none'; } d.removeAttribute('data-cnk-bad'); } }
+  function applyMin(){ var d=document.getElementById('cnk-date'); if(d){ d.min=FIRST; } check(); }
+  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded',applyMin); } else { applyMin(); }
+  setTimeout(applyMin,800); setTimeout(applyMin,2500);
+  document.addEventListener('input', function(e){ if(e.target&&e.target.id==='cnk-date') check(); }, true);
+  document.addEventListener('change', function(e){ if(e.target&&e.target.id==='cnk-date') check(); }, true);
+  document.addEventListener('click', function(e){ var b=e.target&&e.target.closest?e.target.closest('button'):null; if(b && /continue to payment/i.test(b.textContent||'')){ var d=document.getElementById('cnk-date'); if(bad(d)){ e.preventDefault(); e.stopPropagation(); check(); var m=msgEl(); if(m){ try{ m.scrollIntoView({behavior:'smooth',block:'center'}); }catch(_){}} } } }, true);
 })();
 </script>
 <script>
