@@ -3369,6 +3369,19 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
       }
     }
 
+    // 1d) Total Collected row (amount actually collected; deposit kept on cancel)
+    if(b && !mc.querySelector('[data-cnk-collected-row]')){
+      var crows=[].slice.call(mc.querySelectorAll('.cnk-mrow'));
+      var collected=Number(b.amountPaid!=null?b.amountPaid:(b.deposit||0))||0;
+      var canchor=crows.filter(function(r){ var l=r.querySelector('.ml'); return l && /balance remaining/i.test(l.textContent.trim()); })[0];
+      if(!canchor) canchor=crows.filter(function(r){ var l=r.querySelector('.ml'); return l && /deposit paid/i.test(l.textContent.trim()); })[0];
+      if(canchor){
+        var cr=document.createElement('div'); cr.className='cnk-mrow'; cr.setAttribute('data-cnk-collected-row','1');
+        cr.innerHTML='<span class="ml">Total Collected</span><span class="mv">'+mMoney(collected)+'</span>';
+        if(canchor.nextSibling){ canchor.parentNode.insertBefore(cr, canchor.nextSibling); } else { canchor.parentNode.appendChild(cr); }
+      }
+    }
+
     // 1b) inject Discount row (before Total) if discount>0
     if(b && Number(b.discount)>0 && !mc.querySelector('[data-cnk-disc-row]')){
       var drows=[...mc.querySelectorAll('.cnk-mrow')];
