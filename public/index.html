@@ -4022,5 +4022,54 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
   document.addEventListener('click', function(e){ var b=e.target&&e.target.closest?e.target.closest('button'):null; if(b && /sign in/i.test(b.textContent||'')){ setTimeout(sync, 900); setTimeout(sync, 2000); } }, true);
 })();
 </script>
+
+<script>
+(function(){
+  if(window.__cnkCalendar) return; window.__cnkCalendar=true;
+  var FIRST=(window.CNK_FIRST_BOOKABLE||'2026-07-20');
+  var MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var DOW=['Su','Mo','Tu','We','Th','Fr','Sa'];
+  var counts={}, boothCount=1, viewY, viewM;
+  function pad(n){ return (n<10?'0':'')+n; }
+  function ymd(y,m,d){ return y+'-'+pad(m+1)+'-'+pad(d); }
+  function getBooth(){ try{ if(typeof getBoothCount==='function'){ var b=getBoothCount(); if(b) return b; } }catch(e){} try{ return parseInt(localStorage.getItem('cnk_booth_count')||'1',10)||1; }catch(e){} return 1; }
+  function todayStr(){ var t=new Date(); return ymd(t.getFullYear(), t.getMonth(), t.getDate()); }
+  function loadData(cb){ boothCount=getBooth(); fetch('/api/list-bookings?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json();}).then(function(j){ counts={}; (j.bookings||[]).forEach(function(b){ if(!b||!b.date) return; var s=String(b.status||'').toLowerCase(); if(s==='cancelled'||s==='complete'||s==='completed') return; counts[b.date]=(counts[b.date]||0)+1; }); if(cb) cb(); }).catch(function(){ if(cb) cb(); }); }
+  function blockState(ds){ var t=todayStr(); if(ds<FIRST||ds<t) return 'unavailable'; if((counts[ds]||0)>=boothCount) return 'booked'; return ''; }
+  function ensureWrap(){ var input=document.getElementById('cnk-date'); if(!input) return null; var w=document.getElementById('cnk-cal'); if(w) return w; input.style.display='none'; w=document.createElement('div'); w.id='cnk-cal'; w.style.cssText='margin-top:6px;background:#252522;border:1px solid rgba(196,152,58,0.25);border-radius:10px;padding:14px;max-width:380px;'; input.parentNode.insertBefore(w, input.nextSibling); return w; }
+  function pick(ds){ var input=document.getElementById('cnk-date'); if(input){ input.value=ds; try{ input.dispatchEvent(new Event('input',{bubbles:true})); input.dispatchEvent(new Event('change',{bubbles:true})); }catch(e){} } render(); }
+  function render(){
+    var w=ensureWrap(); if(!w) return; var input=document.getElementById('cnk-date');
+    if(typeof viewY==='undefined'){ var f=(input&&input.value)?input.value:FIRST; var p=f.split('-'); viewY=parseInt(p[0],10)||2026; viewM=(parseInt(p[1],10)||7)-1; }
+    var selected=(input&&input.value)||'';
+    w.innerHTML='';
+    var head=document.createElement('div'); head.style.cssText='display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;';
+    var prev=document.createElement('button'); prev.type='button'; prev.textContent=String.fromCharCode(8249); prev.style.cssText='background:none;border:none;color:#C4983A;font-size:22px;cursor:pointer;padding:2px 12px;'; prev.onclick=function(){ viewM--; if(viewM<0){viewM=11;viewY--;} render(); };
+    var title=document.createElement('div'); title.textContent=MONTHS[viewM]+' '+viewY; title.style.cssText='color:#F5F0E8;font-family:Georgia,serif;font-size:16px;';
+    var next=document.createElement('button'); next.type='button'; next.textContent=String.fromCharCode(8250); next.style.cssText='background:none;border:none;color:#C4983A;font-size:22px;cursor:pointer;padding:2px 12px;'; next.onclick=function(){ viewM++; if(viewM>11){viewM=0;viewY++;} render(); };
+    head.appendChild(prev); head.appendChild(title); head.appendChild(next); w.appendChild(head);
+    var grid=document.createElement('div'); grid.style.cssText='display:grid;grid-template-columns:repeat(7,1fr);gap:4px;';
+    DOW.forEach(function(d){ var c=document.createElement('div'); c.textContent=d; c.style.cssText='text-align:center;color:#8a8a86;font-size:11px;padding:4px 0;'; grid.appendChild(c); });
+    var first=new Date(viewY,viewM,1); var startDow=first.getDay(); var days=new Date(viewY,viewM+1,0).getDate();
+    for(var i=0;i<startDow;i++){ grid.appendChild(document.createElement('div')); }
+    var base='text-align:center;padding:9px 0;border-radius:7px;font-size:13px;';
+    for(var day=1;day<=days;day++){
+      var ds=ymd(viewY,viewM,day); var st=blockState(ds); var c=document.createElement('div'); c.textContent=day;
+      if(ds===selected){ c.style.cssText=base+'background:#C4983A;color:#1A1A18;font-weight:700;cursor:pointer;'; (function(x){ c.onclick=function(){ pick(x); }; })(ds); }
+      else if(st){ c.style.cssText=base+'background:rgba(192,57,43,0.22);color:#e07a6c;border:1px solid rgba(192,57,43,0.5);cursor:not-allowed;text-decoration:line-through;'; c.title=(st==='booked'?'Booked':'Unavailable'); }
+      else { c.style.cssText=base+'background:#1A1A18;color:#F5F0E8;cursor:pointer;border:1px solid rgba(196,152,58,0.15);'; (function(x){ c.onclick=function(){ pick(x); }; })(ds); }
+      grid.appendChild(c);
+    }
+    w.appendChild(grid);
+    var legend=document.createElement('div'); legend.style.cssText='display:flex;gap:16px;margin-top:12px;font-size:11px;color:#8a8a86;';
+    var l1=document.createElement('span'); var sw1=document.createElement('span'); sw1.style.cssText='display:inline-block;width:10px;height:10px;background:#1A1A18;border:1px solid rgba(196,152,58,0.4);border-radius:2px;margin-right:5px;'; l1.appendChild(sw1); l1.appendChild(document.createTextNode('Available'));
+    var l2=document.createElement('span'); var sw2=document.createElement('span'); sw2.style.cssText='display:inline-block;width:10px;height:10px;background:rgba(192,57,43,0.6);border-radius:2px;margin-right:5px;'; l2.appendChild(sw2); l2.appendChild(document.createTextNode('Booked / Unavailable'));
+    legend.appendChild(l1); legend.appendChild(l2); w.appendChild(legend);
+  }
+  function init(){ if(!document.getElementById('cnk-date')) return; loadData(render); }
+  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', init); } else { init(); }
+  var tries=0; var iv=setInterval(function(){ tries++; if(document.getElementById('cnk-date') && !document.getElementById('cnk-cal')){ loadData(render); } if(tries>60) clearInterval(iv); }, 1000);
+})();
+</script>
 </body>
 </html>
