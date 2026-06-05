@@ -2334,7 +2334,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
   window.openModal = function(id){
     var b = find(id); if(!b){ return; }
     var pw = b.paperwork || {};
-    var statusBtns = ['pending','confirmed','balance_due','complete'].map(function(s){
+    var statusBtns = ['balance_due','paid','completed','cancelled'].map(function(s){
       var label = s==='balance_due'?'Balance Due':(s.charAt(0).toUpperCase()+s.slice(1));
       var active = (b.status===s)?' style="background:var(--gold);color:var(--charcoal);border-color:var(--gold);"':'';
       return '<button class="cnk-mbtn cnk-mbtn-back"'+active+' onclick="updateStatus(\''+b.id+'\',\''+s+'\')">'+label+'</button>';
