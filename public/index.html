@@ -4107,5 +4107,34 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
   wrap(); setTimeout(wrap,800); setTimeout(wrap,2500);
 })();
 </script>
+
+<script>
+(function(){
+  if(window.__cnkStatusPersist) return; window.__cnkStatusPersist=true;
+  function wrap(){
+    if(typeof window.updateStatus==='function' && !window.updateStatus.__cnkSP){
+      var orig=window.updateStatus;
+      window.updateStatus=function(id,status){
+        var r=orig.apply(this,arguments);
+        try{
+          var arr=(typeof getBookings==='function')?getBookings():JSON.parse(localStorage.getItem('cnk_bookings')||'[]');
+          var b=arr.filter(function(x){return x.id===id;})[0];
+          if(b){
+            var total=Number(b.price)||0, paid=Number(b.amountPaid!=null?b.amountPaid:b.deposit)||0;
+            if(status==='paid'||status==='cancelled'){ b.balance=0; }
+            else if(status==='balance_due'){ b.balance=Math.round((total-paid)*100)/100; }
+            if(typeof saveBookings==='function') saveBookings(arr);
+            if(typeof cnkDbSave==='function') cnkDbSave(b);
+            if(typeof loadBookings==='function') loadBookings();
+          }
+        }catch(e){}
+        return r;
+      };
+      window.updateStatus.__cnkSP=true;
+    }
+  }
+  wrap(); setTimeout(wrap,800); setTimeout(wrap,2500);
+})();
+</script>
 </body>
 </html>
