@@ -3824,5 +3824,16 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
   setTimeout(wire,1200); setTimeout(wire,3000);
 })();
 </script>
-</body>
+<script>
+(function(){
+  if(window.__cnkMinDate) return; window.__cnkMinDate=true;
+  var FIRST='2026-07-20'; /* booths arrive Jul 15; first bookable date. Change here to reopen earlier dates. */
+  window.CNK_FIRST_BOOKABLE=FIRST;
+  function apply(){ var d=document.getElementById('cnk-date'); if(d){ d.min=FIRST; if(d.value && d.value<FIRST){ d.value=''; try{ d.dispatchEvent(new Event('change',{bubbles:true})); }catch(e){} } } }
+  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded',apply); } else { apply(); }
+  setTimeout(apply,800); setTimeout(apply,2500);
+  document.addEventListener('change',function(e){ if(e.target&&e.target.id==='cnk-date'){ if(e.target.value && e.target.value<FIRST){ alert('We are currently booking events starting July 20, 2026 and later. Please choose a later date.'); e.target.value=''; } } },true);
+  document.addEventListener('click',function(e){ var b=e.target&&e.target.closest?e.target.closest('button'):null; if(!b) return; var t=(b.textContent||'').toLowerCase(); if(t.indexOf('continue')>=0){ var d=document.getElementById('cnk-date'); if(d && d.value && d.value<FIRST){ e.preventDefault(); e.stopPropagation(); alert('We are currently booking events starting July 20, 2026 and later. Please choose a date on or after July 20.'); } } },true);
+})();
+</script></body>
 </html>
