@@ -1430,7 +1430,7 @@ async function submitBooking() {
 
   const nonce = tokenResult.token;
   const depositCents = Math.round(selectedPricing.deposit * 100);
-  const pkgLabel = { hourly:'Hourly', halfday:'Half Day', fullday:'Full Day' };
+  const pkgLabel = { hourly:'2 Hours', halfday:'Half Day', fullday:'Full Day' };
   const bookingId = 'CNK-' + (100296 + bookings.length);
 
   // Send nonce + amount to backend to charge via Square Payments API
@@ -1691,7 +1691,7 @@ function renderUpcoming() {
 
 // ─── TABLE RENDERER ──────────────────────────────────────────────
 function renderTable(bookings, showActions) {
-  const pkgLabel = { hourly:'Hourly', halfday:'Half Day', fullday:'Full Day' };
+  const pkgLabel = { hourly:'2 Hours', halfday:'Half Day', fullday:'Full Day' };
   const statusBadge = {
     paid: '<span class="badge badge-confirmed">Paid</span>',
     balance_due: '<span class="badge badge-balance">Balance Due</span>',
@@ -1727,7 +1727,7 @@ function renderTable(bookings, showActions) {
 function openModal(id) {
   const b = loadBookings().find(b => b.id === id);
   if (!b) return;
-  const pkgLabel = { hourly:'Hourly', halfday:'Half Day', fullday:'Full Day' };
+  const pkgLabel = { hourly:'2 Hours', halfday:'Half Day', fullday:'Full Day' };
   const balance = b.price - b.deposit;
   document.getElementById('modal-content').innerHTML = `
     <div class="modal-title">${b.name}</div>
@@ -1860,7 +1860,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
       <div class="form-group">
         <label class="form-label">Package</label>
         <select id="mb-package" class="form-select" onchange="cnkMbRecalc()">
-          <option value="hourly">Hourly ($125/hr)</option>
+          <option value="hourly">2 Hours ($299)</option>
           <option value="halfday" selected>Half Day ($399)</option>
           <option value="fullday">Full Day ($699)</option>
         </select>
@@ -2153,7 +2153,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
 <script>
 (function(){
   var PKG={hourly:{label:'2 Hours',base:299},halfday:{label:'Half Day',base:399},fullday:{label:'Full Day',base:699}};
-  var DUR={hourly:'',halfday:'Up to 4 hours',fullday:'Up to 8 hours'};
+  var DUR={hourly:'2 hours',halfday:'Up to 4 hours',fullday:'Up to 8 hours'};
   function money(n){ return '$'+(n||0).toFixed(2); }
   function val(id){ var e=document.getElementById(id); return e?e.value.trim():''; }
   function set(id,v){ var e=document.getElementById(id); if(e) e.textContent=v||'—'; }
@@ -2319,7 +2319,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
 
 <script>
 (function(){
-  var PKG={hourly:'Hourly',halfday:'Half Day',fullday:'Full Day'};
+  var PKG={hourly:'2 Hours',halfday:'Half Day',fullday:'Full Day'};
   function money(n){ n=Number(n)||0; return '$'+n.toFixed(2); }
   function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   function getBookings(){ try{ return JSON.parse(localStorage.getItem('cnk_bookings')||'[]'); }catch(e){ return []; } }
@@ -3439,7 +3439,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
   window.openAgreement = function(id){
     var b=mGetBooking(id); if(!b){ alert('Booking not found.'); return; }
     var pw=b.paperwork||{};
-    var pkgName={hourly:'Hourly',halfday:'Half Day',fullday:'Full Day'}[b.package]||b.package||'';
+    var pkgName={hourly:'2 Hours',halfday:'Half Day',fullday:'Full Day'}[b.package]||b.package||'';
     function row(k,v){ return '<tr><td style="padding:5px 14px 5px 0;color:#666;white-space:nowrap;vertical-align:top;">'+mEsc(k)+'</td><td style="padding:5px 0;color:#111;font-weight:600;">'+mEsc(v||'—')+'</td></tr>'; }
     var clauses=[
       ['1. Parties & Equipment','CNK Booths LLC ("Company") agrees to provide photo booth rental services to the Client named below for the event described herein.'],
