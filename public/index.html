@@ -623,7 +623,7 @@
   .cnk-contract strong { color:var(--cream); }
   .cnk-check { display:flex; align-items:flex-start; gap:10px; margin-top:16px; font-size:13px; color:var(--cream-dim); cursor:pointer; line-height:1.5; }
   .cnk-check input { width:18px; height:18px; accent-color:var(--gold); flex-shrink:0; margin-top:1px; }
-  .package-card.selected #cnk-hourly-ctrl { display:block !important; }
+  .package-card.selected #cnk-hourly-ctrl { display:none !important; }
 </style>
 
 
@@ -882,7 +882,7 @@
 (function(){
   var APP_ID='sq0idp-ch7FwGd6cjBOMX_SzQ3UPA', LOC_ID='LF3G4CFPFPKDV';
   var TAX=0.0745, CC=0.03, DEP=0.5, HOUR=125;
-  var state={ pkg:null, hours:1, addon:0 }; window._cnkState=state;
+  var state={ pkg:null, hours:2, addon:0 }; window._cnkState=state;
   var sqPayments=null, sqCard=null, cardMounted=false;
   var PKG={ hourly:{label:'2 Hours',base:299}, halfday:{label:'Half Day',base:399}, fullday:{label:'Full Day',base:699} };
 
