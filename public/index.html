@@ -648,9 +648,9 @@
       <div class="section-label">Choose Your Package</div>
       <div class="packages-grid">
         <div class="package-card" data-pkg="hourly" onclick="cnkPick('hourly')">
-          <span class="pkg-badge">Hourly</span>
-          <div class="pkg-price"><sup>$</sup>125</div>
-          <div class="pkg-duration">per hour · maximum 3 hours</div>
+          <span class="pkg-badge">2 Hours</span>
+          <div class="pkg-price"><sup>$</sup>299</div>
+          <div class="pkg-duration">2 hours of coverage</div>
           <div class="pkg-divider"></div>
           <ul class="pkg-features">
             <li>Unlimited photo sessions</li><li>Digital delivery included</li>
@@ -658,14 +658,14 @@
           </ul>
           <div id="cnk-hourly-ctrl" style="display:none;margin-top:20px;background:rgba(196,152,58,0.06);border:1px solid rgba(196,152,58,0.15);border-radius:8px;padding:16px;">
             <div style="font-size:13px;color:var(--cream);margin-bottom:4px;font-weight:500;">How many hours?</div>
-            <div style="font-size:11px;color:var(--cream-dim);margin-bottom:12px;">Max 3 hrs · 4+ hrs = Half Day</div>
+            <div style="font-size:11px;color:var(--cream-dim);margin-bottom:12px;">Need more coverage? Choose Half Day or Full Day</div>
             <div style="display:flex;align-items:center;justify-content:center;gap:16px;">
               <button type="button" class="addon-btn" onclick="event.stopPropagation();cnkHours(-1)">−</button>
               <div style="text-align:center;"><span id="cnk-hours" style="font-family:'Cormorant Garamond',serif;font-size:32px;color:var(--cream);">1</span><div style="font-size:10px;letter-spacing:0.15em;color:var(--cream-dim);">HOURS</div></div>
               <button type="button" class="addon-btn" onclick="event.stopPropagation();cnkHours(1)">+</button>
             </div>
           </div>
-          <button type="button" class="pkg-select-btn">Select Hourly</button>
+          <button type="button" class="pkg-select-btn">Select 2 Hours</button>
         </div>
         <div class="package-card" data-pkg="halfday" onclick="cnkPick('halfday')">
           <span class="pkg-badge">Half Day</span>
@@ -884,12 +884,12 @@
   var TAX=0.0745, CC=0.03, DEP=0.5, HOUR=125;
   var state={ pkg:null, hours:1, addon:0 }; window._cnkState=state;
   var sqPayments=null, sqCard=null, cardMounted=false;
-  var PKG={ hourly:{label:'Hourly',base:125}, halfday:{label:'Half Day',base:399}, fullday:{label:'Full Day',base:699} };
+  var PKG={ hourly:{label:'2 Hours',base:299}, halfday:{label:'Half Day',base:399}, fullday:{label:'Full Day',base:699} };
 
   function money(n){ return '$'+n.toFixed(2); }
   function calc(){
     if(!state.pkg) return null;
-    var base = state.pkg==='hourly' ? HOUR*Math.max(1,Math.min(3,state.hours)) : PKG[state.pkg].base;
+    var base = PKG[state.pkg].base;
     var addonCost = Math.max(0,state.addon)*HOUR;
     var sub = base + addonCost;
     var tax = sub*TAX;
@@ -927,7 +927,7 @@
 
   function fillSummary(){
     var c=calc(); if(!c) return;
-    document.getElementById('cnk-sum-pkg').textContent = PKG[state.pkg].label + (state.pkg==='hourly'?(' · '+state.hours+'hr'):'');
+    document.getElementById('cnk-sum-pkg').textContent = PKG[state.pkg].label;
     document.getElementById('cnk-sum-base').textContent = money(c.base);
     var ar=document.getElementById('cnk-sum-addon-row');
     if(state.addon>0){ ar.style.display='flex'; document.getElementById('cnk-sum-addon-label').textContent='Extra hours ('+state.addon+' × $125)'; document.getElementById('cnk-sum-addon').textContent=money(c.addonCost); }
@@ -2152,7 +2152,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
 
 <script>
 (function(){
-  var PKG={hourly:{label:'Hourly',base:125},halfday:{label:'Half Day',base:399},fullday:{label:'Full Day',base:699}};
+  var PKG={hourly:{label:'2 Hours',base:299},halfday:{label:'Half Day',base:399},fullday:{label:'Full Day',base:699}};
   var DUR={hourly:'',halfday:'Up to 4 hours',fullday:'Up to 8 hours'};
   function money(n){ return '$'+(n||0).toFixed(2); }
   function val(id){ var e=document.getElementById(id); return e?e.value.trim():''; }
@@ -4136,5 +4136,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
   wrap(); setTimeout(wrap,800); setTimeout(wrap,2500);
 })();
 </script>
+
+<style>#cnk-hourly-box{display:none!important;}</style>
 </body>
 </html>
