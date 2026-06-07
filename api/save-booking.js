@@ -36,6 +36,16 @@ module.exports = async function handler(req, res) {
     await ensureTable();
     const b = req.body || {};
     if (!b.id) { res.status(400).json({ error: 'Missing booking id' }); return; }
+    // --- Double-booking guard: block dates already at booth capacity ---
+    const TOTAL_BOOTHS = parseInt(process.env.TOTAL_BOOTHS || '1', 10);
+    if (b && b.date) {
+      const existingOnDate = await sql`SELECT id FROM bookings WHERE event_date = ${b.date} AND id <> ${b.id || ''} AND COALESCE(status, '') NOT IN ('cancelled','canceled','declined','refunded','void')`;
+      if (existingOnDate.length >= TOTAL_BOOTHS) {
+        res.status(409).json({ error: 'date_unavailable', message: 'That date is already fully booked. Please choose another date.', booked: existingOnDate.length, booths: TOTAL_BOOTHS });
+        return;
+      }
+    }
+
     await sql`
       INSERT INTO bookings (id, name, email, phone, event_date, package, base_price, tax, cc_fee, price, deposit, balance, status, event_type, location, guests, notes, source, created, data)
       VALUES (${b.id}, ${b.name||''}, ${b.email||''}, ${b.phone||''}, ${b.date||''}, ${b.package||''}, ${b.basePrice||0}, ${b.tax||0}, ${b.ccFee||0}, ${b.price||0}, ${b.deposit||0}, ${b.balance||0}, ${b.status||'confirmed'}, ${b.eventType||''}, ${b.location||''}, ${b.guests||''}, ${b.notes||''}, ${b.source||''}, ${b.created||Date.now()}, ${JSON.stringify(b)})
