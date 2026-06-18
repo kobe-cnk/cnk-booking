@@ -40,14 +40,16 @@ module.exports = async function handler(req, res) {
     const isSpecial = String(b.id || '').indexOf('__') === 0 || b.status === 'blocked';
     const TOTAL_BOOTHS = parseInt(process.env.TOTAL_BOOTHS || '1', 10);
     if (b && b.date && !isSpecial) {
-      // 1) Reject if the date has been blocked off (events / trade shows)
-      const blocked = await sql`SELECT id FROM bookings WHERE event_date = ${b.date} AND status = 'blocked'`;
+      // 1) Reject if the date has been blocked off (events / trade shows).
+      //    Query the data JSON (authoritative, same source list-bookings uses) rather than
+      //    relying solely on the event_date column.
+      const blocked = await sql`SELECT id FROM bookings WHERE status = 'blocked' AND (event_date = ${b.date} OR data->>'date' = ${b.date})`;
       if (blocked.length > 0) {
         res.status(409).json({ error: 'date_unavailable', message: 'That date is unavailable. Please choose another date.', blocked: true });
         return;
       }
       // 2) Reject if already at booth capacity
-      const existingOnDate = await sql`SELECT id FROM bookings WHERE event_date = ${b.date} AND id <> ${b.id || ''} AND COALESCE(status, '') NOT IN ('cancelled','canceled','declined','refunded','void','blocked')`;
+      const existingOnDate = await sql`SELECT id FROM bookings WHERE (event_date = ${b.date} OR data->>'date' = ${b.date}) AND id <> ${b.id || ''} AND COALESCE(status, '') NOT IN ('cancelled','canceled','declined','refunded','void','blocked')`;
       if (existingOnDate.length >= TOTAL_BOOTHS) {
         res.status(409).json({ error: 'date_unavailable', message: 'That date is already fully booked. Please choose another date.', booked: existingOnDate.length, booths: TOTAL_BOOTHS });
         return;
