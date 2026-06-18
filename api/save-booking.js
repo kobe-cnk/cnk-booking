@@ -36,10 +36,18 @@ module.exports = async function handler(req, res) {
     await ensureTable();
     const b = req.body || {};
     if (!b.id) { res.status(400).json({ error: 'Missing booking id' }); return; }
-    // --- Double-booking guard: block dates already at booth capacity ---
+    // --- Availability guard ---
+    const isSpecial = String(b.id || '').indexOf('__') === 0 || b.status === 'blocked';
     const TOTAL_BOOTHS = parseInt(process.env.TOTAL_BOOTHS || '1', 10);
-    if (b && b.date) {
-      const existingOnDate = await sql`SELECT id FROM bookings WHERE event_date = ${b.date} AND id <> ${b.id || ''} AND COALESCE(status, '') NOT IN ('cancelled','canceled','declined','refunded','void')`;
+    if (b && b.date && !isSpecial) {
+      // 1) Reject if the date has been blocked off (events / trade shows)
+      const blocked = await sql`SELECT id FROM bookings WHERE event_date = ${b.date} AND status = 'blocked'`;
+      if (blocked.length > 0) {
+        res.status(409).json({ error: 'date_unavailable', message: 'That date is unavailable. Please choose another date.', blocked: true });
+        return;
+      }
+      // 2) Reject if already at booth capacity
+      const existingOnDate = await sql`SELECT id FROM bookings WHERE event_date = ${b.date} AND id <> ${b.id || ''} AND COALESCE(status, '') NOT IN ('cancelled','canceled','declined','refunded','void','blocked')`;
       if (existingOnDate.length >= TOTAL_BOOTHS) {
         res.status(409).json({ error: 'date_unavailable', message: 'That date is already fully booked. Please choose another date.', booked: existingOnDate.length, booths: TOTAL_BOOTHS });
         return;
