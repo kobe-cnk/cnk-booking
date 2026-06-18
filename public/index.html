@@ -581,6 +581,35 @@
     .sidebar-section { padding: 0; margin: 0; display: flex; gap: 4px; }
     .sidebar-title { display: none; }
     .sidebar-btn { white-space: nowrap; }
+    .admin-main { padding: 20px 16px; }
+    .admin-header { margin-bottom: 24px; }
+    .admin-title { font-size: 28px; }
+    .calendar-section { padding: 18px; }
+    /* Let wide tables scroll sideways on a phone instead of being clipped */
+    .table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .table-wrapper table { min-width: 620px; }
+  }
+  @media (max-width: 600px) {
+    .admin-main { padding: 16px 12px; }
+    .admin-title { font-size: 24px; }
+    .stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 24px; }
+    .stat-card { padding: 16px; }
+    .stat-value { font-size: 30px; }
+    .calendar-section { padding: 12px; }
+    .calendar-nav { margin-bottom: 16px; }
+    .cal-title { font-size: 20px; }
+    .cal-grid { gap: 3px; }
+    .cal-day { font-size: 12px; }
+    .cal-day-label { font-size: 9px; padding: 4px 0; }
+    .table-header { padding: 16px; }
+    .table-search { width: 100%; }
+    thead th { padding: 10px 12px; }
+    tbody td { padding: 12px; font-size: 12px; }
+    .modal { padding: 24px 20px; }
+    .modal-title { font-size: 24px; }
+    .modal-sub { margin-bottom: 18px; }
+    .detail-val { max-width: 55%; }
+    .action-btn { margin-bottom: 4px; }
   }
 </style>
 </head>
