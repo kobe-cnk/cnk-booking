@@ -42,15 +42,7 @@ module.exports = async function handler(req, res) {
     });
     const out = await r.json();
     if (!r.ok) { res.status(200).json({ ok: false, error: (out && out.message) || ('HTTP ' + r.status) }); return; }
-    // Also send the CUSTOMER a confirmation email (best-effort; never blocks the booking).
-    let customerEmail = null;
-    try {
-      if (b.email) {
-        const { sendCustomerConfirmation } = require('../lib/confirmation');
-        customerEmail = await sendCustomerConfirmation(b);
-      }
-    } catch (e) { customerEmail = { ok: false, error: String(e && e.message || e) }; }
-    res.status(200).json({ ok: true, id: out.id, customerEmail: customerEmail });
+    res.status(200).json({ ok: true, id: out.id });
   } catch (e) {
     res.status(200).json({ ok: false, error: String(e && e.message || e) });
   }
