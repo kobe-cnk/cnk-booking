@@ -40,18 +40,25 @@ module.exports = async function handler(req, res) {
     const isSpecial = String(b.id || '').indexOf('__') === 0 || b.status === 'blocked';
     const TOTAL_BOOTHS = parseInt(process.env.TOTAL_BOOTHS || '1', 10);
     if (b && b.date && !isSpecial) {
-      // 1) Reject if the date has been blocked off (events / trade shows).
-      //    Query the data JSON (authoritative, same source list-bookings uses) rather than
-      //    relying solely on the event_date column.
-      const blocked = await sql`SELECT id FROM bookings WHERE status = 'blocked' AND (event_date = ${b.date} OR data->>'date' = ${b.date})`;
-      if (blocked.length > 0) {
+      // Read the same way list-bookings does (SELECT data) — this path returns fresh rows
+      // reliably — then match the date in JS so we don't depend on the event_date column.
+      const { rows } = await sql`SELECT data FROM bookings`;
+      const sameDate = rows
+        .map(function (r) { return r.data || {}; })
+        .filter(function (x) { return x && String(x.date || '') === String(b.date) && String(x.id || '') !== String(b.id || ''); });
+      // 1) Blocked date (event / trade show)
+      if (sameDate.some(function (x) { return String(x.status || '').toLowerCase() === 'blocked' || String(x.id || '').indexOf('__BLOCK__') === 0; })) {
         res.status(409).json({ error: 'date_unavailable', message: 'That date is unavailable. Please choose another date.', blocked: true });
         return;
       }
-      // 2) Reject if already at booth capacity
-      const existingOnDate = await sql`SELECT id FROM bookings WHERE (event_date = ${b.date} OR data->>'date' = ${b.date}) AND id <> ${b.id || ''} AND COALESCE(status, '') NOT IN ('cancelled','canceled','declined','refunded','void','blocked')`;
-      if (existingOnDate.length >= TOTAL_BOOTHS) {
-        res.status(409).json({ error: 'date_unavailable', message: 'That date is already fully booked. Please choose another date.', booked: existingOnDate.length, booths: TOTAL_BOOTHS });
+      // 2) At booth capacity
+      const activeOnDate = sameDate.filter(function (x) {
+        var s = String(x.status || '').toLowerCase();
+        return ['cancelled', 'canceled', 'declined', 'refunded', 'void', 'blocked'].indexOf(s) === -1
+          && String(x.id || '').indexOf('__') !== 0;
+      });
+      if (activeOnDate.length >= TOTAL_BOOTHS) {
+        res.status(409).json({ error: 'date_unavailable', message: 'That date is already fully booked. Please choose another date.', booked: activeOnDate.length, booths: TOTAL_BOOTHS });
         return;
       }
     }
