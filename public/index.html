@@ -3736,7 +3736,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
   if(typeof _load!=='function') return;
   window.loadBookings = function(){
     var list = _load() || [];
-    try{ list.forEach(function(b){ if(!b) return; var s=(b.status||'').toString().toLowerCase(); var bal=Number(b.balance)||0; if(s==='cancelled') b.status='cancelled'; else if(s==='complete'||s==='completed') b.status='completed'; else b.status = (bal>0.005?'balance_due':'paid'); }); }catch(e){}
+    try{ list.forEach(function(b){ if(!b) return; var s=(b.status||'').toString().toLowerCase(); var bal=Number(b.balance)||0; if(s==='removed') b.status='removed'; else if(s==='cancelled') b.status='cancelled'; else if(s==='complete'||s==='completed') b.status='completed'; else b.status = (bal>0.005?'balance_due':'paid'); }); }catch(e){}
     return list;
   };
 })();
@@ -4249,5 +4249,205 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
 </script>
 
 <style>#cnk-hourly-box{display:none!important;}</style>
+
+<!-- ===== CNK REMOVE / RESTORE RESERVATIONS + CANCELLATION EMAIL (injected) ===== -->
+<script>
+(function(){
+  if(window.__cnkRemoveFeature) return; window.__cnkRemoveFeature=true;
+
+  // 1) Hide 'removed' reservations from all the normal active views & money totals.
+  //    We wrap loadBookings so the rest of the app never sees removed records,
+  //    EXCEPT our own Removed view which reads the raw list via loadBookingsAll().
+  function installLoadFilter(){
+    if(typeof window.loadBookings!=='function'){ return setTimeout(installLoadFilter,80); }
+    if(window.loadBookings.__cnkRemoveWrap) return;
+    var _load = window.loadBookings;
+    window.loadBookingsAll = function(){ try { return _load() || []; } catch(e){ return []; } };
+    window.loadBookings = function(){
+      var list = _load() || [];
+      return list.filter(function(b){ return !b || String(b.status||'').toLowerCase()!=='removed'; });
+    };
+    window.loadBookings.__cnkRemoveWrap = true;
+  }
+  installLoadFilter();
+
+  // helper: persist one booking locally + to the DB
+  function persist(b, fullList){
+    try{ if(typeof saveBookings==='function') saveBookings(fullList); }catch(e){}
+    try{ if(typeof cnkDbSave==='function') cnkDbSave(b); }catch(e){}
+    try{ fetch('/api/save-booking',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}); }catch(e){}
+  }
+  function rerenderAll(){
+    ['renderOverview','renderAllBookings','renderUpcoming','renderCalendar','renderStatusFilters','filterBookings'].forEach(function(n){ try{ if(typeof window[n]==='function') window[n](); }catch(e){} });
+    renderRemoved();
+  }
+
+  // 2) Wrap cancelBooking so a cancellation email goes out after a successful cancel.
+  function installCancelEmail(){
+    if(typeof window.cancelBooking!=='function'){ return setTimeout(installCancelEmail,120); }
+    if(window.cancelBooking.__cnkEmailWrap) return;
+    var _cancel = window.cancelBooking;
+    window.cancelBooking = async function(id){
+      var before = (window.loadBookingsAll?window.loadBookingsAll():[]).find(function(x){return String(x.id)===String(id);});
+      var wasCancelled = before && String(before.status||'').toLowerCase()==='cancelled';
+      var r = await _cancel.apply(this, arguments);
+      // give the cancel flow a moment to flip status, then email if it actually cancelled
+      setTimeout(function(){
+        try{
+          var now = (window.loadBookingsAll?window.loadBookingsAll():[]).find(function(x){return String(x.id)===String(id);});
+          if(now && String(now.status||'').toLowerCase()==='cancelled' && !wasCancelled && now.email && String(now.email).indexOf('@')>-1){
+            fetch('/api/cancel-email',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({booking:now})})
+              .then(function(res){return res.json();}).then(function(j){ if(j&&j.ok && typeof showToast==='function') showToast('Cancellation email sent to '+now.email); }).catch(function(){});
+          }
+        }catch(e){}
+        renderRemoved();
+      }, 600);
+      return r;
+    };
+    window.cancelBooking.__cnkEmailWrap = true;
+  }
+  installCancelEmail();
+
+  // 3) removeReservation / restoreReservation
+  window.removeReservation = function(id){
+    if(!confirm('Remove this cancelled reservation?\n\nIt moves to the Removed list and stops counting toward your deposit and balance totals. You can restore it later.')) return;
+    var list = window.loadBookingsAll ? window.loadBookingsAll() : [];
+    var b = list.find(function(x){ return String(x.id)===String(id); });
+    if(!b){ return; }
+    b.status='removed'; b.removedAt=new Date().toISOString();
+    persist(b, list);
+    if(typeof showToast==='function') showToast('Reservation removed');
+    try{ if(typeof closeModal==='function') closeModal(); }catch(e){}
+    rerenderAll();
+  };
+  window.restoreReservation = function(id){
+    var list = window.loadBookingsAll ? window.loadBookingsAll() : [];
+    var b = list.find(function(x){ return String(x.id)===String(id); });
+    if(!b){ return; }
+    b.status='cancelled'; delete b.removedAt;
+    persist(b, list);
+    if(typeof showToast==='function') showToast('Reservation restored to Cancelled');
+    rerenderAll();
+  };
+
+  // 4) Inject a "Remove reservation" button into the Actions column for cancelled rows.
+  //    The tables are re-rendered often, so we use a delegated MutationObserver that
+  //    adds the button to any cancelled row that doesn't have one yet.
+  function statusOfRow(tr){
+    // find the booking id from a View button, then look up status
+    var btn = tr.querySelector('button[onclick^="openModal("]');
+    if(!btn) return null;
+    var m = (btn.getAttribute('onclick')||'').match(/openModal\('([^']+)'\)/);
+    if(!m) return null;
+    var id = m[1];
+    var all = window.loadBookingsAll?window.loadBookingsAll():[];
+    var b = all.find(function(x){return String(x.id)===String(id);});
+    return b ? {id:id, status:String(b.status||'').toLowerCase()} : null;
+  }
+  function decorateRows(root){
+    try{
+      (root||document).querySelectorAll('tr').forEach(function(tr){
+        var actionsCell = tr.querySelector('td:last-child');
+        if(!actionsCell || !actionsCell.querySelector('button[onclick^="openModal("]')) return;
+        var info = statusOfRow(tr);
+        if(!info) return;
+        if(info.status==='cancelled'){
+          if(!actionsCell.querySelector('.cnk-remove-btn')){
+            var rb=document.createElement('button');
+            rb.className='action-btn danger cnk-remove-btn';
+            rb.textContent='Remove reservation';
+            rb.setAttribute('onclick',"removeReservation('"+info.id+"')");
+            actionsCell.appendChild(rb);
+          }
+        }
+      });
+    }catch(e){}
+  }
+  var mo = new MutationObserver(function(muts){ muts.forEach(function(m){ if(m.addedNodes&&m.addedNodes.length){ decorateRows(document); } }); });
+  function startObserver(){ try{ mo.observe(document.body,{childList:true,subtree:true}); decorateRows(document); }catch(e){ setTimeout(startObserver,200); } }
+  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded',startObserver); } else { startObserver(); }
+
+  // 5) Removed admin view + sidebar tab
+  function ensureRemovedView(){
+    if(document.getElementById('admin-removed')) return;
+    var main = document.querySelector('.admin-main') || document.querySelector('.admin-overview') && document.querySelector('.admin-overview').parentNode;
+    var anchor = document.getElementById('admin-overview');
+    if(!anchor) return;
+    var view=document.createElement('div');
+    view.className='admin-view'; view.id='admin-removed';
+    view.innerHTML =
+      '<div class="admin-header"><h1 class="admin-title">Removed Reservations</h1>'+
+      '<p style="color:var(--cream-dim);margin-top:6px;">These are cancelled reservations you removed. They don\'t count toward your deposit or balance totals. Restore one to send it back to your Cancelled list.</p></div>'+
+      '<div class="table-wrapper" id="removed-table-wrapper" style="margin-top:18px;"></div>';
+    anchor.parentNode.insertBefore(view, anchor.nextSibling);
+    // sidebar button
+    var firstSection=document.querySelector('.admin-sidebar .sidebar-section');
+    var logout=document.querySelector('.admin-sidebar .sidebar-btn[onclick*="cnkAdminLogout"]');
+    if(firstSection && !document.getElementById('cnk-removed-navbtn')){
+      var btn=document.createElement('button');
+      btn.className='sidebar-btn'; btn.id='cnk-removed-navbtn';
+      btn.setAttribute('onclick',"showAdminView('removed')");
+      btn.innerHTML='<span class="icon">🗑</span> Removed';
+      if(logout && logout.parentNode===firstSection){ firstSection.insertBefore(btn, logout); }
+      else { firstSection.appendChild(btn); }
+    }
+  }
+  function renderRemoved(){
+    ensureRemovedView();
+    var wrap=document.getElementById('removed-table-wrapper');
+    if(!wrap) return;
+    var all = window.loadBookingsAll?window.loadBookingsAll():[];
+    var removed = all.filter(function(b){ return b && String(b.status||'').toLowerCase()==='removed'; })
+                     .sort(function(a,b){ return String(b.removedAt||'').localeCompare(String(a.removedAt||'')); });
+    var pkgLabel={ hourly:'2 Hours', halfday:'Half Day', fullday:'Full Day' };
+    if(!removed.length){ wrap.innerHTML='<p style="color:var(--cream-dim);padding:20px;">No removed reservations.</p>'; return; }
+    var fmt = (typeof formatDate==='function')?formatDate:function(d){return d;};
+    wrap.innerHTML='<table><thead><tr><th>Ref</th><th>Client</th><th>Date</th><th>Package</th><th>Deposit</th><th>Removed</th><th>Actions</th></tr></thead><tbody>'+
+      removed.map(function(b){
+        var dep=(Number(b.deposit)||0).toFixed(2);
+        var when=b.removedAt?new Date(b.removedAt).toLocaleDateString():'';
+        return '<tr>'+
+          '<td style="font-family:\'Cormorant Garamond\',serif;font-size:15px;color:var(--gold)">'+b.id+'</td>'+
+          '<td><div>'+(b.name||'')+'</div><div style="font-size:11px;margin-top:2px">'+(b.eventType||'')+'</div></td>'+
+          '<td>'+fmt(b.date)+'</td>'+
+          '<td>'+(pkgLabel[b.package]||b.package||'')+'</td>'+
+          '<td>$'+dep+'</td>'+
+          '<td>'+when+'</td>'+
+          '<td><button class="action-btn" onclick="openModal(\''+b.id+'\')">View</button>'+
+          '<button class="action-btn primary" onclick="restoreReservation(\''+b.id+'\')">Restore</button></td>'+
+          '</tr>';
+      }).join('')+'</tbody></table>';
+  }
+  window.renderRemoved = renderRemoved;
+
+  // make showAdminView aware of the removed view (it already toggles by id pattern,
+  // but ensure our view exists before navigation and refreshes on open)
+  function wrapShowAdminView(){
+    if(typeof window.showAdminView!=='function'){ return setTimeout(wrapShowAdminView,120); }
+    if(window.showAdminView.__cnkRemovedWrap) return;
+    var _s=window.showAdminView;
+    window.showAdminView=function(view){
+      ensureRemovedView();
+      var r=_s.apply(this,arguments);
+      if(view==='removed'){
+        try{
+          document.querySelectorAll('.admin-view').forEach(function(v){v.classList.remove('active');});
+          var rv=document.getElementById('admin-removed'); if(rv) rv.classList.add('active');
+          document.querySelectorAll('.sidebar-btn').forEach(function(b){ b.classList.toggle('active', b.id==='cnk-removed-navbtn'); });
+        }catch(e){}
+        renderRemoved();
+      }
+      return r;
+    };
+    window.showAdminView.__cnkRemovedWrap=true;
+  }
+  wrapShowAdminView();
+
+  // initial build + periodic safety re-decorate
+  setTimeout(function(){ ensureRemovedView(); renderRemoved(); decorateRows(document); }, 800);
+  setTimeout(function(){ ensureRemovedView(); decorateRows(document); }, 2500);
+})();
+</script>
+
 </body>
 </html>
