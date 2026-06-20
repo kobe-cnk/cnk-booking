@@ -4296,7 +4296,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
         try{
           var now = (window.loadBookingsAll?window.loadBookingsAll():[]).find(function(x){return String(x.id)===String(id);});
           if(now && String(now.status||'').toLowerCase()==='cancelled' && !wasCancelled && now.email && String(now.email).indexOf('@')>-1){
-            fetch('/api/cancel-email',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({booking:now})})
+            fetch('/api/confirm-booking',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'cancel', booking:now})})
               .then(function(res){return res.json();}).then(function(j){ if(j&&j.ok && typeof showToast==='function') showToast('Cancellation email sent to '+now.email); }).catch(function(){});
           }
         }catch(e){}

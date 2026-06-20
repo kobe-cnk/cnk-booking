@@ -16,8 +16,35 @@ module.exports = async function handler(req, res) {
   if (!RESEND_KEY) { res.status(200).json({ ok: false, error: 'Email not configured' }); return; }
   try {
     const b = (req.body && req.body.booking) || {};
+    const type = (req.body && req.body.type) || 'confirm';
     const to = (b.email || '').trim();
     if (!to || to.indexOf('@') === -1) { res.status(200).json({ ok: false, error: 'No customer email' }); return; }
+
+    // ----- CANCELLATION email -----
+    if (type === 'cancel') {
+      const crows = [
+        ['Reference', b.id], ['Event date', b.date], ['Package', b.package], ['Location', b.location]
+      ].filter(function(l){ return l[1] !== undefined && l[1] !== null && l[1] !== ''; })
+        .map(function(l){ return '<tr><td style="padding:4px 12px 4px 0;color:#888;">' + esc(l[0]) + '</td><td style="padding:4px 0;color:#111;font-weight:600;">' + esc(l[1]) + '</td></tr>'; }).join('');
+      const chtml = '<div style="font-family:Arial,sans-serif;max-width:560px;">'
+        + '<h2 style="color:#7a1f2b;">Your CNK Booths reservation has been cancelled</h2>'
+        + '<p style="color:#444;">Hi ' + esc((b.name||'there').split(' ')[0]) + ', this confirms your CNK Booths photo booth reservation has been cancelled. Here are the details:</p>'
+        + '<table style="border-collapse:collapse;font-size:14px;">' + crows + '</table>'
+        + '<p style="margin-top:16px;font-size:13px;color:#555;">If any deposit you paid is eligible for a refund, it will be returned to your original payment method. If this was a mistake or you\'d like to rebook a different date, just reply to this email or contact us at photos@cnkbooths.com.</p>'
+        + '<p style="margin-top:16px;font-size:13px;color:#555;">We\'d still love to be part of your next event!</p>'
+        + '<p style="margin-top:20px;font-size:12px;color:#aaa;">CNK Booths — Photo Booth Rentals, Utah</p></div>';
+      const cr = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + RESEND_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ from: FROM, to: [to], reply_to: REPLY_TO, subject: 'Your CNK Booths reservation has been cancelled', html: chtml })
+      });
+      const cout = await cr.json();
+      if (!cr.ok) { res.status(200).json({ ok: false, error: (cout && cout.message) || ('HTTP ' + cr.status) }); return; }
+      res.status(200).json({ ok: true, id: cout.id, type: 'cancel' });
+      return;
+    }
+
+    // ----- CONFIRMATION email (default) -----
     const rows = [
       ['Reference', b.id], ['Event date', b.date], ['Package', b.package],
       ['Event type', b.eventType], ['Location', b.location],
