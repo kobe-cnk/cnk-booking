@@ -3736,7 +3736,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
   if(typeof _load!=='function') return;
   window.loadBookings = function(){
     var list = _load() || [];
-    try{ list.forEach(function(b){ if(!b) return; var s=(b.status||'').toString().toLowerCase(); var bal=Number(b.balance)||0; if(s==='removed') b.status='removed'; else if(s==='cancelled') b.status='cancelled'; else if(s==='complete'||s==='completed') b.status='completed'; else b.status = (bal>0.005?'balance_due':'paid'); }); }catch(e){}
+    try{ list.forEach(function(b){ if(!b) return; var s=(b.status||'').toString().toLowerCase(); var bal=Number(b.balance)||0; if(s==='blocked'||String(b.id||'').indexOf('__BLOCK__')===0) b.status='blocked'; else if(s==='removed') b.status='removed'; else if(s==='cancelled') b.status='cancelled'; else if(s==='complete'||s==='completed') b.status='completed'; else b.status = (bal>0.005?'balance_due':'paid'); }); }catch(e){}
     return list;
   };
 })();
@@ -4446,6 +4446,158 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
   // initial build + periodic safety re-decorate
   setTimeout(function(){ ensureRemovedView(); renderRemoved(); decorateRows(document); }, 800);
   setTimeout(function(){ ensureRemovedView(); decorateRows(document); }, 2500);
+})();
+</script>
+
+<!-- ===== CNK VISIBILITY RULES: cancelled off calendar, removed off all lists, blocked shown everywhere ===== -->
+<script>
+(function(){
+  if(window.__cnkVisibilityRules) return; window.__cnkVisibilityRules=true;
+
+  function isBlocked(b){ return b && (String(b.status||'').toLowerCase()==='blocked' || String(b.id||'').indexOf('__BLOCK__')===0); }
+  function isCancelled(b){ return b && String(b.status||'').toLowerCase()==='cancelled'; }
+  function isRemoved(b){ return b && String(b.status||'').toLowerCase()==='removed'; }
+
+  function blockedName(b){
+    var n = (b.name||'').trim();
+    if(n && n.toLowerCase()!=='blocked') return n;
+    return b.notes ? ('Blocked — '+b.notes) : 'Blocked (event/unavailable)';
+  }
+
+  // ---- 1) ALL BOOKINGS: keep blocked visible, drop removed (loadBookings already drops removed).
+  function patchAllBookings(){
+    if(typeof window.filterBookings!=='function'){ return setTimeout(patchAllBookings,80); }
+    if(window.filterBookings.__cnkVis) return;
+    var origFilter = window.filterBookings;
+    window.filterBookings = function(query){
+      var r = origFilter.apply(this, arguments);
+      setTimeout(styleBlockedRows, 10);
+      return r;
+    };
+    window.filterBookings.__cnkVis = true;
+
+    if(typeof window.renderStatusFilters==='function' && !window.renderStatusFilters.__cnkVis){
+      var origSF = window.renderStatusFilters;
+      window.renderStatusFilters = function(){
+        var r = origSF.apply(this, arguments);
+        try{
+          var box=document.getElementById('status-filters');
+          if(box && !box.querySelector('[data-cnk-blocked-filter]')){
+            var btn=document.createElement('button');
+            btn.className='filter-btn'+(window.activeFilter==='blocked'?' active':'');
+            btn.setAttribute('data-cnk-blocked-filter','1');
+            btn.textContent='Blocked';
+            btn.onclick=function(){ if(typeof window.setFilter==='function') window.setFilter('blocked'); };
+            box.appendChild(btn);
+          }
+        }catch(e){}
+        return r;
+      };
+      window.renderStatusFilters.__cnkVis = true;
+    }
+  }
+  function styleBlockedRows(){
+    try{
+      var v=document.getElementById('admin-bookings'); if(!v) return;
+      v.querySelectorAll('tbody tr').forEach(function(tr){
+        var ref = tr.querySelector('td'); if(!ref) return;
+        var id = (ref.textContent||'').trim();
+        if(id.indexOf('__BLOCK__')===0){
+          var statusTd = tr.children[5];
+          if(statusTd && !statusTd.querySelector('[data-cnk-blocked-badge]')){
+            statusTd.innerHTML='<span data-cnk-blocked-badge="1" class="badge" style="background:#3a2a3a;color:#d8a0d8;">Blocked</span>';
+          }
+        }
+      });
+    }catch(e){}
+  }
+
+  // ---- 2) UPCOMING: keep future blocked dates visible; loadBookings drops removed already.
+  function patchUpcoming(){
+    if(typeof window.renderUpcoming!=='function'){ return setTimeout(patchUpcoming,80); }
+    if(window.renderUpcoming.__cnkVis) return;
+    var orig = window.renderUpcoming;
+    window.renderUpcoming = function(){
+      var r = orig.apply(this, arguments);
+      setTimeout(function(){
+        try{
+          var t=document.getElementById('upcoming-table');
+          if(t) t.querySelectorAll('tbody tr').forEach(function(tr){
+            var ref=tr.querySelector('td'); if(!ref) return;
+            if((ref.textContent||'').trim().indexOf('__BLOCK__')===0){
+              var st=tr.children[5];
+              if(st && !st.querySelector('[data-cnk-blocked-badge]')) st.innerHTML='<span data-cnk-blocked-badge="1" class="badge" style="background:#3a2a3a;color:#d8a0d8;">Blocked</span>';
+            }
+          });
+        }catch(e){}
+      }, 12);
+      return r;
+    };
+    window.renderUpcoming.__cnkVis = true;
+  }
+
+  // ---- 3) CALENDAR: cancelled & removed must NOT appear; blocked MUST appear.
+  function patchCalendar(){
+    if(typeof window.renderCalendar!=='function'){ return setTimeout(patchCalendar,80); }
+    if(window.renderCalendar.__cnkVis) return;
+    var orig = window.renderCalendar;
+    window.renderCalendar = function(){
+      var r = orig.apply(this, arguments);
+      setTimeout(decorateCalendar, 40);
+      setTimeout(decorateCalendar, 80);
+      return r;
+    };
+    window.renderCalendar.__cnkVis = true;
+  }
+  function decorateCalendar(){
+    try{
+      var all = (window.loadBookingsAll ? window.loadBookingsAll() : (window.loadBookings?window.loadBookings():[])) || [];
+      var blockedByDate = {};
+      all.forEach(function(b){ if(isBlocked(b) && b.date) blockedByDate[b.date]=b; });
+
+      var cal=document.getElementById('admin-calendar')||document;
+      cal.querySelectorAll('.cal-day').forEach(function(cell){
+        var m=(cell.getAttribute('onclick')||'').match(/calDayClick\('([0-9\-]+)'\)/);
+        if(!m) return;
+        var date=m[1];
+        if(blockedByDate[date]){
+          cell.classList.add('cnk-blocked-day');
+          cell.setAttribute('title','Blocked — unavailable');
+          // remove the gold enhancer event-tags on blocked days (they'd show the internal block record)
+          cell.querySelectorAll('[data-cnk-ev]').forEach(function(e){ e.remove(); });
+          if(!cell.querySelector('[data-cnk-blocked-tag]')){
+            var tag=document.createElement('div');
+            tag.setAttribute('data-cnk-blocked-tag','1');
+            tag.textContent='Blocked';
+            tag.style.cssText='font-size:9px;line-height:1.2;background:rgba(180,90,180,0.28);color:#e6b8e6;border-radius:3px;padding:1px 4px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
+            cell.appendChild(tag);
+          }
+        }
+      });
+
+      cal.querySelectorAll('.cnk-cal-row[data-id]').forEach(function(row){
+        var id=row.getAttribute('data-id');
+        var rec=all.find(function(x){return String(x.id)===String(id);});
+        if(!rec || isCancelled(rec) || isRemoved(rec)){ row.remove(); return; }
+        if(isBlocked(rec) && !row.querySelector('[data-cnk-blocked-row]')){
+          row.setAttribute('data-cnk-blocked-row','1');
+          var spans=row.querySelectorAll('span');
+          if(spans[1]) spans[1].textContent=blockedName(rec);
+          if(spans[3]) spans[3].textContent='Blocked';
+        }
+      });
+    }catch(e){}
+  }
+
+  if(!document.getElementById('cnk-vis-style')){
+    var st=document.createElement('style'); st.id='cnk-vis-style';
+    st.textContent='.cal-day.cnk-blocked-day{background:rgba(150,70,150,0.18)!important;border-color:rgba(180,90,180,0.45)!important;}';
+    document.head.appendChild(st);
+  }
+
+  patchAllBookings(); patchUpcoming(); patchCalendar();
+  setTimeout(function(){ decorateCalendar(); styleBlockedRows(); }, 700);
+  setTimeout(function(){ decorateCalendar(); styleBlockedRows(); }, 2000);
 })();
 </script>
 
