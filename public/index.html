@@ -4121,7 +4121,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
   async function sync(){
     try{
       var r=await fetch('/api/list-bookings?t='+Date.now(),{cache:'no-store'});
-      var j=await r.json(); var arr=(j&&j.bookings)||[]; try{ var __set=arr.filter(function(x){return x&&x.id==='__BOOTH_SETTINGS__';})[0]; if(__set&&__set.boothCount){ localStorage.setItem('cnk_booth_count', String(parseInt(__set.boothCount,10)||1)); var __bd=document.getElementById('booth-count-display'); if(__bd) __bd.textContent=(parseInt(__set.boothCount,10)||1); } arr=arr.filter(function(x){return x && String(x.id||'').indexOf('__')!==0;}); }catch(e){}
+      var j=await r.json(); var arr=(j&&j.bookings)||[]; try{ var __set=arr.filter(function(x){return x&&x.id==='__BOOTH_SETTINGS__';})[0]; if(__set&&__set.boothCount){ localStorage.setItem('cnk_booth_count', String(parseInt(__set.boothCount,10)||1)); var __bd=document.getElementById('booth-count-display'); if(__bd) __bd.textContent=(parseInt(__set.boothCount,10)||1); } arr=arr.filter(function(x){return x && String(x.id||'').indexOf('__BLOCK__')===0 ? true : String(x.id||'').indexOf('__')!==0;}); }catch(e){}
       if(arr && arr.length){
         localStorage.setItem('cnk_bookings', JSON.stringify(arr));
         synced=true;
