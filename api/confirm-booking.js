@@ -17,6 +17,44 @@ module.exports = async function handler(req, res) {
   try {
     const b = (req.body && req.body.booking) || {};
     const type = (req.body && req.body.type) || 'confirm';
+
+    // ----- PARTNERSHIP agreement signed: email BOTH the partner and CNK -----
+    if (type === 'partnership') {
+      const p = (req.body && req.body.partnership) || {};
+      const partnerEmail = (p.email || '').trim();
+      const rows = [
+        ['Venue / Business', p.venueName], ['Signed by', p.signerName],
+        ['Email', p.email], ['Phone', p.phone], ['Address', p.address], ['Date', p.signDate]
+      ].filter(function(l){ return l[1] !== undefined && l[1] !== null && l[1] !== ''; })
+        .map(function(l){ return '<tr><td style="padding:4px 12px 4px 0;color:#888;">' + esc(l[0]) + '</td><td style="padding:4px 0;color:#111;font-weight:600;">' + esc(l[1]) + '</td></tr>'; }).join('');
+      const terms = '<ul style="font-size:13px;color:#444;line-height:1.6;padding-left:18px;">'
+        + '<li>Venue keeps 25% of gross booth revenue; CNK keeps 75%.</li>'
+        + '<li>CNK collects all revenue and pays the venue between the 1st\u20135th of each month.</li>'
+        + '<li>90-day initial term, then month-to-month; either party may cancel with 30 days\u2019 written notice.</li>'
+        + '<li>Exclusivity: the venue hosts no competing photo booths during the term.</li>'
+        + '<li>CNK owns, installs, maintains, and restocks the booth at no cost to the venue.</li>'
+        + '<li>Venue provides space, power, and Wi-Fi; CNK removes the booth on termination.</li></ul>';
+      const html = '<div style="font-family:Arial,sans-serif;max-width:600px;">'
+        + '<h2 style="color:#b8893a;">CNK Booths \u2014 Venue Partnership Agreement</h2>'
+        + '<p style="color:#444;">This confirms the venue partnership agreement was reviewed and signed electronically. Details below:</p>'
+        + '<table style="border-collapse:collapse;font-size:14px;">' + rows + '</table>'
+        + '<h3 style="color:#7a1f2b;margin-top:20px;font-size:15px;">Agreement Terms</h3>' + terms
+        + '<p style="margin-top:16px;font-size:13px;color:#555;">Electronic signature: <strong>' + esc(p.signerName || p.signature || '') + '</strong>' + (p.agreedAt ? (' \u00b7 ' + esc(new Date(p.agreedAt).toLocaleString())) : '') + '</p>'
+        + '<p style="margin-top:16px;font-size:13px;color:#555;">Questions? Contact us at photos@cnkbooths.com.</p>'
+        + '<p style="margin-top:20px;font-size:12px;color:#aaa;">CNK Booths \u2014 Photo Booth Partnerships, Utah</p></div>';
+      const recipients = ['photos@cnkbooths.com'];
+      if (partnerEmail && partnerEmail.indexOf('@') !== -1) recipients.push(partnerEmail);
+      const pr = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + RESEND_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ from: FROM, to: recipients, reply_to: REPLY_TO, subject: 'CNK Booths Partnership Agreement \u2014 ' + (p.venueName || 'Signed'), html: html })
+      });
+      const pout = await pr.json();
+      if (!pr.ok) { res.status(200).json({ ok: false, error: (pout && pout.message) || ('HTTP ' + pr.status) }); return; }
+      res.status(200).json({ ok: true, id: pout.id, type: 'partnership' });
+      return;
+    }
+
     const to = (b.email || '').trim();
     if (!to || to.indexOf('@') === -1) { res.status(200).json({ ok: false, error: 'No customer email' }); return; }
 

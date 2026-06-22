@@ -1,5 +1,35 @@
 const { sql } = require('@vercel/postgres');
 
+async function ensurePartnerTable() {
+  await sql`
+    CREATE TABLE IF NOT EXISTS partnerships (
+      id TEXT PRIMARY KEY,
+      venue_name TEXT,
+      signer_name TEXT,
+      email TEXT,
+      phone TEXT,
+      address TEXT,
+      sign_date TEXT,
+      status TEXT,
+      created BIGINT,
+      data JSONB
+    )
+  `;
+}
+
+async function savePartnership(req, res, b) {
+  await ensurePartnerTable();
+  await sql`
+    INSERT INTO partnerships (id, venue_name, signer_name, email, phone, address, sign_date, status, created, data)
+    VALUES (${b.id}, ${b.venueName||''}, ${b.signerName||''}, ${b.email||''}, ${b.phone||''}, ${b.address||''}, ${b.signDate||''}, ${b.status||'signed'}, ${b.created||Date.now()}, ${JSON.stringify(b)})
+    ON CONFLICT (id) DO UPDATE SET
+      venue_name=EXCLUDED.venue_name, signer_name=EXCLUDED.signer_name, email=EXCLUDED.email,
+      phone=EXCLUDED.phone, address=EXCLUDED.address, sign_date=EXCLUDED.sign_date,
+      status=EXCLUDED.status, data=EXCLUDED.data
+  `;
+  res.status(200).json({ ok: true, id: b.id });
+}
+
 async function ensureTable() {
   await sql`
     CREATE TABLE IF NOT EXISTS bookings (
@@ -33,9 +63,13 @@ module.exports = async function handler(req, res) {
     return;
   }
   try {
-    await ensureTable();
     const b = req.body || {};
     if (!b.id) { res.status(400).json({ error: 'Missing booking id' }); return; }
+    // --- Partnership agreements go to a completely separate table (never touch bookings) ---
+    if (b.recordType === 'partnership' || String(b.id || '').indexOf('__PARTNER__') === 0) {
+      return await savePartnership(req, res, b);
+    }
+    await ensureTable();
     // --- Availability guard ---
     const isSpecial = String(b.id || '').indexOf('__') === 0 || b.status === 'blocked';
     const TOTAL_BOOTHS = parseInt(process.env.TOTAL_BOOTHS || '1', 10);

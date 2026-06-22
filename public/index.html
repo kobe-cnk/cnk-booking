@@ -4601,5 +4601,97 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
 })();
 </script>
 
+<!-- ===== CNK PARTNERSHIPS: separate admin section, same login, fed by signed venue agreements ===== -->
+<script>
+(function(){
+  if(window.__cnkPartnerships) return; window.__cnkPartnerships=true;
+
+  function ensurePartnerView(){
+    if(document.getElementById('admin-partnerships')) return;
+    var anchor = document.getElementById('admin-overview');
+    if(!anchor) return;
+    var view=document.createElement('div');
+    view.className='admin-view'; view.id='admin-partnerships';
+    view.innerHTML =
+      '<div class="admin-header"><h1 class="admin-title">Venue Partnerships</h1>'+
+      '<p style="color:var(--cream-dim);margin-top:6px;">Signed venue partnership agreements. These are separate from bookings and never affect your booking totals or calendar.</p></div>'+
+      '<div class="table-wrapper" id="partner-table-wrapper" style="margin-top:18px;"></div>';
+    anchor.parentNode.insertBefore(view, anchor.nextSibling);
+    // sidebar button
+    var firstSection=document.querySelector('.admin-sidebar .sidebar-section');
+    var logout=document.querySelector('.admin-sidebar .sidebar-btn[onclick*="cnkAdminLogout"]');
+    if(firstSection && !document.getElementById('cnk-partner-navbtn')){
+      var btn=document.createElement('button');
+      btn.className='sidebar-btn'; btn.id='cnk-partner-navbtn';
+      btn.setAttribute('onclick',"showAdminView('partnerships'); window.cnkLoadPartnerships && window.cnkLoadPartnerships();");
+      btn.innerHTML='<span class="icon">\uD83E\uDD1D</span> Partnerships';
+      if(logout && logout.parentNode===firstSection){ firstSection.insertBefore(btn, logout); }
+      else { firstSection.appendChild(btn); }
+    }
+  }
+
+  window.__cnkPartners = [];
+
+  window.cnkLoadPartnerships = function(){
+    ensurePartnerView();
+    var wrap=document.getElementById('partner-table-wrapper');
+    if(wrap && !wrap.innerHTML){ wrap.innerHTML='<p style="color:var(--cream-dim);padding:20px;">Loading…</p>'; }
+    fetch('/api/list-bookings?type=partnerships&t='+Date.now(), {cache:'no-store'})
+      .then(function(r){ return r.json(); })
+      .then(function(j){ window.__cnkPartners = (j && j.partnerships) || []; renderPartners(); })
+      .catch(function(){ if(wrap) wrap.innerHTML='<p style="color:#e8a0a8;padding:20px;">Could not load partnerships.</p>'; });
+  };
+
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+  function renderPartners(){
+    ensurePartnerView();
+    var wrap=document.getElementById('partner-table-wrapper');
+    if(!wrap) return;
+    var list = window.__cnkPartners || [];
+    if(!list.length){ wrap.innerHTML='<p style="color:var(--cream-dim);padding:20px;">No signed partnership agreements yet. They\'ll appear here as venues sign at /partnership.</p>'; return; }
+    wrap.innerHTML='<table><thead><tr><th>Venue</th><th>Signed By</th><th>Email</th><th>Phone</th><th>Date</th><th>Actions</th></tr></thead><tbody>'+
+      list.map(function(p, i){
+        return '<tr>'+
+          '<td style="font-family:\'Cormorant Garamond\',serif;font-size:15px;color:var(--gold)">'+esc(p.venueName||'')+'</td>'+
+          '<td>'+esc(p.signerName||'')+'</td>'+
+          '<td>'+esc(p.email||'')+'</td>'+
+          '<td>'+esc(p.phone||'')+'</td>'+
+          '<td>'+esc(p.signDate||'')+'</td>'+
+          '<td><button class="action-btn" onclick="cnkViewPartner('+i+')">View</button></td>'+
+          '</tr>';
+      }).join('')+'</tbody></table>';
+  }
+
+  window.cnkViewPartner = function(i){
+    var p = (window.__cnkPartners||[])[i]; if(!p) return;
+    var when = p.agreedAt ? new Date(p.agreedAt).toLocaleString() : '';
+    var rows = [
+      ['Venue / Business', p.venueName], ['Address', p.address], ['Signed by', p.signerName],
+      ['Title / Role', p.title], ['Email', p.email], ['Phone', p.phone],
+      ['Date', p.signDate], ['Signature', p.signature], ['Signed at', when]
+    ].filter(function(r){ return r[1]; })
+     .map(function(r){ return '<tr><td style="padding:6px 16px 6px 0;color:var(--cream-dim);white-space:nowrap;vertical-align:top;">'+esc(r[0])+'</td><td style="padding:6px 0;color:var(--cream);">'+esc(r[1])+'</td></tr>'; }).join('');
+    var ov=document.createElement('div');
+    ov.id='cnk-partner-modal';
+    ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
+    ov.innerHTML='<div style="background:var(--charcoal-soft);border:1px solid var(--cream-dimmer);border-radius:14px;max-width:560px;width:100%;max-height:88vh;overflow:auto;padding:30px;font-family:\'DM Sans\',sans-serif;">'+
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">'+
+      '<h2 style="font-family:\'Cormorant Garamond\',serif;font-size:26px;color:var(--cream);font-weight:600;">Partnership Agreement</h2>'+
+      '<button onclick="var m=document.getElementById(\'cnk-partner-modal\');if(m)m.remove();" style="background:none;border:none;color:var(--cream-dim);font-size:24px;cursor:pointer;line-height:1;">&times;</button></div>'+
+      '<div style="font-size:13px;color:var(--gold);margin-bottom:18px;">25% venue / 75% CNK \u00b7 90-day then month-to-month \u00b7 exclusivity</div>'+
+      '<table style="border-collapse:collapse;font-size:14px;width:100%;">'+rows+'</table>'+
+      '<p style="margin-top:20px;font-size:12px;color:var(--cream-dim);">A copy of this signed agreement was emailed to the venue and to photos@cnkbooths.com at signing.</p>'+
+      '</div>';
+    ov.addEventListener('click', function(e){ if(e.target===ov) ov.remove(); });
+    document.body.appendChild(ov);
+  };
+
+  // build the view/button once admin DOM is present
+  function init(){ if(document.querySelector('.admin-sidebar')){ ensurePartnerView(); } else { setTimeout(init, 200); } }
+  setTimeout(init, 400);
+})();
+</script>
+
 </body>
 </html>

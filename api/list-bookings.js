@@ -2,6 +2,18 @@ const { sql } = require('@vercel/postgres');
 
 module.exports = async function handler(req, res) {
   try {
+    // --- Partnerships: completely separate list, never mixed with bookings ---
+    if (req.query && req.query.type === 'partnerships') {
+      await sql`
+        CREATE TABLE IF NOT EXISTS partnerships (
+          id TEXT PRIMARY KEY, venue_name TEXT, signer_name TEXT, email TEXT, phone TEXT,
+          address TEXT, sign_date TEXT, status TEXT, created BIGINT, data JSONB
+        )
+      `;
+      const { rows } = await sql`SELECT data FROM partnerships ORDER BY created DESC`;
+      res.status(200).json({ ok: true, partnerships: rows.map(function(r){ return r.data; }) });
+      return;
+    }
     // Ensure table exists so a fresh DB doesn't error on first read
     await sql`
       CREATE TABLE IF NOT EXISTS bookings (
