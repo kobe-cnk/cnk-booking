@@ -5,6 +5,10 @@
       "destination": "/partnership.html"
     },
     {
+      "source": "/partnership-agreement",
+      "destination": "/partnership-agreement.html"
+    },
+    {
       "source": "/cnk-admin-x7k2m9",
       "destination": "/index.html"
     },
