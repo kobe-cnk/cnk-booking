@@ -5,6 +5,11 @@ module.exports = async function handler(req, res) {
   try {
     const id = (req.body && req.body.id) || null;
     if (!id) { res.status(400).json({ error: 'Missing booking id' }); return; }
+    if (String(id).indexOf('__PARTNER__') === 0) {
+      await sql`DELETE FROM partnerships WHERE id = ${id}`;
+      res.status(200).json({ ok: true, deleted: id });
+      return;
+    }
     await sql`DELETE FROM bookings WHERE id = ${id}`;
     res.status(200).json({ ok: true, deleted: id });
   } catch (e) {
