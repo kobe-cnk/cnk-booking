@@ -678,7 +678,7 @@
       <div class="packages-grid">
         <div class="package-card" data-pkg="hourly" onclick="cnkPick('hourly')">
           <span class="pkg-badge">2 Hours</span>
-          <div class="pkg-price"><sup>$</sup>299</div>
+          <div class="pkg-price"><sup>$</sup>499</div>
           <div class="pkg-duration">2 hours of coverage</div>
           <div class="pkg-divider"></div>
           <ul class="pkg-features">
@@ -698,7 +698,7 @@
         </div>
         <div class="package-card" data-pkg="halfday" onclick="cnkPick('halfday')">
           <span class="pkg-badge">Half Day</span>
-          <div class="pkg-price"><sup>$</sup>399</div>
+          <div class="pkg-price"><sup>$</sup>649</div>
           <div class="pkg-duration">up to 4 hours</div>
           <div class="pkg-divider"></div>
           <ul class="pkg-features">
@@ -709,7 +709,7 @@
         </div>
         <div class="package-card" data-pkg="fullday" onclick="cnkPick('fullday')">
           <span class="pkg-badge">Full Day</span>
-          <div class="pkg-price"><sup>$</sup>699</div>
+          <div class="pkg-price"><sup>$</sup>899</div>
           <div class="pkg-duration">up to 8 hours</div>
           <div class="pkg-divider"></div>
           <ul class="pkg-features">
@@ -913,7 +913,7 @@
   var TAX=0.0745, CC=0.03, DEP=0.5, HOUR=125;
   var state={ pkg:null, hours:2, addon:0 }; window._cnkState=state;
   var sqPayments=null, sqCard=null, cardMounted=false;
-  var PKG={ hourly:{label:'2 Hours',base:299}, halfday:{label:'Half Day',base:399}, fullday:{label:'Full Day',base:699} };
+  var PKG={ hourly:{label:'2 Hours',base:499}, halfday:{label:'Half Day',base:649}, fullday:{label:'Full Day',base:899} };
 
   function money(n){ return '$'+n.toFixed(2); }
   function calc(){
@@ -2263,7 +2263,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
 
 <script>
 (function(){
-  var PKG={hourly:{label:'2 Hours',base:299},halfday:{label:'Half Day',base:399},fullday:{label:'Full Day',base:699}};
+  var PKG={hourly:{label:'2 Hours',base:499},halfday:{label:'Half Day',base:649},fullday:{label:'Full Day',base:899}};
   var DUR={hourly:'2 hours',halfday:'Up to 4 hours',fullday:'Up to 8 hours'};
   function money(n){ return '$'+(n||0).toFixed(2); }
   function val(id){ var e=document.getElementById(id); return e?e.value.trim():''; }
