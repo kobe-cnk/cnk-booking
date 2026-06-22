@@ -4681,6 +4681,8 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
       '<button onclick="var m=document.getElementById(\'cnk-partner-modal\');if(m)m.remove();" style="background:none;border:none;color:var(--cream-dim);font-size:24px;cursor:pointer;line-height:1;">&times;</button></div>'+
       '<div style="font-size:13px;color:var(--gold);margin-bottom:18px;">25% venue / 75% CNK \u00b7 90-day then month-to-month \u00b7 exclusivity</div>'+
       '<table style="border-collapse:collapse;font-size:14px;width:100%;">'+rows+'</table>'+
+      (p.agreementHtml ? ('<details style="margin-top:18px;"><summary style="cursor:pointer;color:var(--gold-light);font-size:13px;">View full signed agreement</summary>'+
+        '<div style="margin-top:12px;padding:16px;background:var(--charcoal);border:1px solid var(--cream-dimmer);border-radius:8px;max-height:340px;overflow:auto;font-size:12.5px;line-height:1.55;">'+p.agreementHtml+'</div></details>') : '')+
       '<p style="margin-top:20px;font-size:12px;color:var(--cream-dim);">A copy of this signed agreement was emailed to the venue and to photos@cnkbooths.com at signing.</p>'+
       '</div>';
     ov.addEventListener('click', function(e){ if(e.target===ov) ov.remove(); });
