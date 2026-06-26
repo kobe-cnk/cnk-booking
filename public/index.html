@@ -4716,5 +4716,29 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
 })();
 </script>
 
+<script>
+/* CNK admin enhancement: show full contract details + CC fee in the booking modal. Data was already saved; this only displays it. Additive, admin-only, safe. */
+(function(){
+  function esc(v){ if(v===undefined||v===null||String(v).trim()===""){return "<span style=\"opacity:.45\">\u2014</span>";} return String(v).replace(/[&<>]/g,function(c){return c==="&"?"&amp;":c==="<"?"&lt;":"&gt;";}); }
+  function injectPanel(id){ try{ if(!id){id=window._cnkModalId;} if(!id){return;}
+    fetch("/api/list-bookings?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){
+      var bk=(j.bookings||[]).filter(function(x){return x.id===id;})[0]; if(!bk){return;}
+      var pw={}; try{ pw= typeof bk.paperwork==="string"?JSON.parse(bk.paperwork):(bk.paperwork||{}); }catch(e){}
+      var fee=(bk.ccFee!==undefined&&bk.ccFee!==null&&bk.ccFee!=="")?("$"+Number(bk.ccFee).toFixed(2)):null;
+      var signed=(pw.signature||pw.signatureImg);
+      var rows=[["Venue name",bk.venueName],["Venue location",bk.location],["Start time",pw.startTime],["End time",pw.endTime],["Setup notes",pw.setup],["Day-of contact",pw.dayContact],["Power",pw.power],["WiFi",pw.wifi],["Outdoor / indoor",pw.outdoor],["CC fee",fee]];
+      var grid=rows.map(function(r){return "<div style=\"font-size:13.5px;line-height:1.5\"><span style=\"color:#9a7b4f;font-weight:600\">"+r[0]+":</span> "+esc(r[1])+"</div>";}).join("");
+      var signHtml=signed?("<span style=\"color:#15803d;font-weight:600\">\u2713 Signed</span>"+(pw.agreedAt?(" <span style=\"opacity:.6\">("+esc(pw.agreedAt)+")</span>"):"")):"<span style=\"color:#b91c1c;font-weight:600\">Not signed</span>";
+      var html="<div id=\"cnk-contract-panel\" style=\"margin-top:14px;padding:14px 16px;border:1px solid #e8e2d6;border-radius:12px;background:#faf8f3\"><div style=\"font-family:Cormorant Garamond,serif;font-size:18px;font-weight:600;color:#9a7b4f;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center\"><span>Booking &amp; Contract Details</span><span style=\"font-size:13px\">"+signHtml+"</span></div><div style=\"display:grid;grid-template-columns:1fr 1fr;gap:7px 18px\">"+grid+"</div></div>";
+      var existing=document.getElementById("cnk-contract-panel"); if(existing){existing.remove();}
+      var anchor=document.getElementById("mb-notes")||document.getElementById("mb-status")||document.getElementById("mb-total"); if(!anchor){return;}
+      var host=anchor.closest("div")||anchor.parentNode; var holder=document.createElement("div"); holder.innerHTML=html; var node=holder.firstChild;
+      (host.parentNode||document.body).insertBefore(node, host.nextSibling);
+    }).catch(function(){}); }catch(e){} }
+  function wrap(){ if(window.__cnkPanelHook){return;} window.__cnkPanelHook=true; var _o=window.openModal; window.openModal=function(){ var id=arguments[0]; var r=_o?_o.apply(this,arguments):undefined; setTimeout(function(){injectPanel(id);},80); setTimeout(function(){injectPanel(id);},350); return r; }; }
+  if(document.readyState==="loading"){ document.addEventListener("DOMContentLoaded",wrap); } else { wrap(); }
+  setTimeout(wrap,1500);
+})();
+</script>
 </body>
 </html>
