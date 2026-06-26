@@ -1004,6 +1004,18 @@
       var data=await resp.json().catch(function(){return {};});
       if(!resp.ok){ throw new Error(data.error || 'Payment was declined. Please try another card.'); }
       window._cnkPaid=true;
+      /* CNK FIX: record booking + send confirmation the instant payment succeeds, so a charged customer is never lost if they drop off before finishing. Idempotent and non-breaking. */
+      try{(function(){
+        if(typeof bookingId==='undefined'||!bookingId)return;
+        var _v=function(id){try{return (typeof val==='function')?val(id):(function(){var e=document.getElementById(id);return e?(e.value||'').trim():'';})();}catch(e){return '';}};
+        var _pkg='';try{_pkg=(typeof state!=='undefined'&&state)?state.pkg:'';}catch(e){}
+        var _lbl='';try{_lbl=(typeof PKG!=='undefined'&&PKG&&PKG[_pkg])?PKG[_pkg].label:'';}catch(e){}
+        var _c={};try{_c=(typeof c!=='undefined'&&c)?c:{};}catch(e){}
+        var _b={id:bookingId,name:(typeof name!=='undefined'&&name)?name:(_v('cnk-first')+' '+_v('cnk-last')).trim(),email:_v('cnk-email'),phone:_v('cnk-phone'),date:_v('cnk-date'),eventType:_v('cnk-type'),venue:(_v('cnk-venue-name')||_v('cnk-venue')),address:[_v('cnk-addr-street'),_v('cnk-addr-city'),_v('cnk-addr-state'),_v('cnk-addr-zip')].filter(Boolean).join(', '),guests:_v('cnk-guests'),notes:_v('cnk-notes'),source:(_v('cnk-source')||'online'),package:_pkg,pkgLabel:_lbl,hours:(_c.hours||''),sub:_c.sub,tax:_c.tax,cc:_c.cc,total:_c.total,deposit:_c.deposit,balance:_c.balance,amountPaid:_c.deposit,status:'confirmed',paid:true,autoSavedAtPayment:true,paidAt:new Date().toISOString(),created:Date.now()};
+        try{if(typeof cnkDbSave==='function'){cnkDbSave(_b);}else if(window.cnkDbSave){window.cnkDbSave(_b);}else{fetch('/api/save-booking',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(_b)}).catch(function(){});}}catch(e){}
+        try{if(typeof notify==='function'){notify(_b);}else if(window.notify){window.notify(_b);}else{window._cnkNotified=window._cnkNotified||{};if(!window._cnkNotified[_b.id]){window._cnkNotified[_b.id]=true;fetch('/api/notify-booking',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({booking:_b})}).catch(function(){});if(_b.email&&_b.email.indexOf('@')!==-1){fetch('/api/confirm-booking',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({booking:_b})}).catch(function(){});}}}}catch(e){}
+      })();}catch(e){}
+
       proc.classList.remove('show'); btn.disabled=false;
       cnkGoStep(3);
       document.getElementById('cnk-pw-sign').value='';
