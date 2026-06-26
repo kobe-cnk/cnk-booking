@@ -34,6 +34,19 @@ module.exports = async function handler(req, res) {
     });
 
     const payment = result.payment;
+    // CNK FIX: record the booking server-side the instant payment clears, so a charge can never exist without a record on our end (independent of the customer's browser).
+    try {
+      const _bk = (req.body && req.body.booking) ? req.body.booking : null;
+      const _rec = (_bk && _bk.id)
+        ? Object.assign({}, _bk, { paymentId: payment.id, paid: true, status: (_bk.status || 'confirmed'), paidAt: new Date().toISOString() })
+        : { id: bookingId, name: name || '', email: email || '', note: description || '', amountPaid: Number(payment.amountMoney.amount) / 100, paymentId: payment.id, paid: true, status: 'paid', source: 'server-backstop', serverBackstop: true, paidAt: new Date().toISOString(), created: Date.now() };
+      if (_rec.id) {
+        const _host = req.headers.host;
+        const _save = fetch('https://' + _host + '/api/save-booking', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(_rec) }).then(function(){}).catch(function(){});
+        await Promise.race([ _save, new Promise(function(r){ setTimeout(r, 4000); }) ]);
+      }
+    } catch (e) { console.error('post-charge backstop save failed', e); }
+
     const card = payment.cardDetails?.card;
 
     return res.status(200).json({
