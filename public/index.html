@@ -4740,5 +4740,25 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
   setTimeout(wrap,1500);
 })();
 </script>
+
+<script>/* cnk-addon-always: extra-hours add-on visible at all times; legacy hourly control retired; package still required to book */
+(function(){
+  if(window.__cnkAddonAlways) return; window.__cnkAddonAlways=true;
+  function apply(){
+    try{
+      var c=document.getElementById("cnk-addon");
+      var bar=c?c.closest(".addon-hours-bar"):null;
+      if(bar && !bar.id) bar.id="cnk-addon-bar";
+      if(!document.getElementById("cnk-addon-always-style")){
+        var st=document.createElement("style"); st.id="cnk-addon-always-style";
+        st.textContent="#cnk-addon-bar{display:flex !important;}#cnk-hourly-ctrl,#cnk-hourly-box{display:none !important;}";
+        document.head.appendChild(st);
+      }
+    }catch(e){}
+  }
+  if(document.readyState!=="loading") apply(); else document.addEventListener("DOMContentLoaded",apply);
+  setTimeout(apply,400); setTimeout(apply,1200);
+})();
+</script>
 </body>
 </html>
