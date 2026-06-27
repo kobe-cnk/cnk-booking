@@ -1028,7 +1028,7 @@
   window.cnkFinish=function(){
     var err=document.getElementById('cnk-s3-err'); err.textContent='';
     if(!document.getElementById('cnk-pw-agree').checked){ err.textContent='Please agree to the Rental Agreement to continue.'; return; }
-    if(!val('cnk-pw-sign')){ err.textContent='Please type your full name to sign.'; return; }
+    if(!val('cnk-pw-sign')){ err.textContent='Please type your full name to sign.'; return; }/* CNK require setup+contact */if(!val('cnk-pw-setup')){err.textContent='Please add setup details (where we set up, access, parking, etc.) to continue.';return;}if(!val('cnk-pw-contact')){err.textContent='Please add a day-of contact name & cell to continue.';return;}
     var c=calc();
     var bookings=[]; try{ bookings=JSON.parse(localStorage.getItem('cnk_bookings')||'[]'); }catch(e){}
     var id=window._cnkBookingId||('CNK-'+Math.floor(100000+Math.random()*900000));
