@@ -4760,5 +4760,48 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
   setTimeout(apply,400); setTimeout(apply,1200);
 })();
 </script>
+
+<script>/* cnk-stats-simplify: admin dashboard shows only Total Bookings + Total Revenue */
+(function(){
+  if(window.__cnkStatsSimplify) return; window.__cnkStatsSimplify=true;
+  var REMOVE={"Balance Due":1,"Deposits Collected":1,"Future to Collect":1};
+  function getBookings(){
+    var a=null;
+    try{ if(typeof loadBookings==="function"){ a=loadBookings(); } }catch(e){}
+    if(!a||typeof a.filter!=="function"){ try{ a=JSON.parse(localStorage.getItem("cnk_bookings")||"[]"); }catch(e){ a=[]; } }
+    return Array.isArray(a)?a:[];
+  }
+  function fmt(n){ n=Number(n)||0; return "$"+n.toLocaleString("en-US",{maximumFractionDigits:0}); }
+  function mkCard(label,value,sub){
+    var c=document.createElement("div"); c.className="stat-card stat-gold";
+    var l=document.createElement("div"); l.className="stat-label"; l.textContent=label;
+    var v=document.createElement("div"); v.className="stat-value"; v.textContent=value;
+    var s=document.createElement("div"); s.className="stat-sub"; s.textContent=sub;
+    c.appendChild(l); c.appendChild(v); c.appendChild(s); return c;
+  }
+  function reduceCards(){
+    var grid=document.getElementById("stats-grid"); if(!grid) return;
+    var cards=grid.querySelectorAll(".stat-card"); if(!cards.length) return;
+    var hasRev=false;
+    cards.forEach(function(c){
+      var le=c.querySelector(".stat-label"); var t=le?le.textContent.trim():"";
+      if(REMOVE[t]){ if(c.parentNode) c.parentNode.removeChild(c); return; }
+      if(t==="Total Revenue") hasRev=true;
+    });
+    if(!hasRev){
+      var list=getBookings().filter(function(b){ if(!b||b.status==="cancelled") return false; var id=String(b.id||""); if(id.indexOf("__BLOCK__")===0||id.indexOf("__PARTNER__")===0) return false; return true; });
+      var rev=list.reduce(function(s,b){ var p=Number(b.price||b.total); if(!p||isNaN(p)) p=(Number(b.deposit||0)+Number(b.balance||0)); return s+(p||0); },0);
+      grid.appendChild(mkCard("Total Revenue",fmt(rev),"All bookings, incl. tax & fees"));
+    }
+  }
+  function init(){
+    var grid=document.getElementById("stats-grid");
+    if(!grid){ setTimeout(init,150); return; }
+    try{ new MutationObserver(function(){ reduceCards(); }).observe(grid,{childList:true}); }catch(e){}
+    reduceCards(); setTimeout(reduceCards,600); setTimeout(reduceCards,1500); setTimeout(reduceCards,3000);
+  }
+  if(document.readyState!=="loading") init(); else document.addEventListener("DOMContentLoaded",init);
+})();
+</script>
 </body>
 </html>
