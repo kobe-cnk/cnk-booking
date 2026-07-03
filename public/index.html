@@ -4903,3 +4903,20 @@ try{var mo=new MutationObserver(function(){mount();});mo.observe(document.docume
 if(document.readyState!=='loading'){mount();}else{document.addEventListener('DOMContentLoaded',mount);}
 })();
 </script>
+
+
+<script>
+(function(){
+if(window.__cnkPricingLoader)return;window.__cnkPricingLoader=true;
+window.CNK_PRICING=window.CNK_PRICING||{pkg:{hourly:549,halfday:799,fullday:999},hour:150};
+function applyDisplay(){try{var c=window.CNK_PRICING;if(!c)return;
+ document.querySelectorAll('[data-pkg]').forEach(function(card){var pk=card.getAttribute('data-pkg');var el=card.querySelector('.pkg-price');if(el&&c.pkg&&typeof c.pkg[pk]==='number'){var h='<sup>$</sup>'+c.pkg[pk];if(el.innerHTML!==h)el.innerHTML=h;}});
+ var bar=document.getElementById('cnk-addon-bar');if(bar){var els=bar.querySelectorAll('*');for(var i=0;i<els.length;i++){var e=els[i];if(e.children.length===0&&/\$\d+\/hr/.test(e.textContent)){var nt=e.textContent.replace(/\$\d+\/hr/,'$'+c.hour+'/hr');if(e.textContent!==nt)e.textContent=nt;}}}
+}catch(e){}}
+window.cnkApplyPricingDisplay=applyDisplay;
+window.cnkLoadPricing=function(){return fetch('/api/list-bookings?z='+Date.now(),{cache:'no-store'}).then(function(r){return r.json();}).then(function(j){var all=(j&&j.bookings)||j||[];var rec=all.filter(function(b){return b&&String(b.id)==='__SETTINGS__pricing';})[0];var c={pkg:{hourly:549,halfday:799,fullday:999},hour:150};if(rec&&rec.pricing){try{var p=rec.pricing;if(p.pkg){['hourly','halfday','fullday'].forEach(function(k){if(typeof p.pkg[k]==='number'&&p.pkg[k]>0)c.pkg[k]=p.pkg[k];});}if(typeof p.hour==='number'&&p.hour>0)c.hour=p.hour;}catch(e){}}window.CNK_PRICING=c;applyDisplay();return c;}).catch(function(){return window.CNK_PRICING;});};
+window.cnkLoadPricing();
+[300,1000,2500].forEach(function(d){setTimeout(applyDisplay,d);});
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){applyDisplay();window.cnkLoadPricing();});
+})();
+</script>
