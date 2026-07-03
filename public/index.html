@@ -954,7 +954,7 @@
     setTimeout(mountCard, 150);
   };
 
-  function fillSummary(){
+  function fillSummary(){try{window.cnkFillSummary=fillSummary;}catch(e){}
     var c=calc(); if(!c) return;
     document.getElementById('cnk-sum-pkg').textContent = PKG[state.pkg].label;
     document.getElementById('cnk-sum-base').textContent = money(c.base);
@@ -4805,3 +4805,24 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
 </script>
 </body>
 </html>
+
+
+<script>
+(function(){
+if(window.__cnkPromoEngine)return;window.__cnkPromoEngine=true;
+function norm(c){return String(c||'').trim().toUpperCase();}
+window.__cnkPromos=window.__cnkPromos||[];window.__cnkAppliedPromo=window.__cnkAppliedPromo||null;
+window.cnkPromoLoad=function(){return fetch('/api/list-bookings?z='+Date.now(),{cache:'no-store'}).then(function(r){return r.json();}).then(function(j){var all=(j&&j.bookings)||j||[];window.__cnkPromos=all.filter(function(b){return b&&String(b.id).indexOf('__PROMO__')===0;});return window.__cnkPromos;}).catch(function(){return window.__cnkPromos;});};
+window.cnkPromoValidate=function(code){var cc=norm(code);if(!cc)return{valid:false,reason:'Enter a code'};var p=window.__cnkPromos.filter(function(x){return norm(x.code)===cc;})[0];if(!p)return{valid:false,reason:'Code not found'};if(p.active===false)return{valid:false,reason:'Code is inactive'};if(p.expires){var ex=new Date(String(p.expires)+'T23:59:59');if(!isNaN(ex.getTime())&&Date.now()>ex.getTime())return{valid:false,reason:'Code expired'};}if(p.maxUses&&Number(p.maxUses)>0&&Number(p.uses||0)>=Number(p.maxUses))return{valid:false,reason:'Usage limit reached'};return{valid:true,promo:p};};
+window.cnkPromoActive=function(){var ap=window.__cnkAppliedPromo;if(!ap)return null;var v=window.cnkPromoValidate(ap.code);if(!v.valid)return null;return{valid:true,code:norm(ap.code),promo:v.promo};};
+window.cnkPromoDiscountFor=function(sub){var a=window.cnkPromoActive();if(!a)return 0;var p=a.promo,d=0;if(p.type==='pct'){d=sub*(Number(p.value)||0)/100;}else{d=Number(p.value)||0;}if(d<0)d=0;if(d>sub)d=sub;return Math.round(d*100)/100;};
+function refresh(){try{if(window.cnkFillSummary)window.cnkFillSummary();}catch(e){}drawRow();}
+function drawRow(){try{var box=document.querySelector('.price-breakdown');if(!box)return;var row=document.getElementById('cnk-sum-promo-row');var d=(window.__cnkDisc&&window.__cnkDisc.discount)||0;var code=(window.__cnkDisc&&window.__cnkDisc.promo)||'';if(d>0&&code){if(!row){row=document.createElement('div');row.id='cnk-sum-promo-row';row.className='pb-row';row.style.cssText='display:flex;justify-content:space-between;color:#2e7d32;';var taxEl=document.getElementById('cnk-sum-tax');var taxRow=taxEl?taxEl.closest('div'):null;if(taxRow&&taxRow.parentElement){taxRow.parentElement.insertBefore(row,taxRow);}else{box.appendChild(row);}}row.innerHTML='<span class="pb-label">Promo '+code+'</span><span class="pb-val">−$'+d.toFixed(2)+'</span>';row.style.display='flex';}else if(row){row.style.display='none';}}catch(e){}}
+function applyClicked(){var inp=document.getElementById('cnk-promo-input');var msg=document.getElementById('cnk-promo-msg');var code=norm(inp&&inp.value);if(!code){window.__cnkAppliedPromo=null;refresh();if(msg)msg.textContent='';return;}if(msg){msg.style.color='#666';msg.textContent='Checking…';}window.cnkPromoLoad().then(function(){var v=window.cnkPromoValidate(code);if(!v.valid){window.__cnkAppliedPromo=null;refresh();if(msg){msg.style.color='#c62828';msg.textContent=v.reason;}return;}window.__cnkAppliedPromo={code:code};refresh();var d=(window.__cnkDisc&&window.__cnkDisc.discount)||0;if(msg){msg.style.color='#2e7d32';msg.textContent='Applied — you save $'+d.toFixed(2);}});}
+window.cnkApplyPromo=function(code){var inp=document.getElementById('cnk-promo-input');if(inp)inp.value=code;applyClicked();};
+function mount(){try{var box=document.querySelector('.price-breakdown');if(!box)return;if(document.getElementById('cnk-promo-wrap'))return;var wrap=document.createElement('div');wrap.id='cnk-promo-wrap';wrap.style.cssText='margin:12px 0;display:flex;gap:8px;align-items:center;flex-wrap:wrap;';wrap.innerHTML='<input id="cnk-promo-input" placeholder="Promo code" style="flex:1;min-width:120px;padding:10px;border:1px solid #ccc;border-radius:8px;text-transform:uppercase;" /><button id="cnk-promo-apply" type="button" style="padding:10px 16px;border:none;border-radius:8px;background:#111;color:#fff;cursor:pointer;">Apply</button><div id="cnk-promo-msg" style="width:100%;font-size:13px;margin-top:2px;"></div>';box.parentElement.insertBefore(wrap,box);document.getElementById('cnk-promo-apply').addEventListener('click',applyClicked);document.getElementById('cnk-promo-input').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();applyClicked();}});drawRow();}catch(e){}}
+try{var mo=new MutationObserver(function(){mount();});mo.observe(document.documentElement,{childList:true,subtree:true});}catch(e){}
+if(document.readyState!=='loading'){mount();}else{document.addEventListener('DOMContentLoaded',mount);}
+window.cnkPromoLoad();
+})();
+</script>
