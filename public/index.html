@@ -4950,3 +4950,22 @@ function apply(){
 apply();
 })();
 </script>
+
+
+<script>
+(function(){
+if(window.__cnkPromoUsage)return;window.__cnkPromoUsage=true;
+function norm(c){return String(c||'').trim().toUpperCase();}
+function wrapSave(){
+ if(typeof window.cnkDbSave!=='function'){setTimeout(wrapSave,300);return;}
+ if(window.cnkDbSave.__promoWrapped)return;
+ var orig=window.cnkDbSave;
+ var w=function(b){try{if(b&&String(b.id||'').indexOf('CNK-')===0){var d=window.__cnkDisc;if(d&&d.discount>0&&d.promo){b.promoCode=norm(d.promo);b.promoDiscount=Math.round(d.discount*100)/100;}}}catch(e){}return orig.apply(this,arguments);};
+ w.__promoWrapped=true;window.cnkDbSave=w;
+}
+wrapSave();
+window.cnkPromoLoad=function(){return fetch('/api/list-bookings?z='+Date.now(),{cache:'no-store'}).then(function(r){return r.json();}).then(function(j){var all=(j&&j.bookings)||j||[];var counts={};all.forEach(function(b){if(b&&b.promoCode&&String(b.id||'').indexOf('CNK-')===0&&String(b.status||'').toLowerCase()!=='cancelled'){var k=norm(b.promoCode);counts[k]=(counts[k]||0)+1;}});var promos=all.filter(function(b){return b&&String(b.id).indexOf('__PROMO__')===0;});promos.forEach(function(p){p.uses=counts[norm(p.code)]||0;});window.__cnkPromos=promos;window.__cnkPromoCounts=counts;return promos;}).catch(function(){return window.__cnkPromos||[];});};
+window.cnkPromoUsesFor=function(code){var c=window.__cnkPromoCounts||{};return c[norm(code)]||0;};
+window.cnkPromoLoad();
+})();
+</script>
