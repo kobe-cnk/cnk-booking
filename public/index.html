@@ -4838,3 +4838,68 @@ window.cnkSyncPriceDisplay=function(){try{var c=window.CNK_PRICING;if(!c)return;
 if(document.readyState!=='loading'){window.cnkLoadPricing();}else{document.addEventListener('DOMContentLoaded',function(){window.cnkLoadPricing();});}
 })();
 </script>
+
+
+<script>
+(function(){
+if(window.__cnkAdminPromos)return;window.__cnkAdminPromos=true;
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function norm(c){return String(c||'').trim().toUpperCase();}
+function api(path,body){return fetch(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){return r.json();});}
+function loadPromos(){return fetch('/api/list-bookings?z='+Date.now(),{cache:'no-store'}).then(function(r){return r.json();}).then(function(j){var all=(j&&j.bookings)||j||[];return all.filter(function(b){return b&&String(b.id).indexOf('__PROMO__')===0;});});}
+function render(){
+ var list=document.getElementById('cnk-pa-list'); if(!list)return;
+ list.innerHTML='<div style="color:#888;padding:8px;">Loading…</div>';
+ loadPromos().then(function(codes){
+  if(!codes.length){ list.innerHTML='<div style="color:#888;padding:8px;">No codes yet. Create one below.</div>'; return; }
+  codes.sort(function(a,b){return (b.created||0)-(a.created||0);});
+  var html='<table style="width:100%;border-collapse:collapse;font-size:14px;"><tr style="text-align:left;color:#888;"><th style="padding:6px;">Code</th><th>Discount</th><th>Expires</th><th>Uses</th><th>Status</th><th></th></tr>';
+  codes.forEach(function(p){
+   var disc=p.type==='pct'?((Number(p.value)||0)+'%'):('$'+(Number(p.value)||0));
+   var exp=p.expires?esc(p.expires):'—';
+   var uses=(p.uses||0)+((p.maxUses&&Number(p.maxUses)>0)?(' / '+p.maxUses):'');
+   var active=p.active!==false;
+   html+='<tr style="border-top:1px solid #eee;"><td style="padding:6px;font-weight:600;">'+esc(p.code)+'</td><td>'+disc+'</td><td>'+exp+'</td><td>'+uses+'</td><td><span style="color:'+(active?'#2e7d32':'#999')+';">'+(active?'Active':'Inactive')+'</span></td><td style="text-align:right;white-space:nowrap;"><button data-act="toggle" data-id="'+esc(p.id)+'" style="margin-right:6px;padding:4px 8px;border:1px solid #ccc;border-radius:6px;background:#fff;cursor:pointer;">'+(active?'Disable':'Enable')+'</button><button data-act="del" data-id="'+esc(p.id)+'" data-code="'+esc(p.code)+'" style="padding:4px 8px;border:1px solid #e0b4b4;border-radius:6px;background:#fff;color:#c62828;cursor:pointer;">Delete</button></td></tr>';
+  });
+  html+='</table>'; list.innerHTML=html;
+  window.__cnkPromoCache={}; codes.forEach(function(p){window.__cnkPromoCache[p.id]=p;});
+  list.querySelectorAll('button[data-act]').forEach(function(btn){
+   btn.addEventListener('click',function(){
+    var id=btn.getAttribute('data-id'),act=btn.getAttribute('data-act');
+    if(act==='toggle'){var p=window.__cnkPromoCache[id];if(!p)return;p.active=(p.active===false);api('/api/save-booking',p).then(render);}
+    else if(act==='del'){if(confirm('Delete code '+btn.getAttribute('data-code')+'? This cannot be undone.')){api('/api/delete-booking',{id:id}).then(render);}}
+   });
+  });
+ });
+}
+function createCode(){
+ var code=norm((document.getElementById('cnk-pa-code')||{}).value);
+ var type=(document.getElementById('cnk-pa-type')||{}).value;
+ var value=Number((document.getElementById('cnk-pa-value')||{}).value)||0;
+ var expires=(document.getElementById('cnk-pa-exp')||{}).value||null;
+ var maxUses=Number((document.getElementById('cnk-pa-max')||{}).value)||0;
+ var msg=document.getElementById('cnk-pa-msg');
+ if(!code){msg.style.color='#c62828';msg.textContent='Enter a code';return;}
+ if(value<=0){msg.style.color='#c62828';msg.textContent='Enter a discount amount';return;}
+ if(type==='pct'&&value>100){msg.style.color='#c62828';msg.textContent='Percent cannot exceed 100';return;}
+ var rec={id:'__PROMO__'+code,code:code,type:type,value:value,expires:expires,maxUses:maxUses,uses:0,active:true,status:'promo',source:'promo',created:Date.now()};
+ msg.style.color='#666';msg.textContent='Saving…';
+ api('/api/save-booking',rec).then(function(r){
+  if(r&&r.ok){msg.style.color='#2e7d32';msg.textContent='Created '+code;['cnk-pa-code','cnk-pa-value','cnk-pa-exp','cnk-pa-max'].forEach(function(i){var e=document.getElementById(i);if(e)e.value='';});render();}
+  else{msg.style.color='#c62828';msg.textContent='Save failed';}
+ });
+}
+function mount(){
+ var av=document.querySelector('.admin-view'); if(!av)return;
+ if(document.getElementById('cnk-promo-admin'))return;
+ var sec=document.createElement('div'); sec.id='cnk-promo-admin'; sec.style.cssText='margin:24px 0;padding:16px;border:1px solid #eee;border-radius:12px;background:#fff;';
+ sec.innerHTML='<div class="section-label" style="font-weight:700;margin-bottom:12px;">Promo Codes</div><div id="cnk-pa-list"></div><div style="margin-top:16px;padding-top:14px;border-top:1px solid #eee;"><div style="font-weight:600;margin-bottom:8px;">Create a code</div><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;"><input id="cnk-pa-code" placeholder="CODE" style="padding:8px;border:1px solid #ccc;border-radius:6px;text-transform:uppercase;width:130px;" /><select id="cnk-pa-type" style="padding:8px;border:1px solid #ccc;border-radius:6px;"><option value="flat">$ off</option><option value="pct">% off</option></select><input id="cnk-pa-value" type="number" placeholder="Amount" style="padding:8px;border:1px solid #ccc;border-radius:6px;width:90px;" /><label style="font-size:13px;color:#666;">Expires <input id="cnk-pa-exp" type="date" style="padding:7px;border:1px solid #ccc;border-radius:6px;" /></label><label style="font-size:13px;color:#666;">Max uses <input id="cnk-pa-max" type="number" placeholder="unlimited" style="padding:8px;border:1px solid #ccc;border-radius:6px;width:90px;" /></label><button id="cnk-pa-create" style="padding:9px 16px;border:none;border-radius:6px;background:#111;color:#fff;cursor:pointer;">Create</button></div><div id="cnk-pa-msg" style="font-size:13px;margin-top:8px;"></div></div>';
+ var cal=av.querySelector('.calendar-section');
+ if(cal&&cal.parentElement){cal.parentElement.insertBefore(sec,cal.nextSibling);}else{av.appendChild(sec);}
+ var cb=document.getElementById('cnk-pa-create'); if(cb)cb.addEventListener('click',createCode);
+ render();
+}
+try{var mo=new MutationObserver(function(){mount();});mo.observe(document.documentElement,{childList:true,subtree:true});}catch(e){}
+if(document.readyState!=='loading'){mount();}else{document.addEventListener('DOMContentLoaded',mount);}
+})();
+</script>
