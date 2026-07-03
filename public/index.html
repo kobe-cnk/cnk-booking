@@ -4934,3 +4934,19 @@ try{var mo=new MutationObserver(function(){mount();});mo.observe(document.docume
 if(document.readyState!=='loading'){mount();}else{document.addEventListener('DOMContentLoaded',mount);}
 })();
 </script>
+
+
+<script>
+(function(){
+if(window.__cnkAddonReset)return;window.__cnkAddonReset=true;
+function apply(){
+ if(typeof window.cnkPick!=='function'){setTimeout(apply,300);return;}
+ if(window.cnkPick.__wrappedReset)return;
+ var orig=window.cnkPick;
+ var w=function(pkg){try{var st=window._cnkState;if(st&&st.pkg&&st.pkg!==pkg){st.addon=0;}}catch(e){}return orig.apply(this,arguments);};
+ w.__wrappedReset=true;
+ window.cnkPick=w;
+}
+apply();
+})();
+</script>
