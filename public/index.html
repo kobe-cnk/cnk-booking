@@ -920,7 +920,7 @@
     if(!state.pkg) return null;
     var base = PKG[state.pkg].base;
     var addonCost = Math.max(0,state.addon)*HOUR;
-    var sub = base + addonCost;
+    var sub = base + addonCost;var __pdsub=sub,__disc=0,__promo=null;try{if(window.cnkPromoActive){var __pi=window.cnkPromoActive();if(__pi&&__pi.valid){__disc=window.cnkPromoDiscountFor?window.cnkPromoDiscountFor(__pdsub):0;if(__disc>__pdsub)__disc=__pdsub;if(!(__disc>0))__disc=0;__promo=__pi.code;}}}catch(e){__disc=0;__promo=null;}sub=__pdsub-__disc;try{window.__cnkDisc={discount:__disc,promo:__promo,preSub:__pdsub};}catch(e){}
     var tax = sub*TAX;
     var __d=(window._cnkState&&Number(window._cnkState.delivery))||0; var cc = (sub+tax+__d)*CC;
     var total = sub+tax+__d+cc;
