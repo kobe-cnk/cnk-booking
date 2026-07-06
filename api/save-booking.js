@@ -81,7 +81,7 @@ module.exports = async function handler(req, res) {
         .map(function (r) { return r.data || {}; })
         .filter(function (x) { return x && String(x.date || '') === String(b.date) && String(x.id || '') !== String(b.id || ''); });
       // 1) Blocked date (event / trade show)
-      if (sameDate.some(function (x) { return String(x.status || '').toLowerCase() === 'blocked' || String(x.id || '').indexOf('__BLOCK__') === 0; })) {
+      if (sameDate.some(function (x) { return String(x.status || '').toLowerCase() === 'blocked' || (String(x.id || '').indexOf('__BLOCK__') === 0 && ['cancelled','removed'].indexOf(String(x.status || '').toLowerCase()) === -1); })) {
         res.status(409).json({ error: 'date_unavailable', message: 'That date is unavailable. Please choose another date.', blocked: true });
         return;
       }
