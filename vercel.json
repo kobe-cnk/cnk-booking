@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/api/fcr-damage",
+      "destination": "/api/notify-booking"
+    },
+    {
       "source": "/partnership",
       "destination": "/partnership.html"
     },
