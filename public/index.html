@@ -4969,3 +4969,29 @@ window.cnkPromoUsesFor=function(code){var c=window.__cnkPromoCounts||{};return c
 window.cnkPromoLoad();
 })();
 </script>
+
+
+<style>
+#cnk-promo-admin,#cnk-pricing-admin{background:#252522 !important;border:1px solid #3a3a36 !important;color:#F5F0E8 !important;}
+#cnk-promo-admin .section-label,#cnk-pricing-admin .section-label{color:#C4983A !important;}
+#cnk-promo-admin table th,#cnk-promo-admin td,#cnk-promo-admin label,#cnk-pricing-admin label,#cnk-promo-admin div,#cnk-pricing-admin div{color:#F5F0E8;}
+#cnk-promo-admin input,#cnk-promo-admin select,#cnk-pricing-admin input{background:#1A1A18 !important;border:1px solid #3a3a36 !important;color:#F5F0E8 !important;}
+#cnk-promo-admin input::placeholder,#cnk-pricing-admin input::placeholder{color:#8a8a82;}
+#cnk-promo-admin table tr,#cnk-promo-admin th,#cnk-promo-admin td{border-color:#3a3a36 !important;}
+#cnk-promo-admin table th{color:#9a9a90 !important;}
+#cnk-pa-create,#cnk-pr-save{background:#C4983A !important;color:#1A1A18 !important;font-weight:600;}
+#cnk-promo-admin button[data-act="toggle"]{background:#2E2E2B !important;color:#F5F0E8 !important;border:1px solid #4a4a44 !important;}
+#cnk-promo-admin button[data-act="del"]{background:transparent !important;color:#d98a95 !important;border:1px solid #8B1A2C !important;}
+#cnk-pa-msg,#cnk-pr-msg{color:#F5F0E8;}
+</style>
+<script>
+(function(){
+if(window.__cnkAdminTheme)return;window.__cnkAdminTheme=true;
+function hideRecent(){try{
+ var labels=document.querySelectorAll('.section-label');
+ for(var i=0;i<labels.length;i++){var l=labels[i];if(/recent bookings/i.test(l.textContent||'')){if(l.style.display!=='none')l.style.display='none';var n=l.nextElementSibling;if(n&&/table-wrapper|table/i.test(n.className||'')&&n.style.display!=='none')n.style.display='none';}}
+}catch(e){}}
+hideRecent();
+var mo=new MutationObserver(function(){hideRecent();});try{mo.observe(document.documentElement,{childList:true,subtree:true});}catch(e){}
+})();
+</script>
