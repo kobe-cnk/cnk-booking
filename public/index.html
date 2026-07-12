@@ -5110,3 +5110,52 @@ wrap();
 try{['click','change','input'].forEach(function(ev){document.addEventListener(ev,function(){setTimeout(function(){relabel();fixPills();},60);},true);});}catch(e){}
 })();
 </script>
+
+
+<style>
+@media (max-width: 640px){
+ .cnk-mstack thead{display:none;}
+ .cnk-mstack,.cnk-mstack tbody,.cnk-mstack tr,.cnk-mstack td{display:block;width:100%;}
+ .cnk-mstack tr{border:1px solid #3a3a36;border-radius:12px;margin:0 0 12px;padding:10px 12px;background:#252522;box-sizing:border-box;}
+ .cnk-mstack td{border:none !important;padding:7px 0 !important;display:flex;justify-content:space-between;align-items:center;gap:12px;text-align:right;white-space:normal !important;}
+ .cnk-mstack td::before{content:attr(data-label);font-weight:600;color:#9a9a90;text-align:left;flex:0 0 40%;}
+ .cnk-mstack td:last-child{justify-content:flex-end;flex-wrap:wrap;gap:8px;padding-top:10px !important;border-top:1px solid #3a3a36 !important;margin-top:4px;}
+ .cnk-mstack td:last-child::before{content:'';flex:0 0 0;}
+ .table-wrapper{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+ .modal-overlay{padding:0 !important;align-items:flex-end !important;}
+ .modal{width:100% !important;max-width:100% !important;max-height:92vh !important;overflow-y:auto !important;border-radius:14px 14px 0 0 !important;-webkit-overflow-scrolling:touch;}
+ .modal-close{min-width:44px;min-height:44px;font-size:22px;}
+ #modal-content{word-break:break-word;}
+ input,select,textarea{font-size:16px !important;}
+ #cnk-pricing-admin input,#cnk-promo-admin input,#cnk-promo-admin select{width:100% !important;box-sizing:border-box;}
+ #cnk-pricing-admin label,#cnk-promo-admin label{width:100%;}
+ #cnk-pricing-admin>div,#cnk-promo-admin>div>div{flex-direction:column !important;align-items:stretch !important;}
+ #cnk-pr-save,#cnk-pa-create{width:100% !important;min-height:46px;}
+ .action-btn{min-height:40px;padding:9px 12px;}
+ .stats-grid{grid-template-columns:1fr 1fr !important;}
+}
+</style>
+<script>
+(function(){
+if(window.__cnkMobileAdmin)return;window.__cnkMobileAdmin=true;
+function labelize(){try{
+ var tables=document.querySelectorAll('table');
+ for(var t=0;t<tables.length;t++){
+  var tbl=tables[t];
+  var ths=tbl.querySelectorAll('th');
+  if(!ths.length)continue;
+  var labels=[];for(var i=0;i<ths.length;i++)labels.push((ths[i].textContent||'').trim());
+  tbl.classList.add('cnk-mstack');
+  var rows=tbl.querySelectorAll('tr');
+  for(var r=0;r<rows.length;r++){
+   var tds=rows[r].querySelectorAll('td');
+   for(var d=0;d<tds.length;d++){
+    if(!tds[d].hasAttribute('data-label'))tds[d].setAttribute('data-label',labels[d]||'');
+   }
+  }
+ }
+}catch(e){}}
+labelize();
+try{var mo=new MutationObserver(function(){labelize();});mo.observe(document.documentElement,{childList:true,subtree:true});}catch(e){}
+})();
+</script>
