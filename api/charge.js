@@ -17,6 +17,62 @@ module.exports = async function handler(req, res) {
   try {
     const { nonce, amount, currency, description, email, name, bookingId } = req.body;
 
+    // __cnkCardOnFile: save a card on file. Never charges. Runs AFTER the deposit has cleared,
+    // so a failure here can never affect the deposit.
+    if (req.body && req.body.action === 'save_card') {
+      try {
+        const custRes = await client.customersApi.createCustomer({
+          idempotencyKey: randomUUID(),
+          emailAddress: email || undefined,
+          givenName: String(name || '').split(' ')[0] || undefined,
+          familyName: String(name || '').split(' ').slice(1).join(' ') || undefined,
+          referenceId: bookingId || undefined
+        });
+        const customerId = custRes.result.customer.id;
+        const cardRes = await client.cardsApi.createCard({
+          idempotencyKey: randomUUID(),
+          sourceId: nonce,
+          verificationToken: req.body.verificationToken || undefined,
+          card: { customerId: customerId, cardholderName: name || undefined, referenceId: bookingId || undefined }
+        });
+        const cd = cardRes.result.card;
+        return res.status(200).json({
+          ok: true, customerId: customerId, cardId: cd.id,
+          last4: String(cd.last4 || ''), brand: String(cd.cardBrand || ''),
+          expMonth: String(cd.expMonth || ''), expYear: String(cd.expYear || '')
+        });
+      } catch (e) {
+        // Soft-fail: the deposit already succeeded; never surface an error that could confuse the customer.
+        return res.status(200).json({ ok: false, error: String((e && e.message) || 'save_card_failed').slice(0, 200) });
+      }
+    }
+
+    // __cnkCardOnFile: charge a previously saved card (admin-initiated balance charge only).
+    if (req.body && req.body.action === 'charge_saved') {
+      const cardId = req.body.cardId;
+      const customerId = req.body.customerId;
+      if (!cardId || !customerId || !amount || amount < 50) {
+        return res.status(400).json({ ok: false, error: 'Missing card, customer, or amount' });
+      }
+      try {
+        const payRes = await client.paymentsApi.createPayment({
+          sourceId: cardId,
+          customerId: customerId,
+          idempotencyKey: randomUUID(),
+          amountMoney: { amount: BigInt(Math.round(amount)), currency: currency || 'USD' },
+          note: description || 'CNK Booths balance',
+          referenceId: bookingId || undefined
+        });
+        const p = payRes.result.payment;
+        return res.status(200).json({
+          ok: true, paymentId: String(p.id), status: String(p.status),
+          amount: Number(p.amountMoney.amount)
+        });
+      } catch (e) {
+        return res.status(200).json({ ok: false, error: String((e && e.message) || 'charge_failed').slice(0, 200) });
+      }
+    }
+
     if (!nonce || !amount || amount < 50) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
