@@ -912,7 +912,7 @@
   var APP_ID='sq0idp-ch7FwGd6cjBOMX_SzQ3UPA', LOC_ID='LF3G4CFPFPKDV';
   var TAX=0.0745, CC=0.03, DEP=0.5, HOUR=150;
   var state={ pkg:null, hours:2, addon:0 }; window._cnkState=state;
-  var sqPayments=null, sqCard=null, cardMounted=false;
+  var sqPayments=null, sqCard=null, cardMounted=false; window.__cnkGetCard=function(){return sqCard;}; window.__cnkGetPayments=function(){return sqPayments;};
   var PKG={ hourly:{label:'2 Hours',base:549}, halfday:{label:'Half Day',base:799}, fullday:{label:'Full Day',base:999} };
 
   function money(n){ return '$'+n.toFixed(2); }
@@ -5432,5 +5432,116 @@ function mount(){
 if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',mount);}else{mount();}
 setTimeout(mount,1200); setTimeout(mount,3000);
 window.cnkRenderAgreements=render;
+})();
+</script>
+
+
+<script>
+(function(){
+if(window.__cnkCardOnFileClient)return;window.__cnkCardOnFileClient=true;
+var AUTH_ID='cnk-pw-cardauth';
+var AUTH_TEXT='I authorize CNK Booths to charge this card for the remaining balance of my booking.';
+function val(id){var e=document.getElementById(id);return e?String(e.value||'').trim():'';}
+// --- inject the authorization checkbox into the rental agreement ---
+function injectAuth(){
+ try{
+  if(document.getElementById(AUTH_ID))return;
+  var agree=document.getElementById('cnk-pw-agree'); if(!agree)return;
+  var host=agree.closest('label')||agree.parentNode; if(!host||!host.parentNode)return;
+  var wrap=document.createElement('label');
+  wrap.style.cssText='display:flex;gap:8px;align-items:flex-start;margin-top:10px;font-size:14px;line-height:1.4;';
+  var cb=document.createElement('input'); cb.type='checkbox'; cb.id=AUTH_ID; cb.style.marginTop='3px';
+  var sp=document.createElement('span'); sp.textContent=AUTH_TEXT;
+  wrap.appendChild(cb); wrap.appendChild(sp);
+  host.parentNode.insertBefore(wrap, host.nextSibling);
+ }catch(e){}
+}
+[300,1000,2200].forEach(function(d){setTimeout(injectAuth,d);});
+document.addEventListener('click',function(){setTimeout(injectAuth,80);},true);
+
+// --- require the authorization before payment unlocks ---
+function wrapFinish(){
+ if(typeof window.cnkFinish!=='function'){setTimeout(wrapFinish,300);return;}
+ if(window.cnkFinish.__cofWrapped)return;
+ var prev=window.cnkFinish;
+ var w=function(){
+  try{
+   if(!window._cnkPaid){
+    injectAuth();
+    var a=document.getElementById(AUTH_ID);
+    if(a && !a.checked){
+     var eb=document.getElementById('cnk-pw-err');
+     if(eb){ eb.innerHTML='<strong>Please complete the rental agreement before booking:</strong><br>\u2022 Authorize the card for the remaining balance'; eb.style.display='block'; eb.scrollIntoView({behavior:'smooth',block:'center'}); }
+     return false;
+    }
+   }
+  }catch(e){}
+  return prev.apply(this,arguments);
+ };
+ w.__cofWrapped=true;
+ window.cnkFinish=w;
+}
+wrapFinish();
+
+// --- after the deposit clears, save the card on file (best effort, never blocks) ---
+window.__cnkSaveCardResult=null;
+function saveCard(){
+ try{
+  var a=document.getElementById(AUTH_ID);
+  if(!a || !a.checked) return;
+  var card = window.__cnkGetCard && window.__cnkGetCard();
+  if(!card || typeof card.tokenize!=='function') return;
+  var id = window._cnkBookingId || '';
+  var first=val('cnk-first'), last=val('cnk-last'), email=val('cnk-email');
+  var name=(first+' '+last).trim();
+  card.tokenize().then(function(r){
+   if(!r || r.status!=='OK' || !r.token) return null;
+   var pay = window.__cnkGetPayments && window.__cnkGetPayments();
+   if(pay && typeof pay.verifyBuyer==='function'){
+    return pay.verifyBuyer(r.token,{intent:'STORE',billingContact:{givenName:first,familyName:last,email:email}})
+      .then(function(v){ return {token:r.token, vt:(v&&v.token)||null}; })
+      .catch(function(){ return {token:r.token, vt:null}; });
+   }
+   return {token:r.token, vt:null};
+  }).then(function(t){
+   if(!t) return null;
+   return fetch('/api/charge',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({action:'save_card',nonce:t.token,verificationToken:t.vt,email:email,name:name,bookingId:id})})
+    .then(function(r){return r.json();});
+  }).then(function(j){
+   window.__cnkSaveCardResult = j || null;
+   if(!j || !j.ok || !j.cardId) return;
+   return fetch('/api/list-bookings?z='+Date.now(),{cache:'no-store'}).then(function(r){return r.json();}).then(function(d){
+    var all=(d&&d.bookings)||d||[];
+    var rec=all.filter(function(b){return b && String(b.id)===String(id);})[0];
+    if(!rec) return;
+    rec.squareCardId=j.cardId; rec.squareCustomerId=j.customerId;
+    rec.cardLast4=j.last4||''; rec.cardBrand=j.brand||'';
+    rec.cardAuthorized=true; rec.cardSavedAt=new Date().toISOString();
+    return fetch('/api/save-booking',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(rec)});
+   });
+  }).catch(function(){});
+ }catch(e){}
+}
+function wrapPay(){
+ if(typeof window.cnkPay!=='function'){setTimeout(wrapPay,300);return;}
+ if(window.cnkPay.__cofWrapped)return;
+ var orig=window.cnkPay;
+ var w=function(){
+  var r=orig.apply(this,arguments);
+  try{
+   var n=0;
+   var iv=setInterval(function(){
+    n++;
+    if(window._cnkPaid){ clearInterval(iv); setTimeout(saveCard,600); }
+    else if(n>140){ clearInterval(iv); }
+   },500);
+  }catch(e){}
+  return r;
+ };
+ w.__cofWrapped=true;
+ window.cnkPay=w;
+}
+wrapPay();
 })();
 </script>
