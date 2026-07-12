@@ -5545,3 +5545,93 @@ function wrapPay(){
 wrapPay();
 })();
 </script>
+
+
+<script>
+(function(){
+if(window.__cnkAdminBalances)return;window.__cnkAdminBalances=true;
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function money(n){return '$'+(Number(n)||0).toFixed(2);}
+function load(){
+ return fetch('/api/list-bookings?z='+Date.now(),{cache:'no-store'}).then(function(r){return r.json();}).then(function(j){
+  var all=(j&&j.bookings)||j||[];
+  var today=new Date(); today.setHours(0,0,0,0);
+  return all.filter(function(b){
+   if(!b||String(b.id).indexOf('CNK-')!==0)return false;
+   if(String(b.status||'').toLowerCase()==='cancelled')return false;
+   if(!(Number(b.balance||0)>0.005))return false;
+   return true;
+  }).sort(function(a,b){return String(a.date||'').localeCompare(String(b.date||''));});
+ }).catch(function(){return [];});
+}
+window.cnkChargeBalance=function(id,btn){
+ fetch('/api/list-bookings?z='+Date.now(),{cache:'no-store'}).then(function(r){return r.json();}).then(function(j){
+  var all=(j&&j.bookings)||j||[];
+  var b=all.filter(function(x){return x&&String(x.id)===String(id);})[0];
+  if(!b){alert('Booking not found.');return;}
+  var amt=Number(b.balance||0);
+  if(!(amt>0.005)){alert('No balance owed.');return;}
+  if(!b.squareCardId||!b.squareCustomerId){alert('No card on file for this booking.');return;}
+  var who=((b.first||'')+' '+(b.last||'')).trim()||b.id;
+  if(!confirm('Charge '+money(amt)+' to '+who+"'s card on file (\u2022\u2022\u2022\u2022 "+(b.cardLast4||'')+')?\n\nThis moves real money.'))return;
+  if(btn){btn.disabled=true;btn.textContent='Charging...';}
+  fetch('/api/charge',{method:'POST',headers:{'Content-Type':'application/json'},
+   body:JSON.stringify({action:'charge_saved',cardId:b.squareCardId,customerId:b.squareCustomerId,
+     amount:Math.round(amt*100),currency:'USD',description:'CNK Booths balance '+b.id,bookingId:b.id})})
+   .then(function(r){return r.json();})
+   .then(function(res){
+    if(!res||!res.ok){ alert('Charge failed: '+((res&&res.error)||'unknown')); if(btn){btn.disabled=false;btn.textContent='Charge '+money(amt);} return; }
+    b.amountPaid=Number(b.amountPaid||0)+amt;
+    b.balance=0; b.status='paid'; b.balancePaymentId=res.paymentId; b.balancePaidAt=new Date().toISOString();
+    return fetch('/api/save-booking',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)})
+      .then(function(){ alert('Charged '+money(amt)+' successfully.'); render(); });
+   }).catch(function(e){ alert('Charge error: '+e.message); if(btn){btn.disabled=false;} });
+ });
+};
+function render(){
+ var host=document.getElementById('cnk-balances-admin'); if(!host)return;
+ load().then(function(list){
+  var withCard=list.filter(function(b){return b.squareCardId;}).length;
+  var owed=list.reduce(function(s,b){return s+Number(b.balance||0);},0);
+  var rows=list.map(function(b){
+   var nm=((b.first||'')+' '+(b.last||'')).trim()||b.id;
+   var hasCard=!!(b.squareCardId&&b.squareCustomerId);
+   var cardCell = hasCard
+     ? '<span style="color:#4caf50;font-weight:600">'+esc(b.cardBrand||'Card')+' \u2022\u2022\u2022\u2022 '+esc(b.cardLast4||'')+'</span>'
+     : '<span style="color:#9a9a92">No card on file</span>';
+   var btn = hasCard
+     ? '<button onclick="cnkChargeBalance(\''+b.id+'\',this)" style="background:#8B1A2C;color:#F5F0E8;border:0;border-radius:7px;padding:6px 12px;font-weight:600;cursor:pointer">Charge '+money(b.balance)+'</button>'
+     : '<span style="color:#8a8a82;font-size:12px">Collect manually</span>';
+   return '<tr style="border-top:1px solid #3a3a36">'
+    +'<td style="padding:9px 8px;color:#F5F0E8">'+esc(nm)+'</td>'
+    +'<td style="padding:9px 8px;color:#c9c9c0;font-size:13px">'+esc(b.date||'')+'</td>'
+    +'<td style="padding:9px 8px;color:#C4983A;font-weight:600">'+money(b.balance)+'</td>'
+    +'<td style="padding:9px 8px;font-size:13px">'+cardCell+'</td>'
+    +'<td style="padding:9px 8px;text-align:right">'+btn+'</td></tr>';
+  }).join('');
+  host.innerHTML='<div style="background:#252522;border:1px solid #3a3a36;border-radius:12px;padding:18px;margin-top:18px">'
+   +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'
+   +'<h3 style="margin:0;color:#F5F0E8;font-size:18px">Balances Due</h3>'
+   +'<button id="cnk-bal-refresh" style="background:#2E2E2B;color:#F5F0E8;border:1px solid #3a3a36;border-radius:8px;padding:6px 12px;cursor:pointer">Refresh</button></div>'
+   +'<div style="color:#9a9a92;font-size:13px;margin-bottom:12px"><strong style="color:#F5F0E8">'+money(owed)+'</strong> owed across '+list.length+' booking(s). '+withCard+' have a card on file.</div>'
+   +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:14px">'
+   +'<thead><tr style="text-align:left;color:#9a9a92;font-size:12px;text-transform:uppercase">'
+   +'<th style="padding:6px 8px">Customer</th><th style="padding:6px 8px">Event</th><th style="padding:6px 8px">Balance</th><th style="padding:6px 8px">Card</th><th style="padding:6px 8px"></th>'
+   +'</tr></thead><tbody>'+rows+'</tbody></table></div>'
+   +'<div style="color:#8a8a82;font-size:12px;margin-top:10px">Only bookings made after card-on-file was turned on will have a saved card.</div></div>';
+  var r=document.getElementById('cnk-bal-refresh'); if(r)r.onclick=render;
+ });
+}
+function mount(){
+ var view=document.querySelector('.admin-view'); if(!view){setTimeout(mount,500);return;}
+ if(document.getElementById('cnk-balances-admin'))return;
+ var d=document.createElement('div'); d.id='cnk-balances-admin';
+ var ag=document.getElementById('cnk-agreements-admin');
+ if(ag&&ag.parentNode){ ag.parentNode.insertBefore(d, ag.nextSibling); } else { view.appendChild(d); }
+ render();
+}
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',mount);}else{mount();}
+setTimeout(mount,1200); setTimeout(mount,3000);
+window.cnkRenderBalances=render;
+})();
+</script>
