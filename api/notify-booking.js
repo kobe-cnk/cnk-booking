@@ -56,8 +56,8 @@ module.exports = async function handler(req, res) {
     const lines = [
       ['Reference', b.id], ['Source', b.source || channel], ['Name', b.name],
       ['Email', b.email], ['Phone', b.phone], ['Event date', b.date],
-      ['Event type', b.eventType], ['Package', b.package], ['Guests', b.guests],
-      ['Location', b.location], ['Total', money(b.price)], ['Collected', money(b.deposit)],
+      ['Event type', b.eventType], ['Package', (b.pkgLabel || ({hourly:'2 Hours',halfday:'Half Day',fullday:'Full Day'})[b.package] || b.package)], ['Guests', b.guests],
+      ['Location', (b.location || [b.venue, b.address].filter(Boolean).join(', '))], ['Total', money((b.price != null ? b.price : (b.total != null ? b.total : 0)) /*__cnkFieldCompat*/)], ['Collected', money(b.deposit)],
       ['Balance', money(b.balance)]
     ];
     if (b.deliveryFee) lines.push(['Delivery fee', money(b.deliveryFee) + (b.deliveryMiles ? (' (' + b.deliveryMiles + ' mi RT)') : '')]);
