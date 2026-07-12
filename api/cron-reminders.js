@@ -21,6 +21,36 @@ function targetDateStr(){
   return y + '-' + m + '-' + d;
 }
 
+// __cnkClientReminder: 2-week final-payment notice sent to the CLIENT (CNK also gets its own copy).
+async function sendClientEmail(b){
+  const to = String((b && b.email) || '').trim();
+  if (!to || to.indexOf('@') === -1) return false;
+  const total = Number(b.total != null ? b.total : b.price) || 0;
+  const dep = Number(b.deposit) || 0;
+  const bal = Number(b.balance != null ? b.balance : (total - dep)) || 0;
+  const html = '<div style="font-family:Arial,Helvetica,sans-serif;max-width:560px;color:#1A1A18;">'
+    + '<h2 style="margin:0 0 12px;">Your final payment is coming up</h2>'
+    + '<p style="margin:0 0 14px;font-size:15px;">Hi ' + esc(b.name || 'there') + ', we are excited for your event! Your event is about two weeks away, and the remaining balance is now due.</p>'
+    + '<table style="font-size:14px;border-collapse:collapse;margin:14px 0;">'
+    + '<tr><td style="padding:4px 12px 4px 0;color:#888;">Event date</td><td style="padding:4px 0;font-weight:600;">' + esc(b.date || '') + '</td></tr>'
+    + '<tr><td style="padding:4px 12px 4px 0;color:#888;">Package</td><td style="padding:4px 0;font-weight:600;">' + esc(b.pkgLabel || b.package || '') + '</td></tr>'
+    + '<tr><td style="padding:4px 12px 4px 0;color:#888;">Total</td><td style="padding:4px 0;font-weight:600;">' + money(total) + '</td></tr>'
+    + '<tr><td style="padding:4px 12px 4px 0;color:#888;">Deposit paid</td><td style="padding:4px 0;font-weight:600;">' + money(dep) + '</td></tr>'
+    + '<tr><td style="padding:4px 12px 4px 0;color:#888;">Balance due</td><td style="padding:4px 0;font-weight:700;color:#8B1A2C;">' + money(bal) + '</td></tr>'
+    + '</table>'
+    + '<p style="margin:0 0 14px;font-size:14px;">We will reach out to collect the remaining balance before your event. If you have any questions, just reply to this email or call us at (385) 223-6269.</p>'
+    + '<p style="margin:0 0 14px;font-size:13px;color:#555;border-left:3px solid #C4983A;padding-left:10px;">As a reminder, per your signed rental agreement the 50% deposit is non-refundable.</p>'
+    + '<p style="margin-top:20px;font-size:12px;color:#aaa;">CNK Booths &middot; photos@cnkbooths.com</p></div>';
+  try {
+    const r = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + RESEND_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ from: FROM, to: [to], reply_to: TO, subject: 'Final payment due for your CNK Booths event on ' + (b.date || ''), html: html })
+    });
+    return r.ok;
+  } catch (e) { return false; }
+}
+
 async function sendEmail(b){
   const finalDue = b.date; // event is 14 days out; reminder is to collect now
   const html = '<div style="font-family:Arial,sans-serif;max-width:560px;">'
@@ -64,6 +94,7 @@ module.exports = async function handler(req, res) {
       const status = (b.status||'').toLowerCase();
       if (b.date === target && bal > 0.005 && status !== 'cancelled' && !b.finalReminderSent) {
         const ok = await sendEmail(b);
+        try { await sendClientEmail(b); } catch (e) { /* client email never blocks the CNK reminder */ }
         if (ok) {
           b.finalReminderSent = new Date().toISOString();
         try { var _to=(b.email||'').trim(); if(process.env.RESEND_API_KEY && _to && _to.indexOf('@')!==-1){ var _first=(b.name||'there').split(' ')[0]; var _html='<div style="font-family:Arial,sans-serif;max-width:560px;"><h2 style="color:#b8893a;">Your CNK Booths Event is 2 Weeks Away!</h2><p>Hi '+_first+', your photo booth rental on <strong>'+(b.date||'')+'</strong> is coming up. Per your rental agreement, the remaining balance is due now (no later than 14 days before your event).</p><p style="font-size:15px;">Balance due: <strong>
