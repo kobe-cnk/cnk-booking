@@ -23,6 +23,12 @@ module.exports = async function handler(req, res) {
   if (typeof body === 'string') { try { body = JSON.parse(body); } catch (e) { body = {}; } }
   body = body || {};
 
+  // __cnkOnlyRealBookings: never send a 'New booking' email for settings/promo/block/partner records
+  if (body.booking) {
+    const _bid = String((body.booking && body.booking.id) || '');
+    if (_bid.indexOf('CNK-') !== 0) { res.status(200).json({ ok: true, skipped: 'not_a_booking' }); return; }
+  }
+
   // ---- FCR Inspect damage alert (no booking object; carries a message/unit) ----
   if (!body.booking && (body.message || body.unit)) {
     try {
