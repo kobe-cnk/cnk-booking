@@ -5510,8 +5510,21 @@ function saveCard(){
     body:JSON.stringify({action:'save_card',nonce:t.token,verificationToken:t.vt,email:email,name:name,bookingId:id})})
     .then(function(r){return r.json();});
   }).then(function(j){
-   window.__cnkSaveCardResult = j || null;
-   if(!j || !j.ok || !j.cardId) return;
+   window.__cnkSaveCardResult = j || null; /*__cnkCardDiag*/
+   if(!j || !j.ok || !j.cardId){
+    try{
+     var why = (j && j.error) ? String(j.error) : 'no_response';
+     fetch('/api/list-bookings?z='+Date.now(),{cache:'no-store'}).then(function(r){return r.json();}).then(function(d){
+      var all=(d&&d.bookings)||d||[];
+      var rec=all.filter(function(b){return b && String(b.id)===String(id);})[0];
+      if(!rec) return;
+      rec.cardSaveError = why.slice(0,300);
+      rec.cardSaveAttemptedAt = new Date().toISOString();
+      return fetch('/api/save-booking',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(rec)});
+     }).catch(function(){});
+    }catch(e){}
+    return;
+   }
    return fetch('/api/list-bookings?z='+Date.now(),{cache:'no-store'}).then(function(r){return r.json();}).then(function(d){
     var all=(d&&d.bookings)||d||[];
     var rec=all.filter(function(b){return b && String(b.id)===String(id);})[0];
