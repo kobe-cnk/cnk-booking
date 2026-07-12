@@ -10,6 +10,16 @@ const FROM = process.env.RESEND_FROM || 'CNK Booths <onboarding@resend.dev>';
 function money(n){ n = Number(n)||0; return '$' + n.toFixed(2); }
 function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 // Date 14 days from 'today' in America/Denver (Utah), as YYYY-MM-DD
+// __cnkCatchUp: today in America/Denver as YYYY-MM-DD
+function todayDateStr(){
+  const now = new Date();
+  const denver = new Date(now.toLocaleString('en-US', { timeZone: 'America/Denver' }));
+  const y = denver.getFullYear();
+  const m = String(denver.getMonth()+1).padStart(2,'0');
+  const d = String(denver.getDate()).padStart(2,'0');
+  return y+'-'+m+'-'+d;
+}
+
 function targetDateStr(){
   const now = new Date();
   // shift to Denver time to avoid UTC off-by-one
@@ -85,6 +95,7 @@ module.exports = async function handler(req, res) {
   if (!RESEND_KEY) { res.status(200).json({ ok:false, error:'Email not configured' }); return; }
   try {
     const target = targetDateStr();
+    const todayStr = todayDateStr();
     const { rows } = await sql`SELECT id, data FROM bookings`;
     let sent = 0; const details = [];
     for (const row of rows) {
@@ -92,7 +103,7 @@ module.exports = async function handler(req, res) {
       if (!b || !b.date) continue;
       const bal = Number(b.balance)||0;
       const status = (b.status||'').toLowerCase();
-      if (b.date === target && bal > 0.005 && status !== 'cancelled' && !b.finalReminderSent) {
+      if (b.date <= target && b.date >= todayStr && bal > 0.005 && status !== 'cancelled' && !b.finalReminderSent) {
         const ok = await sendEmail(b);
         try { await sendClientEmail(b); } catch (e) { /* client email never blocks the CNK reminder */ }
         if (ok) {
