@@ -938,7 +938,7 @@
   window.cnkAddon=function(d){ state.addon=Math.max(0,state.addon+d); refreshAddon(); };
   function refreshAddon(){
     document.getElementById('cnk-addon').textContent=state.addon;
-    document.getElementById('cnk-addon-cost').textContent='+'+money(state.addon*HOUR);
+    document.getElementById('cnk-addon-cost').textContent='+'+money(state.addon*((window.CNK_PRICING&&typeof window.CNK_PRICING.hour==='number'&&window.CNK_PRICING.hour>0)?window.CNK_PRICING.hour:HOUR)/*__cnkRateFix*/);
   }
 
   function val(id){ var e=document.getElementById(id); return e?e.value.trim():''; }
@@ -2289,7 +2289,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
     if(!s.pkg) return null;
     var HOUR=150,TAX=0.0745,CC=0.03,DEP=0.5;
     var base = s.pkg==='hourly' ? HOUR*Math.max(1,Math.min(3,s.hours||1)) : PKG[s.pkg].base;
-    var addonCost=Math.max(0,s.addon||0)*HOUR;
+    var addonCost=Math.max(0,s.addon||0)*((window.CNK_PRICING&&typeof window.CNK_PRICING.hour==='number'&&window.CNK_PRICING.hour>0)?window.CNK_PRICING.hour:HOUR)/*__cnkRateFix*/;
     var sub=base+addonCost, tax=sub*TAX, cc=(sub+tax)*CC, total=sub+tax+cc, deposit=total*DEP;
     return {base:base,addonCost:addonCost,addon:s.addon||0,sub:sub,tax:tax,cc:cc,total:total,deposit:deposit,balance:total-deposit,pkg:s.pkg,hours:s.hours||1};
   }
@@ -4943,7 +4943,7 @@ function apply(){
  if(typeof window.cnkPick!=='function'){setTimeout(apply,300);return;}
  if(window.cnkPick.__wrappedReset)return;
  var orig=window.cnkPick;
- var w=function(pkg){try{var st=window._cnkState;if(st&&st.pkg&&st.pkg!==pkg){st.addon=0;}}catch(e){}return orig.apply(this,arguments);};
+ var lastPkg=null;var w=function(pkg){try{if(lastPkg&&lastPkg!==pkg&&typeof window.cnkAddon==='function'){window.cnkAddon(-9999);}lastPkg=pkg;}catch(e){}return orig.apply(this,arguments);};
  w.__wrappedReset=true;
  window.cnkPick=w;
 }
