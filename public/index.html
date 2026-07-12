@@ -959,7 +959,7 @@
     document.getElementById('cnk-sum-pkg').textContent = PKG[state.pkg].label;
     document.getElementById('cnk-sum-base').textContent = money(c.base);
     var ar=document.getElementById('cnk-sum-addon-row');
-    if(state.addon>0){ ar.style.display='flex'; document.getElementById('cnk-sum-addon-label').textContent='Extra hours ('+state.addon+' × $150)'; document.getElementById('cnk-sum-addon').textContent=money(c.addonCost); }
+    if(state.addon>0){ ar.style.display='flex'; document.getElementById('cnk-sum-addon-label').textContent='Extra hours ('+state.addon+' × $'+((window.CNK_PRICING&&window.CNK_PRICING.hour)||150)+')'; document.getElementById('cnk-sum-addon').textContent=money(c.addonCost); }
     else ar.style.display='none';
     document.getElementById('cnk-sum-tax').textContent=money(c.tax);
     document.getElementById('cnk-sum-cc').textContent=money(c.cc); var __dr=document.getElementById('cnk-sum-delivery-row'),__de=document.getElementById('cnk-sum-delivery'); if(__de)__de.textContent=money(c.delivery||0); if(__dr)__dr.style.display=((c.delivery||0)>0)?'flex':'none';
@@ -5157,5 +5157,29 @@ function labelize(){try{
 }catch(e){}}
 labelize();
 try{var mo=new MutationObserver(function(){labelize();});mo.observe(document.documentElement,{childList:true,subtree:true});}catch(e){}
+})();
+</script>
+
+
+<script>
+(function(){
+if(window.__cnkRateText)return;window.__cnkRateText=true;
+function rate(){var c=window.CNK_PRICING;return (c&&Number(c.hour)>0)?Number(c.hour):125;}
+function fix(){try{
+ var r=rate();
+ var w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT,null);
+ var n,hits=[];
+ while(n=w.nextNode()){
+  var t=n.nodeValue;
+  if(!t||t.indexOf('$')===-1)continue;
+  if(!/\$\d+\s*(\/\s*hr|\/\s*hour|per additional hour|per hour)/i.test(t))continue;
+  var nt=t.replace(/\$\d+(\s*)(\/\s*hr|\/\s*hour|per additional hour|per hour)/gi,'$'+r+'$1$2');
+  if(nt!==t)hits.push([n,nt]);
+ }
+ hits.forEach(function(h){h[0].nodeValue=h[1];});
+}catch(e){}}
+window.cnkFixRateText=fix;
+[400,1200,2500].forEach(function(d){setTimeout(fix,d);});
+['click','change'].forEach(function(ev){document.addEventListener(ev,function(){setTimeout(fix,120);},true);});
 })();
 </script>
