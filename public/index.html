@@ -5248,8 +5248,7 @@ var TPL=[
  {n:'Balance due — customer',who:'Customer',sub:'Your CNK Booths balance is due - event on {date}',trig:'Balance reminder to the customer',src:'cron-reminders.js',flag:'clientReminderSent'},
  {n:'Final payment due',who:'Customer',sub:'Final payment due for your CNK Booths event on {date}',trig:'Final payment reminder',src:'cron-reminders.js',flag:'finalPayment'},
  {n:'Booking cancelled',who:'Customer',sub:'Your CNK Booths reservation has been cancelled',trig:'You cancel a booking',src:'confirm-booking.js',flag:'cancelled'},
- {n:'Venue partnership signed',who:'Venue + you',sub:'Signed Venue Partnership Agreement — {venue}',trig:'A venue signs the partnership page',src:'confirm-booking.js',flag:'partner'},
- {n:'Damage flagged (FCR)',who:'FCRutah@gmail.com',sub:'Damage flagged - {unit}',trig:'FCR Inspect flags damage (separate app)',src:'notify-booking.js',flag:'fcr'}
+ {n:'Venue partnership signed',who:'Venue + you',sub:'Signed Venue Partnership Agreement — {venue}',trig:'A venue signs the partnership page',src:'confirm-booking.js',flag:'partner'}
 ];
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 function stats(){
