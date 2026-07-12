@@ -5610,9 +5610,11 @@ function render(){
   var rows=list.map(function(b){
    var nm=((b.first||'')+' '+(b.last||'')).trim()||b.id;
    var hasCard=!!(b.squareCardId&&b.squareCustomerId);
-   var cardCell = hasCard
+   var cardCell = hasCard /*__cnkDiagCell*/
      ? '<span style="color:#4caf50;font-weight:600">'+esc(b.cardBrand||'Card')+' \u2022\u2022\u2022\u2022 '+esc(b.cardLast4||'')+'</span>'
-     : '<span style="color:#9a9a92">No card on file</span>';
+     : (b.cardSaveError
+        ? '<span style="color:#8B1A2C;font-weight:600">Card save FAILED</span><div style="color:#c98a94;font-size:11px;margin-top:2px;max-width:280px">'+esc(b.cardSaveError)+'</div>'
+        : '<span style="color:#9a9a92">No card on file</span>');
    var btn = hasCard
      ? '<button onclick="cnkChargeBalance(\''+b.id+'\',this)" style="background:#8B1A2C;color:#F5F0E8;border:0;border-radius:7px;padding:6px 12px;font-weight:600;cursor:pointer">Charge '+money(b.balance)+'</button>'
      : '<span style="color:#8a8a82;font-size:12px">Collect manually</span>';
