@@ -5234,3 +5234,80 @@ function place(){try{
 ['click','change'].forEach(function(ev){document.addEventListener(ev,function(){setTimeout(place,120);},true);});
 })();
 </script>
+
+
+<script>
+(function(){
+if(window.__cnkAdminEmails)return;window.__cnkAdminEmails=true;
+var ADMIN='photos@cnkbooths.com';
+var TPL=[
+ {n:'New booking alert',who:'You ('+ADMIN+')',sub:'New booking: {name} - {date} ({id})',trig:'A customer completes a booking',src:'notify-booking.js',flag:'newBooking'},
+ {n:'Rental agreement to sign',who:'Customer',sub:'Please sign your CNK Booths rental agreement ({id})',trig:'Agreement is sent to the customer',src:'send-agreement.js',flag:'agreementSentAt'},
+ {n:'Signed agreement received',who:'You ('+ADMIN+')',sub:'Signed agreement - {name} ({date})',trig:'Customer signs the agreement',src:'sign-agreement.js',flag:'signed'},
+ {n:'Balance due — heads up',who:'You ('+ADMIN+')',sub:'Final payment due in 2 weeks: {name} ({id})',trig:'2 weeks before the event',src:'cron-reminders.js',flag:'finalReminderSent'},
+ {n:'Balance due — customer',who:'Customer',sub:'Your CNK Booths balance is due - event on {date}',trig:'Balance reminder to the customer',src:'cron-reminders.js',flag:'clientReminderSent'},
+ {n:'Final payment due',who:'Customer',sub:'Final payment due for your CNK Booths event on {date}',trig:'Final payment reminder',src:'cron-reminders.js',flag:'finalPayment'},
+ {n:'Booking cancelled',who:'Customer',sub:'Your CNK Booths reservation has been cancelled',trig:'You cancel a booking',src:'confirm-booking.js',flag:'cancelled'},
+ {n:'Venue partnership signed',who:'Venue + you',sub:'Signed Venue Partnership Agreement — {venue}',trig:'A venue signs the partnership page',src:'confirm-booking.js',flag:'partner'},
+ {n:'Damage flagged (FCR)',who:'FCRutah@gmail.com',sub:'Damage flagged - {unit}',trig:'FCR Inspect flags damage (separate app)',src:'notify-booking.js',flag:'fcr'}
+];
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function stats(){
+ return fetch('/api/list-bookings?z='+Date.now(),{cache:'no-store'}).then(function(r){return r.json();}).then(function(j){
+  var all=(j&&j.bookings)||j||[];
+  var b=all.filter(function(x){return x&&String(x.id).indexOf('CNK-')===0;});
+  var partners=all.filter(function(x){return x&&String(x.id).indexOf('__PARTNER__')===0;});
+  return {
+   newBooking:b.length,
+   agreementSentAt:b.filter(function(x){return x.agreementSentAt;}).length,
+   signed:b.filter(function(x){return String(x.signStatus||'').toLowerCase()==='signed';}).length,
+   finalReminderSent:b.filter(function(x){return x.finalReminderSent;}).length,
+   clientReminderSent:b.filter(function(x){return x.clientReminderSent;}).length,
+   finalPayment:null,
+   cancelled:b.filter(function(x){return String(x.status||'').toLowerCase()==='cancelled';}).length,
+   partner:partners.length,
+   fcr:null
+  };
+ }).catch(function(){return {};});
+}
+function render(){
+ var host=document.getElementById('cnk-emails-admin'); if(!host)return;
+ stats().then(function(st){
+  var rows=TPL.map(function(t){
+   var v=st[t.flag];
+   var cnt=(v==null)?'<span style="color:#8a8a82">—</span>':('<strong style="color:#C4983A">'+v+'</strong>');
+   return '<tr style="border-top:1px solid #3a3a36">'
+    +'<td style="padding:10px 8px;color:#F5F0E8"><strong>'+esc(t.n)+'</strong><div style="color:#9a9a92;font-size:12px;margin-top:2px">'+esc(t.trig)+'</div></td>'
+    +'<td style="padding:10px 8px;color:#F5F0E8;font-size:13px">'+esc(t.who)+'</td>'
+    +'<td style="padding:10px 8px;color:#c9c9c0;font-size:12px;font-family:monospace">'+esc(t.sub)+'</td>'
+    +'<td style="padding:10px 8px;text-align:center;font-size:15px">'+cnt+'</td>'
+    +'</tr>';
+  }).join('');
+  host.innerHTML='<div style="background:#252522;border:1px solid #3a3a36;border-radius:12px;padding:18px;margin-top:18px">'
+   +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'
+   +'<h3 style="margin:0;color:#F5F0E8;font-size:18px">Emails</h3>'
+   +'<button id="cnk-em-refresh" style="background:#C4983A;color:#1A1A18;border:0;border-radius:8px;padding:6px 12px;font-weight:600;cursor:pointer">Refresh</button>'
+   +'</div>'
+   +'<div style="color:#9a9a92;font-size:13px;margin-bottom:12px">Every email the booking system can send. The count is how many times it applies right now based on your bookings.</div>'
+   +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:14px">'
+   +'<thead><tr style="text-align:left;color:#9a9a92;font-size:12px;text-transform:uppercase">'
+   +'<th style="padding:6px 8px">Email / when it fires</th><th style="padding:6px 8px">Goes to</th><th style="padding:6px 8px">Subject</th><th style="padding:6px 8px;text-align:center">Count</th>'
+   +'</tr></thead><tbody>'+rows+'</tbody></table></div>'
+   +'<div style="color:#8a8a82;font-size:12px;margin-top:10px">A dash means there is no per-booking record to count (it is event-driven).</div>'
+   +'</div>';
+  var rb=document.getElementById('cnk-em-refresh'); if(rb)rb.onclick=render;
+ });
+}
+function mount(){
+ var view=document.querySelector('.admin-view'); if(!view){setTimeout(mount,500);return;}
+ if(document.getElementById('cnk-emails-admin'))return;
+ var d=document.createElement('div'); d.id='cnk-emails-admin';
+ var promo=document.getElementById('cnk-promo-admin');
+ if(promo&&promo.parentNode){ promo.parentNode.insertBefore(d, promo.nextSibling); } else { view.appendChild(d); }
+ render();
+}
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',mount);}else{mount();}
+setTimeout(mount,1200); setTimeout(mount,3000);
+window.cnkRenderEmails=render;
+})();
+</script>
