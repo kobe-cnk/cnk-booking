@@ -5008,3 +5008,39 @@ mark();
 try{var mo=new MutationObserver(function(){mark();});mo.observe(document.documentElement,{childList:true,subtree:true});}catch(e){}
 })();
 </script>
+
+
+<script>
+(function(){
+if(window.__cnkNormalize)return;window.__cnkNormalize=true;
+function norm(b){try{
+ if(!b||typeof b!=='object')return b;
+ if(String(b.id||'').indexOf('CNK-')!==0)return b;
+ var rate=(window.CNK_PRICING&&Number(window.CNK_PRICING.hour))||125;
+ var hrs=Number(b.addon!=null?b.addon:(b.extraHours!=null?b.extraHours:0))||0;
+ var sub=Number(b.sub)||0;
+ var extraCost=Math.round(hrs*rate*100)/100;
+ if(b.extraHours==null)b.extraHours=hrs;
+ if(b.extraCost==null)b.extraCost=extraCost;
+ if(b.basePrice==null&&sub>0)b.basePrice=Math.round((sub-extraCost)*100)/100;
+ if(b.price==null&&b.total!=null)b.price=Number(b.total)||0;
+ if(b.ccFee==null&&b.cc!=null)b.ccFee=Number(b.cc)||0;
+ if(!b.location){var loc=[b.venue,b.address].filter(Boolean).join(' \u2014 ');if(loc)b.location=loc;}
+}catch(e){}return b;}
+window.cnkNormalizeBooking=norm;
+var of=window.fetch;
+window.fetch=function(u,o){
+ try{
+  var url=(typeof u==='string')?u:((u&&u.url)||'');
+  if(o&&typeof o.body==='string'&&/\/api\/(save-booking|notify-booking|charge)/.test(url)){
+   var p=JSON.parse(o.body);
+   var changed=false;
+   if(p&&p.id){norm(p);changed=true;}
+   if(p&&p.booking&&p.booking.id){norm(p.booking);changed=true;}
+   if(changed){o=Object.assign({},o,{body:JSON.stringify(p)});}
+  }
+ }catch(e){}
+ return of.call(this,u,o);
+};
+})();
+</script>
