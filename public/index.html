@@ -850,7 +850,7 @@
           <p><strong>Late Payment:</strong> Any remaining balance unpaid by the due date is subject to a $50 late fee, in addition to the balance due.</p>
 
           <div class="cnk-sec-title">Terms &amp; Conditions</div>
-          <p><strong>1. Deposit &amp; Cancellation.</strong> A deposit equal to 50% of the total rental fee is required to secure the event date. If the event is cancelled more than 14 days prior to the event date, $50 of the total deposit is non-refundable and retained as a booking fee. The remaining amount will be refunded immediately. No portion of any payments is refundable if the event is cancelled within 14 days of the event date.</p>
+          <p><strong>1. Deposit &amp; Cancellation.</strong> A deposit equal to 50% of the total rental fee is required to secure the event date. This deposit is non-refundable at the time of payment. If the event is cancelled for any reason, the deposit is retained by CNK Booths as a booking fee and will not be refunded. No portion of any payments is refundable if the event is cancelled within 14 days of the event date.</p>
           <p><strong>2. Remaining Balance.</strong> The remaining balance is due no later than 14 days prior to the event date. If the booking is made within 14 days of the event date, payment in full is required at the time of signing in lieu of the standard deposit and balance schedule. Once paid, the remaining balance is non-refundable. Failure to provide timely payment may result in cancellation of services without refund of any amounts paid.</p>
           <p><strong>3. Setup, Breakdown &amp; Client Space Requirements.</strong> CNK Booths will arrive approximately 60 minutes prior to the agreed start time to set up the booth. Breakdown will occur at the conclusion of the rental period. The client is responsible for providing (a) a suitable space of at least 6' x 6' with reasonable overhead clearance, (b) access to a standard 110V power outlet within 25 feet of the booth, and (c) where digital sharing features are required, a stable WiFi connection. Inadequate space, power, or connectivity does not constitute breach by CNK Booths, but may limit certain features.</p>
           <p><strong>4. Outdoor Events.</strong> If the booth is to be set up outdoors, the client must provide a fully covered, level, and dry location (such as a tent with sidewalls). CNK Booths reserves the right to refuse outdoor setup if conditions appear unsafe for the equipment or attendant, including rain, high winds, extreme temperatures, or uneven ground. If the client did not disclose the outdoor location in advance and no suitable indoor alternative is available at the venue, the booking fee is non-refundable.</p>
@@ -3570,7 +3570,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
       ['3. Payment','A 50% deposit reserves the date. The remaining balance is due in full no later than fourteen (14) days before the event date. Prices include applicable sales tax; card payments include a 3% processing fee.'],
       ['4. Delivery & Travel','Delivery within 50 miles round-trip is included. Beyond that, travel is billed at $1.25 per mile, or a custom agreed amount as noted.'],
       ['5. Setup & Space','Client must provide adequate space, a level surface, and access to a standard power outlet within 15 feet, unless otherwise arranged.'],
-      ['6. Cancellation','Deposits are non-refundable within 30 days of the event. Cancellations outside that window may be refunded at the Company\u2019s discretion.'],
+      ['6. Cancellation','The 50% deposit is non-refundable at the time of payment and will not be returned if the event is cancelled for any reason. No portion of any payment is refundable if the event is cancelled within 14 days of the event date.'],
       ['7. Damage','Client is responsible for any damage to the booth or equipment caused by guests during the event.'],
       ['8. Media Release','If agreed, the Company may use photos taken at the event for promotional purposes.'],
       ['9. Liability','The Company\u2019s liability is limited to the total amount paid for the rental. The Company is not liable for circumstances beyond its control.'],
@@ -5214,5 +5214,23 @@ window.fetch=function(u,o){
  }catch(e){}
  return of.apply(this,arguments);
 };
+})();
+</script>
+
+
+<style>#cnk-dep-notice{margin:12px 0;padding:11px 13px;border:1px solid #C4983A;background:rgba(196,152,58,0.10);border-radius:8px;color:#1A1A18;font-size:13.5px;line-height:1.45;}
+#cnk-dep-notice strong{color:#8B1A2C;}</style>
+<script>
+(function(){
+if(window.__cnkDepositNotice)return;window.__cnkDepositNotice=true;
+function place(){try{
+ var btn=document.getElementById('cnk-pay-btn'); if(!btn)return;
+ if(document.getElementById('cnk-dep-notice'))return;
+ var d=document.createElement('div'); d.id='cnk-dep-notice';
+ d.innerHTML='<strong>Your 50% deposit is non-refundable.</strong> By paying, you agree that this deposit is non-refundable at the time of payment and will not be returned if you cancel, as stated in the rental agreement you signed.';
+ btn.parentNode.insertBefore(d, btn);
+}catch(e){}}
+[300,900,2000].forEach(function(t){setTimeout(place,t);});
+['click','change'].forEach(function(ev){document.addEventListener(ev,function(){setTimeout(place,120);},true);});
 })();
 </script>
