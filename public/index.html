@@ -5044,3 +5044,69 @@ window.fetch=function(u,o){
 };
 })();
 </script>
+
+
+<style>#cnk-pw-err{display:none;margin:10px 0;padding:10px 12px;border:1px solid #8B1A2C;background:rgba(139,26,44,0.08);border-radius:8px;color:#8B1A2C;font-size:14px;}</style>
+<script>
+(function(){
+if(window.__cnkContractFirst)return;window.__cnkContractFirst=true;
+var REQ=[['cnk-pw-start','Event start time'],['cnk-pw-end','Event end time'],['cnk-pw-setup','Setup location'],['cnk-pw-contact','Day-of contact'],['cnk-pw-power','Power availability'],['cnk-pw-wifi','WiFi availability'],['cnk-pw-outdoor','Indoor or outdoor']];
+function sec(n){return document.getElementById('cnk-s'+n);}
+function isActive(n){var e=sec(n);return !!(e&&e.classList.contains('active'));}
+function errBox(){var e=document.getElementById('cnk-pw-err');if(e)return e;var d=document.createElement('div');d.id='cnk-pw-err';var s3=sec(3);if(s3)s3.appendChild(d);return d;}
+function missing(){var out=[];REQ.forEach(function(f){var el=document.getElementById(f[0]);if(!el)return;var v=(el.value||'').trim();if(!v)out.push(f[1]);});
+ var ag=document.getElementById('cnk-pw-agree');if(ag&&!ag.checked)out.push('Agree to the rental agreement');
+ var sg=document.getElementById('cnk-pw-sign');if(sg&&!(sg.value||'').trim())out.push('Signature');
+ return out;}
+function showErr(list){var e=errBox();if(!list.length){e.style.display='none';return;}e.innerHTML='<strong>Please complete the rental agreement before booking:</strong><br>'+list.map(function(x){return '\u2022 '+x;}).join('<br>');e.style.display='block';e.scrollIntoView({behavior:'smooth',block:'center'});}
+function relabel(){try{
+ var pills=document.querySelectorAll('.cnk-step-pill');
+ if(pills.length>=3){pills[1].textContent='2 Paperwork';pills[2].textContent='3 Payment';}
+ document.querySelectorAll('button[onclick]').forEach(function(b){var oc=b.getAttribute('onclick')||'';
+  if(/cnkToPayment/.test(oc)&&/Continue to Payment/i.test(b.textContent))b.textContent='Continue to Agreement \u2192';
+  if(/cnkFinish/.test(oc)&&/Submit Paperwork/i.test(b.textContent))b.textContent='Continue to Payment \u2192';});
+}catch(e){}}
+function fixPills(){try{var pills=document.querySelectorAll('.cnk-step-pill');if(pills.length<3)return;var idx=isActive(1)?0:(isActive(3)?1:(isActive(2)?2:-1));if(idx<0)return;
+ for(var i=0;i<pills.length;i++){pills[i].classList.toggle('active',i<=idx);}}catch(e){}}
+function wrap(){
+ if(typeof window.cnkToPayment!=='function'||typeof window.cnkFinish!=='function'||typeof window.cnkGoStep!=='function'||typeof window.cnkPay!=='function'){setTimeout(wrap,300);return;}
+ if(window.cnkToPayment.__cf)return;
+ var oTo=window.cnkToPayment,oFin=window.cnkFinish,oGo=window.cnkGoStep,oPay=window.cnkPay;
+ var w1=function(){var r=oTo.apply(this,arguments);try{if(isActive(2)){oGo(3);relabel();fixPills();}}catch(e){}return r;};
+ w1.__cf=true;window.cnkToPayment=w1;
+ window.cnkGoStep=function(){var r=oGo.apply(this,arguments);try{relabel();fixPills();}catch(e){}return r;};
+ window.cnkFinish=function(){
+  try{
+   if(!window._cnkPaid){
+    var miss=missing();
+    if(miss.length){showErr(miss);return false;}
+    showErr([]);
+    oGo(2);relabel();fixPills();
+    try{if(window.cnkFillSummary)window.cnkFillSummary();}catch(e){}
+    return false;
+   }
+  }catch(e){}
+  return oFin.apply(this,arguments);
+ };
+ window.cnkPay=function(){
+  try{
+   var miss=missing();
+   if(miss.length){oGo(3);relabel();fixPills();showErr(miss);return false;}
+  }catch(e){}
+  var r=oPay.apply(this,arguments);
+  try{
+   var tries=0;
+   var iv=setInterval(function(){
+    tries++;
+    if(window._cnkPaid){clearInterval(iv);try{window.cnkFinish();}catch(e){}}
+    else if(tries>120){clearInterval(iv);}
+   },500);
+  }catch(e){}
+  return r;
+ };
+ relabel();fixPills();
+}
+wrap();
+try{var mo=new MutationObserver(function(){relabel();fixPills();});mo.observe(document.documentElement,{childList:true,subtree:true});}catch(e){}
+})();
+</script>
