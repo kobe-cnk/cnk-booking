@@ -4995,3 +4995,16 @@ hideRecent();
 var mo=new MutationObserver(function(){hideRecent();});try{mo.observe(document.documentElement,{childList:true,subtree:true});}catch(e){}
 })();
 </script>
+
+
+<style>tr.cnk-row-clickable{cursor:pointer;}tr.cnk-row-clickable:hover{background:rgba(196,152,58,0.10) !important;}</style>
+<script>
+(function(){
+if(window.__cnkRowClick)return;window.__cnkRowClick=true;
+function idFromRow(tr){try{var b=tr.querySelectorAll('button[onclick]');for(var i=0;i<b.length;i++){var oc=b[i].getAttribute('onclick')||'';var m=oc.match(/openModal\(\s*['"]([^'"]+)['"]\s*\)/);if(m)return m[1];}}catch(e){}return null;}
+function mark(){try{var rows=document.querySelectorAll('tr');for(var i=0;i<rows.length;i++){var tr=rows[i];if(tr.__cnkRC)continue;if(!idFromRow(tr))continue;tr.__cnkRC=true;tr.classList.add('cnk-row-clickable');tr.setAttribute('title','Click to view booking');}}catch(e){}}
+document.addEventListener('click',function(e){try{var t=e.target;if(!t||!t.closest)return;if(t.closest('button,a,input,select,textarea,label'))return;var tr=t.closest('tr');if(!tr)return;var id=idFromRow(tr);if(!id)return;if(typeof window.openModal==='function'){e.preventDefault();e.stopPropagation();window.openModal(id);}}catch(err){}},true);
+mark();
+try{var mo=new MutationObserver(function(){mark();});mo.observe(document.documentElement,{childList:true,subtree:true});}catch(e){}
+})();
+</script>
