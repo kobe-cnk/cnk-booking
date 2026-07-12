@@ -5061,7 +5061,7 @@ function missing(){var out=[];REQ.forEach(function(f){var el=document.getElement
 function showErr(list){var e=errBox();if(!list.length){e.style.display='none';return;}e.innerHTML='<strong>Please complete the rental agreement before booking:</strong><br>'+list.map(function(x){return '\u2022 '+x;}).join('<br>');e.style.display='block';e.scrollIntoView({behavior:'smooth',block:'center'});}
 function relabel(){try{
  var pills=document.querySelectorAll('.cnk-step-pill');
- if(pills.length>=3){pills[1].textContent='2 Paperwork';pills[2].textContent='3 Payment';}
+ if(pills.length>=3){if(pills[1].textContent!=='2 Paperwork')pills[1].textContent='2 Paperwork';if(pills[2].textContent!=='3 Payment')pills[2].textContent='3 Payment';}
  document.querySelectorAll('button[onclick]').forEach(function(b){var oc=b.getAttribute('onclick')||'';
   if(/cnkToPayment/.test(oc)&&/Continue to Payment/i.test(b.textContent))b.textContent='Continue to Agreement \u2192';
   if(/cnkFinish/.test(oc)&&/Submit Paperwork/i.test(b.textContent))b.textContent='Continue to Payment \u2192';});
@@ -5107,6 +5107,6 @@ function wrap(){
  relabel();fixPills();
 }
 wrap();
-try{var mo=new MutationObserver(function(){relabel();fixPills();});mo.observe(document.documentElement,{childList:true,subtree:true});}catch(e){}
+try{['click','change','input'].forEach(function(ev){document.addEventListener(ev,function(){setTimeout(function(){relabel();fixPills();},60);},true);});}catch(e){}
 })();
 </script>
