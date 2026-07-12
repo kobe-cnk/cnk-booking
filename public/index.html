@@ -5470,7 +5470,8 @@ function wrapFinish(){
     injectAuth();
     var a=document.getElementById(AUTH_ID);
     if(a && !a.checked){
-     var eb=document.getElementById('cnk-pw-err');
+     var eb=document.getElementById('cnk-pw-err'); /*__cofErrFix*/
+     if(!eb){ eb=document.createElement('div'); eb.id='cnk-pw-err'; var s3=document.getElementById('cnk-s3'); if(s3)s3.appendChild(eb); }
      if(eb){ eb.innerHTML='<strong>Please complete the rental agreement before booking:</strong><br>\u2022 Authorize the card for the remaining balance'; eb.style.display='block'; eb.scrollIntoView({behavior:'smooth',block:'center'}); }
      return false;
     }
