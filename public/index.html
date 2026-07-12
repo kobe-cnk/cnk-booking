@@ -5183,3 +5183,36 @@ window.cnkFixRateText=fix;
 ['click','change'].forEach(function(ev){document.addEventListener(ev,function(){setTimeout(fix,120);},true);});
 })();
 </script>
+
+
+<script>
+(function(){
+if(window.__cnkNotifyOnce)return;window.__cnkNotifyOnce=true;
+var known=null; // fail-open: null means "unknown", never blocks
+try{
+ fetch('/api/list-bookings?z='+Date.now(),{cache:'no-store'})
+  .then(function(r){return r.json();})
+  .then(function(j){var all=(j&&j.bookings)||j||[];var k={};all.forEach(function(b){if(b&&b.id)k[String(b.id)]=1;});known=k;})
+  .catch(function(){});
+}catch(e){}
+function skip(reason){
+ try{ return Promise.resolve(new Response(JSON.stringify({ok:true,skipped:reason}),{status:200,headers:{'Content-Type':'application/json'}})); }
+ catch(e){ return Promise.resolve({ok:true,json:function(){return Promise.resolve({ok:true,skipped:reason});}}); }
+}
+var of=window.fetch;
+window.fetch=function(u,o){
+ try{
+  var url = (typeof u==='string') ? u : ((u&&u.url)||'');
+  if(o && typeof o.body==='string' && url.indexOf('/api/notify-booking')!==-1){
+   var b=JSON.parse(o.body);
+   var id=(b&&b.booking&&b.booking.id)?String(b.booking.id):'';
+   if(id){
+    if(id.indexOf('CNK-')!==0) return skip('not_a_booking');
+    if(known && known[id]) return skip('already_exists');
+   }
+  }
+ }catch(e){}
+ return of.apply(this,arguments);
+};
+})();
+</script>
