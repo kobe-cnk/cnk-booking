@@ -61,6 +61,29 @@ async function sendClientEmail(b){
   } catch (e) { return false; }
 }
 
+async function sendChargeAlert(b){
+  const nm = ((b.first || '') + ' ' + (b.last || '')).trim() || b.id;
+  const bal = money(b.balance);
+  const brand = b.cardBrand || 'Card';
+  const last4 = b.cardLast4 || '';
+  const html = '<div style="font-family:Arial,sans-serif;max-width:560px;">'
+    + '<h2 style="color:#b8893a;">Ready to charge &mdash; event in 2 weeks</h2>'
+    + '<p style="font-size:16px;"><strong>' + esc(nm) + '</strong><br>Event: <strong>' + esc(b.date) + '</strong></p>'
+    + '<p style="font-size:26px;margin:16px 0;color:#b8893a;"><strong>' + esc(bal) + '</strong> <span style="font-size:14px;color:#555;">remaining balance</span></p>'
+    + '<p style="font-size:14px;">Card on file: <strong>' + esc(brand) + ' &bull;&bull;&bull;&bull; ' + esc(last4) + '</strong></p>'
+    + '<p style="margin-top:18px;font-size:14px;border-left:3px solid #C4983A;padding-left:10px;">Open the admin panel &rarr; <strong>Balances Due</strong> &rarr; click <strong>Charge ' + esc(bal) + '</strong>.</p>'
+    + '<p style="margin-top:20px;font-size:12px;color:#999;">Booking ' + esc(b.id) + '. The customer was <strong>not</strong> emailed &mdash; they authorized this card at booking.</p>'
+    + '</div>';
+  try {
+    const r = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + RESEND_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ from: FROM, to: [TO], subject: 'Ready to charge: ' + nm + ' \u2014 ' + bal + ' (' + (b.date || '') + ')', html: html })
+    });
+    return r.ok;
+  } catch (e) { return false; }
+}
+
 async function sendEmail(b){
   const finalDue = b.date; // event is 14 days out; reminder is to collect now
   const html = '<div style="font-family:Arial,sans-serif;max-width:560px;">'
@@ -104,8 +127,9 @@ module.exports = async function handler(req, res) {
       const bal = Number(b.balance)||0;
       const status = (b.status||'').toLowerCase();
       if (b.date <= target && b.date >= todayStr && bal > 0.005 && status !== 'cancelled' && !b.finalReminderSent) {
-        const ok = await sendEmail(b);
-        try { await sendClientEmail(b); } catch (e) { /* client email never blocks the CNK reminder */ }
+        const hasCard = !!(b.squareCardId && b.squareCustomerId); /*__cnkChargeAlert*/
+        const ok = hasCard ? await sendChargeAlert(b) : await sendEmail(b);
+        if (!hasCard) { try { await sendClientEmail(b); } catch (e) { /* client email never blocks the CNK reminder */ } }
         if (ok) {
           b.finalReminderSent = new Date().toISOString();
         try { var _to=(b.email||'').trim(); if(process.env.RESEND_API_KEY && _to && _to.indexOf('@')!==-1){ var _first=(b.name||'there').split(' ')[0]; var _html='<div style="font-family:Arial,sans-serif;max-width:560px;"><h2 style="color:#b8893a;">Your CNK Booths Event is 2 Weeks Away!</h2><p>Hi '+_first+', your photo booth rental on <strong>'+(b.date||'')+'</strong> is coming up. Per your rental agreement, the remaining balance is due now (no later than 14 days before your event).</p><p style="font-size:15px;">Balance due: <strong>
