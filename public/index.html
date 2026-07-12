@@ -5311,3 +5311,28 @@ setTimeout(mount,1200); setTimeout(mount,3000);
 window.cnkRenderEmails=render;
 })();
 </script>
+
+
+<style>
+/* __cnkCalMobile — stop the admin calendar from re-measuring itself on every month change */
+@media (max-width: 600px){
+  .cal-grid{
+    grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+    gap: 3px !important;
+    width: 100% !important;
+  }
+  .cal-day{
+    aspect-ratio: auto !important;   /* fixed box instead of a re-measured square */
+    height: 42px !important;
+    min-height: 42px !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+  }
+  .cal-day-label{ min-width: 0 !important; overflow: hidden !important; }
+  .calendar-section{ overflow-x: hidden !important; }
+}
+@media (max-width: 400px){
+  .cal-day{ height: 38px !important; min-height: 38px !important; font-size: 11px !important; }
+}
+</style>
