@@ -21,14 +21,29 @@ module.exports = async function handler(req, res) {
     // so a failure here can never affect the deposit.
     if (req.body && req.body.action === 'save_card') {
       try {
-        const custRes = await client.customersApi.createCustomer({
-          idempotencyKey: randomUUID(),
-          emailAddress: email || undefined,
-          givenName: String(name || '').split(' ')[0] || undefined,
-          familyName: String(name || '').split(' ').slice(1).join(' ') || undefined,
-          referenceId: bookingId || undefined
-        });
-        const customerId = custRes.result.customer.id;
+        // __cnkCustDedupe: reuse an existing Square customer (Square auto-creates one from the
+        // card payment) instead of blindly making a second profile for the same person.
+        let customerId = null;
+        if (email) {
+          try {
+            const found = await client.customersApi.searchCustomers({
+              limit: BigInt(1),
+              query: { filter: { emailAddress: { exact: email } } }
+            });
+            const hit = found.result && found.result.customers && found.result.customers[0];
+            if (hit && hit.id) customerId = hit.id;
+          } catch (e) { /* search is best effort; fall through to create */ }
+        }
+        if (!customerId) {
+          const custRes = await client.customersApi.createCustomer({
+            idempotencyKey: randomUUID(),
+            emailAddress: email || undefined,
+            givenName: String(name || '').split(' ')[0] || undefined,
+            familyName: String(name || '').split(' ').slice(1).join(' ') || undefined,
+            referenceId: bookingId || undefined
+          });
+          customerId = custRes.result.customer.id;
+        }
         const cardRes = await client.cardsApi.createCard({
           idempotencyKey: randomUUID(),
           sourceId: nonce,
