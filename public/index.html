@@ -5721,3 +5721,63 @@ function sync(){
 setTimeout(sync,300); setInterval(sync,400);
 })();
 </script>
+
+
+<script>
+(function(){
+if(window.__cnkPromoPanelV1)return;window.__cnkPromoPanelV1=true;
+function pesc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function pmoney(n){return '$'+(Number(n)||0).toFixed(2);}
+function pname(b){ return String(b.name||((b.first||'')+' '+(b.last||'')).trim()||b.id||''); }
+function pbooked(b){ var t=Number(b.created||0); if(!t) return ''; return new Date(t).toISOString().slice(0,10); }
+function prender(){
+ var host=document.getElementById('cnk-promo-panel'); if(!host)return;
+ fetch('/api/list-bookings?z='+Date.now(),{cache:'no-store'}).then(function(r){return r.json();}).then(function(j){
+  var all=(j&&j.bookings)||j||[];
+  var used=all.filter(function(b){ return b && String(b.id).indexOf('CNK-')===0 && String(b.promoCode||'').trim(); })
+              .sort(function(a,b){ return Number(b.created||0)-Number(a.created||0); });
+  var totalOff=used.reduce(function(s,b){return s+Number(b.promoDiscount||0);},0);
+  var byCode={};
+  used.forEach(function(b){ var k=String(b.promoCode).toUpperCase(); byCode[k]=byCode[k]||{n:0,amt:0}; byCode[k].n++; byCode[k].amt+=Number(b.promoDiscount||0); });
+  var chips=Object.keys(byCode).map(function(k){
+    return '<span style="display:inline-block;background:#2E2E2B;border:1px solid #C4983A;border-radius:20px;padding:4px 12px;margin:0 6px 6px 0;font-size:13px;color:#C4983A;font-weight:600">'
+      +pesc(k)+' &middot; '+byCode[k].n+' use'+(byCode[k].n===1?'':'s')+' &middot; '+pmoney(byCode[k].amt)+' off</span>';
+  }).join('') || '<span style="color:#8a8a82;font-size:13px">No promo codes used yet.</span>';
+  var rows=used.map(function(b){
+    var cx=String(b.status||'').toLowerCase()==='cancelled';
+    return '<tr style="border-top:1px solid #3a3a36;'+(cx?'opacity:.5':'')+'">'
+     +'<td style="padding:9px 8px;color:#F5F0E8">'+pesc(pname(b))+(cx?' <span style="color:#8B1A2C;font-size:11px">(cancelled)</span>':'')+'</td>'
+     +'<td style="padding:9px 8px;color:#9a9a92;font-size:13px">'+pesc(pbooked(b))+'</td>'
+     +'<td style="padding:9px 8px;color:#c9c9c0;font-size:13px">'+pesc(b.date||'')+'</td>'
+     +'<td style="padding:9px 8px"><span style="color:#C4983A;font-weight:700">'+pesc(String(b.promoCode).toUpperCase())+'</span></td>'
+     +'<td style="padding:9px 8px;color:#4caf50;font-weight:600">-'+pmoney(b.promoDiscount)+'</td>'
+     +'<td style="padding:9px 8px;color:#F5F0E8">'+pmoney(b.price||b.total)+'</td></tr>';
+  }).join('');
+  host.innerHTML='<div style="background:#252522;border:1px solid #3a3a36;border-radius:12px;padding:18px;margin-top:18px">'
+   +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
+   +'<h3 style="margin:0;color:#F5F0E8;font-size:18px">Promo Usage</h3>'
+   +'<button id="cnk-pp-refresh" style="background:#2E2E2B;color:#F5F0E8;border:1px solid #3a3a36;border-radius:8px;padding:6px 12px;cursor:pointer">Refresh</button></div>'
+   +'<div style="color:#9a9a92;font-size:13px;margin-bottom:10px"><strong style="color:#F5F0E8">'+used.length+'</strong> booking(s) used a code &middot; <strong style="color:#C4983A">'+pmoney(totalOff)+'</strong> discounted in total.</div>'
+   +'<div style="margin-bottom:12px">'+chips+'</div>'
+   +(used.length? ('<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:14px">'
+   +'<thead><tr style="text-align:left;color:#9a9a92;font-size:12px;text-transform:uppercase">'
+   +'<th style="padding:6px 8px">Customer</th><th style="padding:6px 8px">Booked</th><th style="padding:6px 8px">Event</th>'
+   +'<th style="padding:6px 8px">Code</th><th style="padding:6px 8px">Discount</th><th style="padding:6px 8px">Total</th>'
+   +'</tr></thead><tbody>'+rows+'</tbody></table></div>') : '')
+   +'</div>';
+  var rb=document.getElementById('cnk-pp-refresh'); if(rb)rb.onclick=prender;
+ }).catch(function(){ host.innerHTML='<div style="color:#8B1A2C;padding:14px">Could not load promo usage.</div>'; });
+}
+function pmount(){
+ var view=document.querySelector('.admin-view'); if(!view){setTimeout(pmount,600);return;}
+ if(document.getElementById('cnk-promo-panel'))return;
+ var d=document.createElement('div'); d.id='cnk-promo-panel';
+ var p=document.getElementById('cnk-promo-admin');
+ if(p&&p.parentNode){ p.parentNode.insertBefore(d, p.nextSibling); } else { view.appendChild(d); }
+ prender();
+}
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',pmount);}else{pmount();}
+setTimeout(pmount,1400); setTimeout(pmount,3200);
+window.cnkRenderPromoPanel=prender;
+})();
+</script>
