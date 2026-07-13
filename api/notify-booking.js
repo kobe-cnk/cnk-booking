@@ -68,6 +68,12 @@ module.exports = async function handler(req, res) {
     ];
     if (b.deliveryFee) lines.push(['Delivery fee', money(b.deliveryFee) + (b.deliveryMiles ? (' (' + b.deliveryMiles + ' mi RT)') : '')]);
     if (b.discount) lines.push(['Discount', '-' + money(b.discount)]);
+    /* __cnkPromoEmail: bookings store promoCode/promoDiscount, NOT `discount`, so the line
+       above never fired and promo usage was invisible. Show the code and the amount. */
+    var _promoCode = String(b.promoCode || '');
+    var _promoOff  = Number(b.promoDiscount || 0);
+    if (_promoCode) lines.push(['PROMO CODE USED', _promoCode]);
+    if (!b.discount && _promoOff > 0) lines.push(['Discount', '-' + money(_promoOff)]);
     if (b.paymentMethod) lines.push(['Payment method', b.paymentMethod]);
     const rows = lines.filter(function(l){ return l[1] !== undefined && l[1] !== null && l[1] !== ''; })
       .map(function(l){ return '<tr><td style="padding:4px 12px 4px 0;color:#888;">' + esc(l[0]) + '</td><td style="padding:4px 0;color:#111;font-weight:600;">' + esc(l[1]) + '</td></tr>'; }).join('');
