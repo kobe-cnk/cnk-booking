@@ -5450,6 +5450,7 @@ function injectAuth(){
   var agree=document.getElementById('cnk-pw-agree'); if(!agree)return;
   var host=agree.closest('label')||agree.parentNode; if(!host||!host.parentNode)return;
   var wrap=document.createElement('label');
+  wrap.className='cnk-check'; /*__cnkAuthStyle: match the other agreement checkboxes*/
   wrap.style.cssText='display:flex;gap:8px;align-items:flex-start;margin-top:10px;font-size:14px;line-height:1.4;';
   var cb=document.createElement('input'); cb.type='checkbox'; cb.id=AUTH_ID; cb.style.marginTop='3px'; cb.checked=true; /*__cnkAuthOptOut: pre-selected, opt-out*/
   var sp=document.createElement('span'); sp.textContent=AUTH_TEXT;
