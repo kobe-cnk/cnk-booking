@@ -5441,7 +5441,7 @@ window.cnkRenderAgreements=render;
 (function(){
 if(window.__cnkCardOnFileClient)return;window.__cnkCardOnFileClient=true;
 var AUTH_ID='cnk-pw-cardauth';
-var AUTH_TEXT='I authorize CNK Booths to securely save this card and charge it for the remaining balance of my booking 14 days before my event date.';
+var AUTH_TEXT='I authorize CNK Booths to securely save this card and charge it for the remaining balance of my booking 14 days before my event date. (Uncheck if you would rather pay the balance yourself.)';
 function val(id){var e=document.getElementById(id);return e?String(e.value||'').trim():'';}
 // --- inject the authorization checkbox into the rental agreement ---
 function injectAuth(){
@@ -5451,7 +5451,7 @@ function injectAuth(){
   var host=agree.closest('label')||agree.parentNode; if(!host||!host.parentNode)return;
   var wrap=document.createElement('label');
   wrap.style.cssText='display:flex;gap:8px;align-items:flex-start;margin-top:10px;font-size:14px;line-height:1.4;';
-  var cb=document.createElement('input'); cb.type='checkbox'; cb.id=AUTH_ID; cb.style.marginTop='3px';
+  var cb=document.createElement('input'); cb.type='checkbox'; cb.id=AUTH_ID; cb.style.marginTop='3px'; cb.checked=true; /*__cnkAuthOptOut: pre-selected, opt-out*/
   var sp=document.createElement('span'); sp.textContent=AUTH_TEXT;
   wrap.appendChild(cb); wrap.appendChild(sp);
   host.parentNode.insertBefore(wrap, host.nextSibling);
@@ -5470,7 +5470,7 @@ function wrapFinish(){
    if(!window._cnkPaid){
     injectAuth();
     var a=document.getElementById(AUTH_ID);
-    if(a && !a.checked){
+    if(false && a && !a.checked){ // opt-out: unchecking simply means no card is saved
      var eb=document.getElementById('cnk-pw-err'); /*__cofErrFix*/
      if(!eb){ eb=document.createElement('div'); eb.id='cnk-pw-err'; var s3=document.getElementById('cnk-s3'); if(s3)s3.appendChild(eb); }
      if(eb){ eb.innerHTML='<strong>Please complete the rental agreement before booking:</strong><br>\u2022 Authorize the card for the remaining balance'; eb.style.display='block'; eb.scrollIntoView({behavior:'smooth',block:'center'}); }
