@@ -5662,7 +5662,9 @@ var ORIG={};
 // Single source of truth: the pricing engine shows #cnk-fullpay-note ONLY when it charges in full.
 function isFullPay(){
  var n=document.getElementById('cnk-fullpay-note');
- return !!(n && n.offsetParent!==null && getComputedStyle(n).display!=='none');
+ /*__cnkFullPayDetect: the pricing engine sets this element's INLINE display. Read that, not
+   visibility - the paperwork step (with the card-auth box) renders before #cnk-s2 is on screen. */
+ return !!(n && n.style.display!=='none');
 }
 function setText(el,key,val){
  if(!el)return; var c=el.textContent;
