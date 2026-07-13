@@ -878,7 +878,7 @@
             <select class="form-select" id="cnk-pw-outdoor"><option value="">Select…</option><option>No — indoor</option><option>Yes — covered &amp; level space provided</option><option>Yes — need to discuss coverage</option></select>
           </div>
           <div class="form-group form-full"><label class="form-label">Custom Overlay / Theme Details</label><textarea class="form-textarea" id="cnk-pw-overlay" placeholder="Names, date, colors, logo, theme for the photo strip design…"></textarea></div>
-          <div class="form-group form-full"><label class="form-label">Onsite Contact (name &amp; phone for event day)</label><input class="form-input" id="cnk-pw-contact" placeholder="Day-of coordinator name & cell"></div>
+          <div class="form-group form-full"><label class="form-label">Day-of Contact Name</label><input class="form-input" id="cnk-pw-contact" placeholder="e.g. Sarah Jones"></div><div class="form-group form-full"><label class="form-label">Day-of Contact Phone</label><input class="form-input" id="cnk-pw-contact-phone" type="tel" placeholder="e.g. (801) 555-0123"></div>
         </div>
 
         <label class="cnk-check"><input type="checkbox" id="cnk-pw-media" checked> I allow CNK Booths to use event photos for marketing (uncheck to opt out)</label>
@@ -1028,13 +1028,13 @@
   window.cnkFinish=function(){
     var err=document.getElementById('cnk-s3-err'); err.textContent='';
     if(!document.getElementById('cnk-pw-agree').checked){ err.textContent='Please agree to the Rental Agreement to continue.'; return; }
-    if(!val('cnk-pw-sign')){ err.textContent='Please type your full name to sign.'; return; }/* CNK require setup+contact */if(!val('cnk-pw-setup')){err.textContent='Please add setup details (where we set up, access, parking, etc.) to continue.';return;}if(!val('cnk-pw-contact')){err.textContent='Please add a day-of contact name & cell to continue.';return;}
+    if(!val('cnk-pw-sign')){ err.textContent='Please type your full name to sign.'; return; }/* CNK require setup+contact */if(!val('cnk-pw-setup')){err.textContent='Please add setup details (where we set up, access, parking, etc.) to continue.';return;}if(!val('cnk-pw-contact')){err.textContent='Please add a day-of contact name to continue.';return;}if(!val('cnk-pw-contact-phone')){err.textContent='Please add a day-of contact phone number to continue.';return;}
     var c=calc();
     var bookings=[]; try{ bookings=JSON.parse(localStorage.getItem('cnk_bookings')||'[]'); }catch(e){}
     var id=window._cnkBookingId||('CNK-'+Math.floor(100000+Math.random()*900000));
     var paperwork={
       startTime:val('cnk-pw-start'), endTime:val('cnk-pw-end'), setup:val('cnk-pw-setup'),
-      power:val('cnk-pw-power'), wifi:val('cnk-pw-wifi'), outdoor:val('cnk-pw-outdoor'), overlay:val('cnk-pw-overlay'), dayContact:val('cnk-pw-contact'),
+      power:val('cnk-pw-power'), wifi:val('cnk-pw-wifi'), outdoor:val('cnk-pw-outdoor'), overlay:val('cnk-pw-overlay'), dayContactName:val('cnk-pw-contact'), dayContactPhone:val('cnk-pw-contact-phone'), dayContact:(val('cnk-pw-contact')+' - '+val('cnk-pw-contact-phone')).trim(),
       mediaRelease:document.getElementById('cnk-pw-media').checked, signature:val('cnk-pw-sign'), signatureImg:(window.cnkPwSig?window.cnkPwSig():''),
       agreedAt:new Date().toISOString()
     };
@@ -1069,7 +1069,7 @@
   window.cnkReset=function(){
     state={pkg:null,hours:1,addon:0};
     window._cnkPaid=false; window._cnkBookingId=null;
-    ['cnk-first','cnk-last','cnk-email','cnk-phone','cnk-date','cnk-venue','cnk-guests','cnk-notes','cnk-pw-setup','cnk-pw-overlay','cnk-pw-contact','cnk-pw-sign','cnk-pw-start','cnk-pw-end'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
+    ['cnk-first','cnk-last','cnk-email','cnk-phone','cnk-date','cnk-venue','cnk-guests','cnk-notes','cnk-pw-setup','cnk-pw-overlay','cnk-pw-contact','cnk-pw-contact-phone','cnk-pw-sign','cnk-pw-start','cnk-pw-end'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
     ['cnk-type','cnk-source','cnk-pw-power'].forEach(function(id){var e=document.getElementById(id);if(e)e.selectedIndex=0;});
     document.getElementById('cnk-pw-agree').checked=false; document.getElementById('cnk-pw-media').checked=false;
     document.querySelectorAll('#cnk-s1 .package-card').forEach(function(c){c.classList.remove('selected');});
@@ -5051,7 +5051,7 @@ window.fetch=function(u,o){
 <script>
 (function(){
 if(window.__cnkContractFirst)return;window.__cnkContractFirst=true;
-var REQ=[['cnk-pw-start','Event start time'],['cnk-pw-end','Event end time'],['cnk-pw-setup','Setup location'],['cnk-pw-contact','Day-of contact'],['cnk-pw-power','Power availability'],['cnk-pw-wifi','WiFi availability'],['cnk-pw-outdoor','Indoor or outdoor']];
+var REQ=[['cnk-pw-start','Event start time'],['cnk-pw-end','Event end time'],['cnk-pw-setup','Setup location'],['cnk-pw-contact','Day-of contact name'],['cnk-pw-contact-phone','Day-of contact phone'],['cnk-pw-power','Power availability'],['cnk-pw-wifi','WiFi availability'],['cnk-pw-outdoor','Indoor or outdoor']];
 function sec(n){return document.getElementById('cnk-s'+n);}
 function isActive(n){var e=sec(n);return !!(e&&e.classList.contains('active'));}
 function errBox(){var e=document.getElementById('cnk-pw-err');if(e)return e;var d=document.createElement('div');d.id='cnk-pw-err';var s3=sec(3);if(s3)s3.appendChild(d);return d;}
