@@ -5914,8 +5914,13 @@ function mount(){
  var view=document.querySelector(".admin-view"); if(!view){setTimeout(mount,600);return;}
  if(document.getElementById("cnk-confirm-panel"))return;
  var d=document.createElement("div"); d.id="cnk-confirm-panel";
- var a=document.getElementById("cnk-agreements-admin");
- if(a&&a.parentNode){ a.parentNode.insertBefore(d,a); } else { view.appendChild(d); }
+ /*__cnkConfirmTop: pin to the top of the default Overview view - a daily call list buried at the bottom is a list nobody runs.*/
+ var ov=document.getElementById("admin-overview")||view;
+ var hd=ov.querySelector(".admin-header");
+ if(hd&&hd.parentNode===ov&&hd.nextSibling){ ov.insertBefore(d,hd.nextSibling); }
+ else if(hd&&hd.parentNode===ov){ ov.appendChild(d); }
+ else if(ov.firstChild){ ov.insertBefore(d,ov.firstChild); }
+ else { ov.appendChild(d); }
  render();
 }
 if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",mount);}else{mount();}
