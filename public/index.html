@@ -5829,7 +5829,7 @@ function FORM(b){
  h+=H3("Money");
  h+="<div style=\"background:#1a1a18;border:1px solid #3a3a36;border-radius:8px;padding:10px 12px;margin-bottom:9px;font-size:14px;color:#c9c9c0\">Balance owed: <strong style=\"color:"+(bal>0?"#e0a030":"#4caf50")+"\">"+M(bal)+"</strong> &nbsp;&middot;&nbsp; Card: "+CARD(b)+"</div>";
  h+=H3("Call result");
- h+="<div style=\"display:flex;gap:10px\"><div style=\"flex:1\">"+SEL("cc-by","Called by",c.calledBy||"","","Kobe","Cole","Noah").slice(0,0)+SEL("cc-by","Called by",c.calledBy||"",["","Kobe","Cole","Noah"])+"</div><div style=\"flex:1\">"+SEL("cc-out","Outcome",c.outcome||"",["","Confirmed","No answer","Left voicemail","Changes made","Reschedule requested"])+"</div></div>";
+ h+="<div style=\"display:flex;gap:10px\"><div style=\"flex:1\">"+/*__cnkCcByFix*/SEL("cc-by","Called by",c.calledBy||"",["","Kobe","Cole","Noah"])+"</div><div style=\"flex:1\">"+SEL("cc-out","Outcome",c.outcome||"",["","Confirmed","No answer","Left voicemail","Changes made","Reschedule requested"])+"</div></div>";
  h+=TA("cc-notes","Call notes",c.notes||"","Anything they said that matters on event day");
  h+="<div id=\"cc-msg\" style=\"min-height:18px;font-size:13px;margin:6px 0\"></div>";
  h+="<div style=\"display:flex;gap:8px;margin-top:6px\">";
