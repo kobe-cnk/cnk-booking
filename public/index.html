@@ -1035,7 +1035,7 @@
     var paperwork={
       startTime:val('cnk-pw-start'), endTime:val('cnk-pw-end'), setup:val('cnk-pw-setup'),
       power:val('cnk-pw-power'), wifi:val('cnk-pw-wifi'), outdoor:val('cnk-pw-outdoor'), overlay:val('cnk-pw-overlay'), dayContactName:val('cnk-pw-contact'), dayContactPhone:val('cnk-pw-contact-phone'), dayContact:(val('cnk-pw-contact')+' - '+val('cnk-pw-contact-phone')).trim(),
-      mediaRelease:document.getElementById('cnk-pw-media').checked, signature:val('cnk-pw-sign'), signatureImg:(window.cnkPwSig?window.cnkPwSig():''),
+      mediaRelease:document.getElementById('cnk-pw-media').checked, /*__cnkRecordAuth: record whether the customer authorized card-on-file, so 'no card' is never ambiguous between 'they declined' and 'the save broke'.*/ cardAuthChecked:(function(){var a=document.getElementById('cnk-pw-cardauth');return a?!!a.checked:null;})(), signature:val('cnk-pw-sign'), signatureImg:(window.cnkPwSig?window.cnkPwSig():''),
       agreedAt:new Date().toISOString()
     };
     var booking={
