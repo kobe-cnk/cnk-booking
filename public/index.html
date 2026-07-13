@@ -5786,3 +5786,140 @@ setTimeout(pmount,1400); setTimeout(pmount,3200);
 window.cnkRenderPromoPanel=prender;
 })();
 </script>
+
+<script>
+(function(){
+if(window.__cnkConfirmCallV1)return;window.__cnkConfirmCallV1=true;
+var S={open:null,all:false,busy:false};
+function E(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];});}
+function M(n){return "$"+(Number(n)||0).toFixed(2);}
+function NM(b){return String(b.name||((b.first||"")+" "+(b.last||"")).trim()||b.id||"");}
+function TODAY(){return new Intl.DateTimeFormat("en-CA",{timeZone:"America/Denver",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());}
+function DOUT(d){if(!d)return 999;var a=new Date(TODAY()+"T00:00:00"),b=new Date(String(d)+"T00:00:00");return Math.round((b-a)/86400000);}
+function DONE(b){return !!(b.confirmCall&&b.confirmCall.confirmedAt);}
+function V(id){var e=document.getElementById(id);return e?String(e.value||"").trim():"";}
+function FLD(id,l,v,t,ph){return "<div style=\"margin-bottom:9px\"><label style=\"display:block;color:#9a9a92;font-size:11px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px\">"+E(l)+"</label><input id=\""+id+"\" type=\""+(t||"text")+"\" value=\""+E(v)+"\" placeholder=\""+E(ph||"")+"\" style=\"width:100%;box-sizing:border-box;background:#1a1a18;border:1px solid #3a3a36;border-radius:8px;padding:9px 10px;color:#F5F0E8;font-size:14px\"></div>";}
+function SEL(id,l,v,o){var x=o.map(function(q){return "<option value=\""+E(q)+"\""+(String(v)===q?" selected":"")+">"+E(q||"--")+"</option>";}).join("");return "<div style=\"margin-bottom:9px\"><label style=\"display:block;color:#9a9a92;font-size:11px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px\">"+E(l)+"</label><select id=\""+id+"\" style=\"width:100%;box-sizing:border-box;background:#1a1a18;border:1px solid #3a3a36;border-radius:8px;padding:9px 10px;color:#F5F0E8;font-size:14px\">"+x+"</select></div>";}
+function TA(id,l,v,ph){return "<div style=\"margin-bottom:9px\"><label style=\"display:block;color:#9a9a92;font-size:11px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px\">"+E(l)+"</label><textarea id=\""+id+"\" rows=\"3\" placeholder=\""+E(ph||"")+"\" style=\"width:100%;box-sizing:border-box;background:#1a1a18;border:1px solid #3a3a36;border-radius:8px;padding:9px 10px;color:#F5F0E8;font-size:14px;resize:vertical\">"+E(v)+"</textarea></div>";}
+function CARD(b){if(b.squareCardId)return "<span style=\"color:#4caf50;font-weight:600\">"+E(String(b.cardBrand||"Card"))+" &bull;&bull;&bull;&bull; "+E(String(b.cardLast4||""))+"</span>";if(b.cardSaveError)return "<span style=\"color:#e05c70;font-weight:600\">Card save FAILED</span>";return "<span style=\"color:#e0a030;font-weight:600\">No card on file</span>";}
+function H3(t){return "<div style=\"color:#C4983A;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin:14px 0 8px;padding-bottom:4px;border-bottom:1px solid #3a3a36\">"+E(t)+"</div>";}
+function FORM(b){
+ var p=b.paperwork||{},c=b.confirmCall||{},bal=Number(b.balance||0);
+ var first=(NM(b).split(" ")[0])||"there";
+ var money = bal>0 ? (b.squareCardId ? "There is a balance of "+M(bal)+" and we will charge the card on file 14 days out. Tell them you will text the day before you charge it." : "There is a balance of "+M(bal)+" and there is NO card on file. Collect payment on this call.") : "Paid in full. Nothing to collect.";
+ var h="<div style=\"background:#1f1f1d;border:1px solid #C4983A;border-radius:12px;padding:16px;margin-top:10px\">";
+ h+="<div style=\"background:#2a2a26;border-left:3px solid #C4983A;padding:10px 12px;border-radius:6px;margin-bottom:6px;color:#c9c9c0;font-size:13px;line-height:1.55\"><strong style=\"color:#C4983A\">Script:</strong> &ldquo;Hi "+E(first)+", this is [your name] from CNK Booths. I am calling to confirm the details for your event on "+E(b.date||"")+" &mdash; do you have two minutes?&rdquo;<br><strong style=\"color:#C4983A\">Money:</strong> "+E(money)+"</div>";
+ h+="<div style=\"color:#8a8a82;font-size:12px;margin-bottom:4px\">Every field below is pre-filled with what they submitted. Correct anything that is wrong &mdash; it saves back to the booking.</div>";
+ h+=H3("Event");
+ h+=FLD("cc-date","Event date",b.date||"","date");
+ h+="<div style=\"display:flex;gap:10px\"><div style=\"flex:1\">"+FLD("cc-start","Start time",p.startTime||"","time")+"</div><div style=\"flex:1\">"+FLD("cc-end","End time",p.endTime||"","time")+"</div></div>";
+ h+=FLD("cc-guests","Guest count",b.guests||"","text","e.g. 120");
+ h+=H3("Location");
+ h+=FLD("cc-venue","Venue name",b.venueName||"","text","e.g. The Gathering Place (blank if private home)");
+ h+=FLD("cc-loc","Address",b.location||"","text","Full street address");
+ h+=FLD("cc-setup","Setup location (exact spot)",p.setup||"","text","e.g. Main ballroom, north wall near entrance");
+ h+="<div style=\"display:flex;gap:10px\"><div style=\"flex:1\">"+SEL("cc-power","Power within 15ft",String(p.power||""),["","Yes","No","Unsure"])+"</div><div style=\"flex:1\">"+SEL("cc-wifi","WiFi",String(p.wifi||""),["","Yes","No","Unsure"])+"</div></div>";
+ h+=SEL("cc-outdoor","Indoor / Outdoor",String(p.outdoor||""),["","Indoor","Outdoor","Both"]);
+ h+=H3("Day-of contact");
+ h+="<div style=\"display:flex;gap:10px\"><div style=\"flex:1\">"+FLD("cc-cname","Contact name",p.dayContactName||"","text","A PERSON, not a place")+"</div><div style=\"flex:1\">"+FLD("cc-cphone","Contact phone",p.dayContactPhone||"","tel","")+"</div></div>";
+ h+=H3("Logistics");
+ h+=FLD("cc-arrive","We arrive / setup by",c.arrivalTime||"","text","e.g. 4:30pm, 90 min before start");
+ h+=TA("cc-park","Parking / loading / access",c.parking||"","Where do we park? Loading door? Elevator? Who lets us in?");
+ h+=TA("cc-special","Special requests",c.special||"","Backdrop, props, template, overlay, anything they asked for");
+ h+=H3("Money");
+ h+="<div style=\"background:#1a1a18;border:1px solid #3a3a36;border-radius:8px;padding:10px 12px;margin-bottom:9px;font-size:14px;color:#c9c9c0\">Balance owed: <strong style=\"color:"+(bal>0?"#e0a030":"#4caf50")+"\">"+M(bal)+"</strong> &nbsp;&middot;&nbsp; Card: "+CARD(b)+"</div>";
+ h+=H3("Call result");
+ h+="<div style=\"display:flex;gap:10px\"><div style=\"flex:1\">"+SEL("cc-by","Called by",c.calledBy||"","","Kobe","Cole","Noah").slice(0,0)+SEL("cc-by","Called by",c.calledBy||"",["","Kobe","Cole","Noah"])+"</div><div style=\"flex:1\">"+SEL("cc-out","Outcome",c.outcome||"",["","Confirmed","No answer","Left voicemail","Changes made","Reschedule requested"])+"</div></div>";
+ h+=TA("cc-notes","Call notes",c.notes||"","Anything they said that matters on event day");
+ h+="<div id=\"cc-msg\" style=\"min-height:18px;font-size:13px;margin:6px 0\"></div>";
+ h+="<div style=\"display:flex;gap:8px;margin-top:6px\">";
+ h+="<button id=\"cc-save\" style=\"background:#C4983A;color:#1a1a18;border:0;border-radius:8px;padding:10px 16px;font-weight:700;cursor:pointer;font-size:14px\">Save &amp; mark confirmed</button>";
+ h+="<button id=\"cc-saveonly\" style=\"background:#2E2E2B;color:#F5F0E8;border:1px solid #3a3a36;border-radius:8px;padding:10px 16px;cursor:pointer;font-size:14px\">Save without confirming</button>";
+ h+="<button id=\"cc-cancel\" style=\"background:transparent;color:#9a9a92;border:1px solid #3a3a36;border-radius:8px;padding:10px 16px;cursor:pointer;font-size:14px\">Close</button>";
+ h+="</div></div>";
+ return h;
+}
+function SAVE(b,confirm){
+ if(S.busy)return; S.busy=true;
+ var msg=document.getElementById("cc-msg"); if(msg){msg.style.color="#9a9a92";msg.textContent="Saving...";}
+ var rec=JSON.parse(JSON.stringify(b));
+ rec.paperwork=rec.paperwork||{};
+ var nm=V("cc-cname"), ph=V("cc-cphone");
+ rec.date=V("cc-date")||rec.date;
+ rec.paperwork.startTime=V("cc-start"); rec.paperwork.endTime=V("cc-end");
+ rec.guests=V("cc-guests");
+ rec.venueName=V("cc-venue"); rec.location=V("cc-loc");
+ rec.paperwork.setup=V("cc-setup");
+ rec.paperwork.power=V("cc-power"); rec.paperwork.wifi=V("cc-wifi"); rec.paperwork.outdoor=V("cc-outdoor");
+ rec.paperwork.dayContactName=nm; rec.paperwork.dayContactPhone=ph;
+ rec.paperwork.dayContact=(nm||ph)?((nm||"")+" - "+(ph||"")):(rec.paperwork.dayContact||"");
+ rec.confirmCall=Object.assign({},rec.confirmCall||{},{
+   arrivalTime:V("cc-arrive"), parking:V("cc-park"), special:V("cc-special"),
+   calledBy:V("cc-by"), outcome:V("cc-out"), notes:V("cc-notes"),
+   savedAt:new Date().toISOString()
+ });
+ if(confirm){ rec.confirmCall.confirmedAt=new Date().toISOString(); }
+ fetch("/api/save-booking",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(rec)})
+  .then(function(r){ if(!r.ok) throw new Error("save failed ("+r.status+")"); return r.json().catch(function(){return {};}); })
+  .then(function(){ S.busy=false; S.open=null; render(); })
+  .catch(function(e){ S.busy=false; var m2=document.getElementById("cc-msg"); if(m2){m2.style.color="#e05c70";m2.textContent="Could not save: "+String(e.message||e);} });
+}
+function render(){
+ var host=document.getElementById("cnk-confirm-panel"); if(!host)return;
+ fetch("/api/list-bookings?z="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){
+  var all=((j&&j.bookings)||j||[]).filter(function(b){return b&&String(b.id).indexOf("CNK-")===0&&String(b.status||"").toLowerCase()!=="cancelled";});
+  var up=all.filter(function(b){return DOUT(b.date)>=0;}).sort(function(a,b){return DOUT(a.date)-DOUT(b.date);});
+  var due=up.filter(function(b){return DOUT(b.date)<=14&&!DONE(b);});
+  var list=S.all?up:due;
+  var rows=list.map(function(b){
+   var d=DOUT(b.date), done=DONE(b), isOpen=(S.open===String(b.id));
+   var chip = done ? "<span style=\"background:#1e3a24;color:#4caf50;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700\">CONFIRMED</span>"
+     : (d<=14 ? "<span style=\"background:#3d2f16;color:#e0a030;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700\">CALL DUE</span>"
+     : "<span style=\"color:#8a8a82;font-size:11px\">"+d+" days out</span>");
+   var h="<div style=\"border-top:1px solid #3a3a36;padding:11px 0\">";
+   h+="<div style=\"display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap\">";
+   h+="<div><div style=\"color:#F5F0E8;font-weight:600\">"+E(NM(b))+"</div><div style=\"color:#9a9a92;font-size:12px\">"+E(b.date||"")+" &middot; "+(d===0?"TODAY":(d===1?"tomorrow":d+" days"))+" &middot; "+E(String(b.phone||"no phone"))+"</div></div>";
+   h+="<div style=\"display:flex;align-items:center;gap:8px\">"+chip+"<button data-cc=\""+E(b.id)+"\" style=\"background:"+(isOpen?"#3a3a36":"#C4983A")+";color:"+(isOpen?"#F5F0E8":"#1a1a18")+";border:0;border-radius:8px;padding:7px 13px;font-weight:700;cursor:pointer;font-size:13px\">"+(isOpen?"Close":(done?"Review":"Open call sheet"))+"</button></div>";
+   h+="</div>";
+   if(isOpen) h+=FORM(b);
+   h+="</div>";
+   return h;
+  }).join("");
+  host.innerHTML="<div style=\"background:#252522;border:1px solid #3a3a36;border-radius:12px;padding:18px;margin-top:18px\">"
+   +"<div style=\"display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:6px\">"
+   +"<h3 style=\"margin:0;color:#F5F0E8;font-size:18px\">14-Day Confirmation Calls</h3>"
+   +"<div style=\"display:flex;gap:8px\">"
+   +"<button id=\"cc-toggle\" style=\"background:#2E2E2B;color:#F5F0E8;border:1px solid #3a3a36;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:13px\">"+(S.all?"Show due only":"Show all upcoming")+"</button>"
+   +"<button id=\"cc-refresh\" style=\"background:#2E2E2B;color:#F5F0E8;border:1px solid #3a3a36;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:13px\">Refresh</button>"
+   +"</div></div>"
+   +"<div style=\"color:#9a9a92;font-size:13px;margin-bottom:6px\"><strong style=\"color:"+(due.length?"#e0a030":"#4caf50")+"\">"+due.length+"</strong> call(s) due &middot; "+up.length+" upcoming event(s)</div>"
+   +(list.length?rows:"<div style=\"color:#8a8a82;padding:14px 0;font-size:14px\">"+(S.all?"No upcoming events.":"No calls due. Every event inside 14 days has been confirmed.")+"</div>")
+   +"</div>";
+  var t=document.getElementById("cc-toggle"); if(t)t.onclick=function(){S.all=!S.all;S.open=null;render();};
+  var rf=document.getElementById("cc-refresh"); if(rf)rf.onclick=function(){S.open=null;render();};
+  Array.prototype.forEach.call(host.querySelectorAll("[data-cc]"),function(btn){
+   btn.onclick=function(){ var id=btn.getAttribute("data-cc"); S.open=(S.open===id)?null:id; render(); };
+  });
+  if(S.open){
+   var rec=all.filter(function(b){return String(b.id)===S.open;})[0];
+   if(rec){
+    var sv=document.getElementById("cc-save"); if(sv)sv.onclick=function(){SAVE(rec,true);};
+    var so=document.getElementById("cc-saveonly"); if(so)so.onclick=function(){SAVE(rec,false);};
+    var cx=document.getElementById("cc-cancel"); if(cx)cx.onclick=function(){S.open=null;render();};
+   }
+  }
+ }).catch(function(){ host.innerHTML="<div style=\"color:#e05c70;padding:14px\">Could not load confirmation calls.</div>"; });
+}
+function mount(){
+ var view=document.querySelector(".admin-view"); if(!view){setTimeout(mount,600);return;}
+ if(document.getElementById("cnk-confirm-panel"))return;
+ var d=document.createElement("div"); d.id="cnk-confirm-panel";
+ var a=document.getElementById("cnk-agreements-admin");
+ if(a&&a.parentNode){ a.parentNode.insertBefore(d,a); } else { view.appendChild(d); }
+ render();
+}
+if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",mount);}else{mount();}
+setTimeout(mount,1500); setTimeout(mount,3400);
+window.cnkRenderConfirmCalls=render;
+})();
+</script>
