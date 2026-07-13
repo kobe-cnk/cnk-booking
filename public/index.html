@@ -5057,6 +5057,11 @@ function isActive(n){var e=sec(n);return !!(e&&e.classList.contains('active'));}
 function errBox(){var e=document.getElementById('cnk-pw-err');if(e)return e;var d=document.createElement('div');d.id='cnk-pw-err';var s3=sec(3);if(s3)s3.appendChild(d);return d;}
 function missing(){var out=[];REQ.forEach(function(f){var el=document.getElementById(f[0]);if(!el)return;var v=(el.value||'').trim();if(!v)out.push(f[1]);});
  var ag=document.getElementById('cnk-pw-agree');if(ag&&!ag.checked)out.push('Agree to the rental agreement');
+ /*__cnkCardRequired: card-on-file authorization is required to book. Visibility-gated on purpose.*/
+ var ca=document.getElementById('cnk-pw-cardauth');
+ var caw=ca?(ca.closest('label')||ca.parentNode):null;
+ var caShown=!!(ca&&caw&&caw.style.display!=='none');
+ if(ca&&caShown&&!ca.checked)out.push('Authorization to keep a card on file');
  var sg=document.getElementById('cnk-pw-sign');if(sg&&!(sg.value||'').trim())out.push('Signature');
  return out;}
 function showErr(list){var e=errBox();if(!list.length){e.style.display='none';return;}e.innerHTML='<strong>Please complete the rental agreement before booking:</strong><br>'+list.map(function(x){return '\u2022 '+x;}).join('<br>');e.style.display='block';e.scrollIntoView({behavior:'smooth',block:'center'});}
@@ -5441,7 +5446,7 @@ window.cnkRenderAgreements=render;
 (function(){
 if(window.__cnkCardOnFileClient)return;window.__cnkCardOnFileClient=true;
 var AUTH_ID='cnk-pw-cardauth';
-var AUTH_TEXT='I authorize CNK Booths to securely save this card and charge it for the remaining balance of my booking 14 days before my event date. (Uncheck if you would rather pay the balance yourself.)';
+var AUTH_TEXT='I authorize CNK Booths to securely save this card and charge it for the remaining balance of my booking 14 days before my event date. A card on file is required to complete this booking.';
 function val(id){var e=document.getElementById(id);return e?String(e.value||'').trim():'';}
 // --- inject the authorization checkbox into the rental agreement ---
 function injectAuth(){
@@ -5452,7 +5457,7 @@ function injectAuth(){
   var wrap=document.createElement('label');
   wrap.className='cnk-check'; /*__cnkAuthStyle: match the other agreement checkboxes*/
   wrap.style.cssText='display:flex;gap:8px;align-items:flex-start;margin-top:10px;font-size:14px;line-height:1.4;';
-  var cb=document.createElement('input'); cb.type='checkbox'; cb.id=AUTH_ID; cb.style.marginTop='3px'; cb.checked=true; /*__cnkAuthOptOut: pre-selected, opt-out*/
+  var cb=document.createElement('input'); cb.type='checkbox'; cb.id=AUTH_ID; cb.style.marginTop='3px'; cb.checked=false; /*__cnkCardRequiredTick: required -> must be actively ticked*/
   var sp=document.createElement('span'); sp.textContent=AUTH_TEXT;
   wrap.appendChild(cb); wrap.appendChild(sp);
   host.parentNode.insertBefore(wrap, host.nextSibling);
