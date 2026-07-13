@@ -850,7 +850,7 @@
           <p><strong>Late Payment:</strong> Any remaining balance unpaid by the due date is subject to a $50 late fee, in addition to the balance due.</p>
 
           <div class="cnk-sec-title">Terms &amp; Conditions</div>
-          <p><strong>1. Deposit &amp; Cancellation.</strong> A deposit equal to 50% of the total rental fee is required to secure the event date. This deposit is non-refundable at the time of payment. If the event is cancelled for any reason, the deposit is retained by CNK Booths as a booking fee and will not be refunded. No portion of any payments is refundable if the event is cancelled within 14 days of the event date.</p>
+          <p><strong>1. Deposit &amp; Cancellation.</strong> A deposit equal to 50% of the total rental fee is required to secure the event date. This deposit is non-refundable at the time of payment. If the event is cancelled for any reason, the deposit is retained by CNK Booths as a booking fee and will not be refunded. No portion of any payments is refundable if the event is cancelled within 14 days of the event date. Any booking made within 14 days of the event date is a final sale: payment is collected in full at the time of booking, and no portion of it is refundable for any reason.</p>
           <p><strong>2. Remaining Balance.</strong> The remaining balance is due no later than 14 days prior to the event date. If the booking is made within 14 days of the event date, payment in full is required at the time of signing in lieu of the standard deposit and balance schedule. Once paid, the remaining balance is non-refundable. Failure to provide timely payment may result in cancellation of services without refund of any amounts paid.</p>
           <p><strong>3. Setup, Breakdown &amp; Client Space Requirements.</strong> CNK Booths will arrive approximately 60 minutes prior to the agreed start time to set up the booth. Breakdown will occur at the conclusion of the rental period. The client is responsible for providing (a) a suitable space of at least 6' x 6' with reasonable overhead clearance, (b) access to a standard 110V power outlet within 25 feet of the booth, and (c) where digital sharing features are required, a stable WiFi connection. Inadequate space, power, or connectivity does not constitute breach by CNK Booths, but may limit certain features.</p>
           <p><strong>4. Outdoor Events.</strong> If the booth is to be set up outdoors, the client must provide a fully covered, level, and dry location (such as a tent with sidewalls). CNK Booths reserves the right to refuse outdoor setup if conditions appear unsafe for the equipment or attendant, including rain, high winds, extreme temperatures, or uneven ground. If the client did not disclose the outdoor location in advance and no suitable indoor alternative is available at the venue, the booking fee is non-refundable.</p>
@@ -3570,7 +3570,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
       ['3. Payment','A 50% deposit reserves the date. The remaining balance is due in full no later than fourteen (14) days before the event date. Prices include applicable sales tax; card payments include a 3% processing fee.'],
       ['4. Delivery & Travel','Delivery within 50 miles round-trip is included. Beyond that, travel is billed at $1.25 per mile, or a custom agreed amount as noted.'],
       ['5. Setup & Space','Client must provide adequate space, a level surface, and access to a standard power outlet within 15 feet, unless otherwise arranged.'],
-      ['6. Cancellation','The 50% deposit is non-refundable at the time of payment and will not be returned if the event is cancelled for any reason. No portion of any payment is refundable if the event is cancelled within 14 days of the event date.'],
+      ['6. Cancellation','The 50% deposit is non-refundable at the time of payment and will not be returned if the event is cancelled for any reason. No portion of any payment is refundable if the event is cancelled within 14 days of the event date. Any booking made within 14 days of the event date is a final sale: payment is collected in full at the time of booking, and no portion of it is refundable for any reason.'],
       ['7. Damage','Client is responsible for any damage to the booth or equipment caused by guests during the event.'],
       ['8. Media Release','If agreed, the Company may use photos taken at the event for promotional purposes.'],
       ['9. Liability','The Company\u2019s liability is limited to the total amount paid for the rental. The Company is not liable for circumstances beyond its control.'],
@@ -5651,5 +5651,71 @@ function mount(){
 if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',mount);}else{mount();}
 setTimeout(mount,1200); setTimeout(mount,3000);
 window.cnkRenderBalances=render;
+})();
+</script>
+
+
+<script>
+(function(){
+if(window.__cnkFullPayLabels)return;window.__cnkFullPayLabels=true;
+var ORIG={};
+// Single source of truth: the pricing engine shows #cnk-fullpay-note ONLY when it charges in full.
+function isFullPay(){
+ var n=document.getElementById('cnk-fullpay-note');
+ return !!(n && n.offsetParent!==null && getComputedStyle(n).display!=='none');
+}
+function setText(el,key,val){
+ if(!el)return; var c=el.textContent;
+ if(ORIG[key]===undefined && c!==val) ORIG[key]=c;
+ if(c!==val) el.textContent=val;
+}
+function restore(el,key){
+ if(!el||ORIG[key]===undefined)return;
+ if(el.textContent!==ORIG[key]) el.textContent=ORIG[key];
+}
+function pick(sel,rx){
+ var a=[].slice.call(document.querySelectorAll(sel));
+ for(var i=0;i<a.length;i++){ if(!a[i].children.length && rx.test(a[i].textContent||'')) return a[i]; }
+ return null;
+}
+function authWrap(){
+ var a=document.getElementById('cnk-pw-cardauth');
+ return a? (a.closest('label')||a.parentNode) : null;
+}
+function sync(){
+ try{
+  var full=isFullPay();
+  var lbl = pick('#cnk-s2 .pb-label', /Deposit due today|Payment in full due today/);
+  var note= pick('#cnk-s2 .pb-note', /reserves your date|payment in full is due today/i);
+  var dep = document.getElementById('cnk-dep-notice');
+  var st  = dep? dep.querySelector('strong') : null;
+  var btn = document.getElementById('cnk-pay-btn');
+  var w   = authWrap();
+  var auth= document.getElementById('cnk-pw-cardauth');
+
+  if(full){
+   setText(lbl,'lbl','Payment in full due today');
+   setText(note,'note','Your event is within 14 days, so payment in full is due today. This booking is final \u2014 no portion is refundable.');
+   setText(st,'st','This payment is non-refundable.');
+   if(btn){
+    var a1=(btn.textContent||'').match(/\$[\d,.]+/);
+    var want='Pay in Full  \u00b7 '+(a1?a1[0]:'');
+    if(ORIG.btn===undefined && btn.textContent.indexOf('Pay in Full')===-1) ORIG.btn=1;
+    if(btn.textContent.trim()!==want.trim()) btn.textContent=want;
+   }
+   // Paid in full => no future balance => the card authorization has nothing to charge.
+   if(w && w.style.display!=='none') w.style.display='none';
+   if(auth && auth.checked) auth.checked=false;
+  } else {
+   restore(lbl,'lbl'); restore(note,'note'); restore(st,'st');
+   if(btn && btn.textContent.indexOf('Pay in Full')!==-1){
+    var a2=(btn.textContent||'').match(/\$[\d,.]+/);
+    btn.textContent='Pay Deposit  \u00b7 '+(a2?a2[0]:'');
+   }
+   if(w && w.style.display==='none'){ w.style.display=''; if(auth) auth.checked=true; }
+  }
+ }catch(e){}
+}
+setTimeout(sync,300); setInterval(sync,400);
 })();
 </script>
