@@ -857,7 +857,7 @@
           <p><strong>5. Delivery &amp; Travel.</strong> Delivery is included within the first 25 miles each way from CNK Booths' base location. Any additional distance beyond 25 miles is billed at $1.25 per mile each way. Delivery distance is calculated by the shortest reasonable driving route. The delivery fee will be calculated and added to the Total Rental Fee prior to the event date.</p>
           <p><strong>6. Idle Hours.</strong> If the client requests that the booth remain on-site between active operating hours (e.g., between ceremony and reception), idle time will be billed at $40 per hour, UNLESS the rental is booked for a "full day". Idle hours must be agreed in advance and counted toward total time on-site.</p>
           <p><strong>7. Overtime.</strong> If the rental period is extended beyond the agreed end time, overtime will be billed at $150 per additional hour (or any portion thereof), payable at the end of the event. Overtime is subject to attendant availability.</p>
-          <p><strong>8. Equipment Care &amp; Liability.</strong> The client assumes responsibility for any damage to the photo booth or related equipment caused by the client, guests, or third parties during the event. Any damage beyond normal wear and tear will be billed to the client at repair or replacement cost. CNK Booths is not liable for any injury, loss, or damage to persons or property arising from guest use of the booth or the surrounding area. The client agrees to indemnify and hold harmless CNK Booths, its owners, and its representatives from any third-party claims, demands, or damages arising out of the event, except those resulting from the gross negligence or willful misconduct of CNK Booths.</p>
+          <p><strong>8. Equipment Care &amp; Liability.</strong> The client assumes responsibility for any damage to the photo booth or related equipment caused by the client, guests, or third parties during the event. Any damage beyond normal wear and tear will be billed to the client at repair or replacement cost. The client authorizes CNK Booths to charge the payment card kept on file for any such amounts, and for any additional time used beyond the booked hours at the additional-hour rate then in effect. CNK Booths will document any damage with photographs and will notify the client by email before charging the card on file. CNK Booths is not liable for any injury, loss, or damage to persons or property arising from guest use of the booth or the surrounding area. The client agrees to indemnify and hold harmless CNK Booths, its owners, and its representatives from any third-party claims, demands, or damages arising out of the event, except those resulting from the gross negligence or willful misconduct of CNK Booths.</p>
           <p><strong>9. Insurance.</strong> CNK Booths maintains general liability insurance. A Certificate of Insurance (COI) is available upon request at no additional charge. Requests to name the venue or other parties as additional insureds may be subject to a small administrative fee and must be made at least 14 days prior to the event.</p>
           <p><strong>10. Photo Rights &amp; Use of Images.</strong> The client grants CNK Booths a non-exclusive, royalty-free license to use photographs captured during the event for promotional purposes, including the CNK Booths website, social media, and marketing materials. The client may opt out of this license by notifying CNK Booths in writing prior to the event (or via the opt-out below). Client retains full personal use rights to all event photos.</p>
           <p><strong>11. Substitution of Equipment.</strong> In the unlikely event of equipment failure, CNK Booths reserves the right to substitute comparable equipment without notice. If the booth cannot be operated for any portion of the rental period due to equipment failure not caused by the client or guests, the client will receive a prorated refund for the affected time.</p>
@@ -3571,7 +3571,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
       ['4. Delivery & Travel','Delivery within 50 miles round-trip is included. Beyond that, travel is billed at $1.25 per mile, or a custom agreed amount as noted.'],
       ['5. Setup & Space','Client must provide adequate space, a level surface, and access to a standard power outlet within 15 feet, unless otherwise arranged.'],
       ['6. Cancellation','The 50% deposit is non-refundable at the time of payment and will not be returned if the event is cancelled for any reason. No portion of any payment is refundable if the event is cancelled within 14 days of the event date. Any booking made within 14 days of the event date is a final sale: payment is collected in full at the time of booking, and no portion of it is refundable for any reason.'],
-      ['7. Damage','Client is responsible for any damage to the booth or equipment caused by guests during the event.'],
+      ['7. Damage','Client is responsible for any damage to the booth or equipment caused by guests during the event. Damage beyond normal wear and tear is billed at repair or replacement cost. Client authorizes the Company to charge the card kept on file for such amounts, and for any additional time used beyond the booked hours at the additional-hour rate then in effect. The Company will document damage with photographs and will notify Client by email before charging the card.'],
       ['8. Media Release','If agreed, the Company may use photos taken at the event for promotional purposes.'],
       ['9. Liability','The Company\u2019s liability is limited to the total amount paid for the rental. The Company is not liable for circumstances beyond its control.'],
       ['10. Weather (Outdoor)','For outdoor events, Client must provide shelter/shade for the booth. The Company may decline setup in unsafe conditions.'],
@@ -5446,7 +5446,7 @@ window.cnkRenderAgreements=render;
 (function(){
 if(window.__cnkCardOnFileClient)return;window.__cnkCardOnFileClient=true;
 var AUTH_ID='cnk-pw-cardauth';
-var AUTH_TEXT='I authorize CNK Booths to securely save this card and charge it for the remaining balance of my booking 14 days before my event date. A card on file is required to complete this booking.';
+var AUTH_TEXT='I authorize CNK Booths to securely save this card and charge it for the remaining balance of my booking 14 days before my event date. I also authorize CNK Booths to charge this card for any additional charges I incur under the Rental Agreement, such as additional time beyond my booked hours, or damage to or loss of equipment. A card on file is required to complete this booking.';
 function val(id){var e=document.getElementById(id);return e?String(e.value||'').trim():'';}
 // --- inject the authorization checkbox into the rental agreement ---
 function injectAuth(){
@@ -5711,15 +5711,15 @@ function sync(){
     if(btn.textContent.trim()!==want.trim()) btn.textContent=want;
    }
    // Paid in full => no future balance => the card authorization has nothing to charge.
-   if(w && w.style.display!=='none') w.style.display='none';
-   if(auth && auth.checked) auth.checked=false;
+   /*__cnkCardAlways: card on file is required for EVERY booking (post-event charges), so never hide it.*/ if(w && w.style.display==='none') w.style.display='';
+   /*__cnkCardAlways: never auto-uncheck -- the customer's choice stands.*/
   } else {
    restore(lbl,'lbl'); restore(note,'note'); restore(st,'st');
    if(btn && btn.textContent.indexOf('Pay in Full')!==-1){
     var a2=(btn.textContent||'').match(/\$[\d,.]+/);
     btn.textContent='Pay Deposit  \u00b7 '+(a2?a2[0]:'');
    }
-   if(w && w.style.display==='none'){ w.style.display=''; if(auth) auth.checked=true; }
+   if(w && w.style.display==='none'){ w.style.display=''; }
   }
  }catch(e){}
 }
