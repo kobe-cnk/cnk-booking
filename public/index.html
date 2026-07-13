@@ -881,7 +881,7 @@
           <div class="form-group form-full"><label class="form-label">Onsite Contact (name &amp; phone for event day)</label><input class="form-input" id="cnk-pw-contact" placeholder="Day-of coordinator name & cell"></div>
         </div>
 
-        <label class="cnk-check"><input type="checkbox" id="cnk-pw-media"> I allow CNK Booths to use event photos for marketing (uncheck to opt out)</label>
+        <label class="cnk-check"><input type="checkbox" id="cnk-pw-media" checked> I allow CNK Booths to use event photos for marketing (uncheck to opt out)</label>
         <label class="cnk-check"><input type="checkbox" id="cnk-pw-agree"> I have read and agree to the Rental Agreement above.<span style="color:#e05c70;"> *</span></label>
 
         <div class="form-group" style="margin-top:16px;">
@@ -3890,7 +3890,8 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
   window.cnkPwSig=function(){ try{ return pad.has?pad.canvas.toDataURL('image/png'):''; }catch(e){ return ''; } };
   function hideGroup(id){ var el=document.getElementById(id); if(el){ var g=(el.closest&&el.closest('.form-group'))||el.parentNode; if(g) g.style.display='none'; } }
   function build(){
-    ['cnk-pw-setup','cnk-pw-overlay','cnk-pw-contact'].forEach(hideGroup);
+    /*__cnkShowFields: setup + onsite contact are REQUIRED by the agreement step, so they must be visible. Only the optional overlay field stays hidden.*/
+    ['cnk-pw-overlay'].forEach(hideGroup);
     var s=document.getElementById('cnk-pw-sign'); if(!s) return;
     if(!document.getElementById('cnk-pw-sign-pad')){
       var grp=(s.closest&&s.closest('.form-group'))||s.parentNode;
