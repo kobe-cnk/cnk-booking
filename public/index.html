@@ -5831,7 +5831,7 @@ function FORM(b){
  h+=H3("Call result");
  h+="<div style=\"display:flex;gap:10px\"><div style=\"flex:1\">"+/*__cnkCcByFix*/SEL("cc-by","Called by",c.calledBy||"",["","Kobe","Cole","Noah"])+"</div><div style=\"flex:1\">"+SEL("cc-out","Outcome",c.outcome||"",["","Confirmed","No answer","Left voicemail","Changes made","Reschedule requested"])+"</div></div>";
  h+=TA("cc-notes","Call notes",c.notes||"","Anything they said that matters on event day");
- h+="<div id=\"cc-msg\" style=\"min-height:18px;font-size:13px;margin:6px 0\"></div>";
+ h+="<input type=\"hidden\" id=\"cc-bid\" value=\""+E(b.id)+"\">";h+="<div id=\"cc-msg\" style=\"min-height:18px;font-size:13px;margin:6px 0\"></div>";
  h+="<div style=\"display:flex;gap:8px;margin-top:6px\">";
  h+="<button id=\"cc-save\" style=\"background:#C4983A;color:#1a1a18;border:0;border-radius:8px;padding:10px 16px;font-weight:700;cursor:pointer;font-size:14px\">Save &amp; mark confirmed</button>";
  h+="<button id=\"cc-saveonly\" style=\"background:#2E2E2B;color:#F5F0E8;border:1px solid #3a3a36;border-radius:8px;padding:10px 16px;cursor:pointer;font-size:14px\">Save without confirming</button>";
@@ -5842,7 +5842,11 @@ function FORM(b){
 function SAVE(b,confirm){
  if(S.busy)return; S.busy=true;
  var msg=document.getElementById("cc-msg"); if(msg){msg.style.color="#9a9a92";msg.textContent="Saving...";}
- var rec=JSON.parse(JSON.stringify(b));
+ /*__cnkSaveBindFix: resolve the record from the form stamp, not the captured variable.*/
+ var _bid=(document.getElementById("cc-bid")||{}).value||"";
+ var _src=(_bid&&S.recs&&S.recs[_bid])?S.recs[_bid]:b;
+ if(_bid&&String(_src&&_src.id)!==_bid){ S.busy=false; var _m=document.getElementById("cc-msg"); if(_m){_m.style.color="#e05c70";_m.textContent="Could not save: booking mismatch. Close and reopen the call sheet.";} return; }
+ var rec=JSON.parse(JSON.stringify(_src));
  rec.paperwork=rec.paperwork||{};
  var nm=V("cc-cname"), ph=V("cc-cphone");
  rec.date=V("cc-date")||rec.date;
@@ -5868,6 +5872,8 @@ function render(){
  var host=document.getElementById("cnk-confirm-panel"); if(!host)return;
  fetch("/api/list-bookings?z="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){
   var all=((j&&j.bookings)||j||[]).filter(function(b){return b&&String(b.id).indexOf("CNK-")===0&&String(b.status||"").toLowerCase()!=="cancelled";});
+  /*__cnkSaveBindFix: keep an id-keyed map so Save can never write to a stale record.*/
+  S.recs={}; all.forEach(function(_b){ S.recs[String(_b.id)]=_b; });
   var up=all.filter(function(b){return DOUT(b.date)>=0;}).sort(function(a,b){return DOUT(a.date)-DOUT(b.date);});
   var due=up.filter(function(b){return DOUT(b.date)<=14&&!DONE(b);});
   var list=S.all?up:due;
