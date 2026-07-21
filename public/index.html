@@ -756,7 +756,7 @@
             <select class="form-select" id="cnk-source">
               <option value="">Select…</option>
               <option>Google Search</option><option>Instagram</option><option>Facebook</option>
-              <option>Friend / Referral</option><option>Wedding Planner</option><option>Venue Recommendation</option><option>Other</option>
+              <option>Friend / Referral</option><option>Wedding Planner</option><option>Cynthia (wedding planner)</option><option>Venue Recommendation</option><option>Other</option>
             </select>
           </div>
         </div>
@@ -783,7 +783,7 @@
           <div class="pb-divider"></div>
           <div class="pb-row pb-total-row"><span class="pb-label">Total</span><span class="pb-total" id="cnk-sum-total">$0</span></div>
           <div class="pb-row"><span class="pb-label">Deposit due today (50%)</span><span class="pb-val pb-deposit" id="cnk-sum-deposit">$0</span></div>
-          <div class="pb-row"><span class="pb-label">Balance due at event</span><span class="pb-val" id="cnk-sum-balance">$0</span></div>
+          <div class="pb-row"><span class="pb-label">Balance Remaining</span><span class="pb-val" id="cnk-sum-balance">$0</span></div>
           <div class="pb-note">A 50% deposit reserves your date. The remaining balance is collected before your event.</div>
         </div>
 
@@ -3776,7 +3776,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
 (function(){
   if(window.__cnkFullPay) return; window.__cnkFullPay=true;
   window.cnkFullPayNow=function(){ try{ var el=document.getElementById('cnk-date'); var ds=el?(el.value||'').trim():''; if(!ds) return false; var ev=new Date(ds+'T00:00:00'); if(isNaN(ev)) return false; var now=new Date(); now.setHours(0,0,0,0); var d=(ev-now)/86400000; /*__cnkChargeFullV2: full payment upfront on every booking; d still computed for the 14-day refund line*/ return true; }catch(e){ return true; } };
-  function note(){ try{ var btn=document.getElementById('cnk-pay-btn'); if(!btn) return; var n=document.getElementById('cnk-fullpay-note'); var due=window.cnkFullPayNow(); if(due){ if(!n){ n=document.createElement('div'); n.id='cnk-fullpay-note'; n.style.cssText='margin:10px 0;padding:10px 12px;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;color:#9a3412;font-size:13px;line-height:1.4;'; n.textContent='Your event is within 14 days, so the full amount is due today (no deposit/balance split).'; btn.parentNode.insertBefore(n, btn); } n.style.display=''; } else if(n){ n.style.display='none'; } }catch(e){} }
+  function note(){ try{ var btn=document.getElementById('cnk-pay-btn'); if(!btn) return; var n=document.getElementById('cnk-fullpay-note'); var due=window.cnkFullPayNow(); if(due){ if(!n){ n=document.createElement('div'); n.id='cnk-fullpay-note'; n.style.cssText='margin:10px 0;padding:10px 12px;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;color:#9a3412;font-size:13px;line-height:1.4;'; n.textContent='/*__cnkPayNoteFix*/Payment is collected in full at the time of booking. If you cancel more than 14 days before your event, half of your total is refundable; within 14 days, payment is final.'; btn.parentNode.insertBefore(n, btn); } n.style.display=''; } else if(n){ n.style.display='none'; } }catch(e){} }
   setInterval(note, 700);
 })();
 </script>
@@ -5702,7 +5702,7 @@ function sync(){
 
   if(full){
    setText(lbl,'lbl','Payment in full due today');
-   setText(note,'note','Your event is within 14 days, so payment in full is due today. This booking is final \u2014 no portion is refundable.');
+   setText(note,'note','Payment is collected in full at the time of booking. Cancellations 14 days or fewer before the event are final and non-refundable.');
    setText(st,'st','This payment is non-refundable.');
    if(btn){
     var a1=(btn.textContent||'').match(/\$[\d,.]+/);
