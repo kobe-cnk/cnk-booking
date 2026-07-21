@@ -966,7 +966,7 @@
     document.getElementById('cnk-sum-total').textContent=money(c.total);
     document.getElementById('cnk-sum-deposit').textContent=money(c.deposit);
     document.getElementById('cnk-sum-balance').textContent=money(c.balance);
-    document.getElementById('cnk-pay-amt').textContent=' · '+money(c.deposit);
+    /*__cnkFillSummarySafe*/(function(){var _pa=document.getElementById('cnk-pay-amt');if(_pa)_pa.textContent=' · '+money(c.deposit);})();
   }
 
   async function mountCard(){
