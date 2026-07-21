@@ -3666,7 +3666,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
       var paid=emGet('eb-deposit');
       var balEl=document.getElementById('eb-balance'); if(balEl) balEl.value=Math.max(0,Math.round((total-paid)*100)/100).toFixed(2);
     }
-    ['eb-deposit','eb-discount','eb-delivery'].forEach(function(fid){ var el=document.getElementById(fid); if(el) el.addEventListener('input', recalc); }); if(el) el.addEventListener('input', recalc); });
+    ['eb-deposit','eb-discount','eb-delivery'].forEach(function(fid){ var el=document.getElementById(fid); if(el) el.addEventListener('input', recalc); });
     // hide/repurpose the miles field note: keep miles for auto-calc, but delivery $ overrides on save
     var milesEl=document.getElementById('eb-miles');
     if(milesEl){
