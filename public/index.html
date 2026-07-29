@@ -459,6 +459,8 @@
   .cal-day:hover:not(.empty) { background: var(--cream-dimmer); border-color: rgba(245,240,232,0.1); }
   .cal-day.today { border-color: rgba(196,152,58,0.4); color: var(--gold); }
   .cal-day.booked { background: rgba(139,26,44,0.2); border-color: rgba(139,26,44,0.4); }
+  .cal-day.paid { background: rgba(34,160,94,0.22) !important; border-color: rgba(34,160,94,0.5) !important; } /*__cnkCalPaidGreen*/
+  .cal-day.paid::after { background: rgba(34,160,94,0.8) !important; }
   .cal-day.booked::after {
     content: ''; position: absolute; bottom: 5px;
     width: 4px; height: 4px; border-radius: 50%; background: var(--burgundy);
@@ -1655,8 +1657,11 @@ function renderCalendar() {
   const bookings = loadBookings();
   const boothCount = getBoothCount();
   const bookingsByDate = {};
-  bookings.filter(function(_cb){return !_cb||(_cb.status!=='cancelled');}).filter(b => b.status !== 'complete').forEach(b => {
+  var paidByDate = {}; /*__cnkCalPaidGreen: track whether every booking on a date is paid in full*/
+  bookings.filter(function(_cb){return !_cb||(_cb.status!=='cancelled');}).forEach(b => {
     bookingsByDate[b.date] = (bookingsByDate[b.date] || 0) + 1;
+    var _paid = (b.status==='paid'||b.status==='complete');
+    if(paidByDate[b.date]===undefined){ paidByDate[b.date] = _paid; } else { paidByDate[b.date] = paidByDate[b.date] && _paid; }
   });
 
   const firstDay = new Date(currentYear, currentMonth, 1).getDay();
@@ -1675,7 +1680,8 @@ function renderCalendar() {
     const isFull = count >= boothCount;
     const isPartial = count > 0 && count < boothCount;
     const isPast = new Date(dateStr) < today && !isToday;
-    const cls = [isToday?'today':'', isFull?'booked':'', isPartial?'partial':'', isPast?'past':''].filter(Boolean).join(' ');
+    const isPaidDay = count > 0 && paidByDate[dateStr] === true;
+    const cls = [isToday?'today':'', isFull?'booked':'', isPartial?'partial':'', isPaidDay?'paid':'', isPast?'past':''].filter(Boolean).join(' ');
     const tooltip = isFull ? 'Fully Booked' : isPartial ? `${count}/${boothCount} booths booked` : '';
     grid += `<div class="cal-day ${cls}" title="${tooltip}" onclick="calDayClick('${dateStr}')">${d}</div>`;
   }
