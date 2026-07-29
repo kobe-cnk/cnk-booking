@@ -5919,6 +5919,7 @@ function render(){
 function mount(){
  var view=document.querySelector(".admin-view"); if(!view){setTimeout(mount,600);return;}
  if(document.getElementById("cnk-confirm-panel"))return;
+ /*__cnkConfirmPanelOff: 14-day confirmation call panel removed from overview per owner request.*/ return;
  var d=document.createElement("div"); d.id="cnk-confirm-panel";
  /*__cnkConfirmTop: pin to the top of the default Overview view - a daily call list buried at the bottom is a list nobody runs.*/
  var ov=document.getElementById("admin-overview")||view;
