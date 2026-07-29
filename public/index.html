@@ -1741,7 +1741,7 @@ function filterBookings(query) {
 function renderUpcoming() {
   const today = new Date(); today.setHours(0,0,0,0);
   const upcoming = loadBookings()
-    .filter(b => new Date(b.date) >= today && b.status !== 'complete')
+    .filter(b => new Date(b.date) >= today && b.status !== 'complete' && b.status !== 'cancelled')
     .sort((a,b) => new Date(a.date) - new Date(b.date));
   document.getElementById('upcoming-table').innerHTML = upcoming.length
     ? renderTable(upcoming, true)
