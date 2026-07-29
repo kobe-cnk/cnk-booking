@@ -1763,7 +1763,7 @@ function renderTable(bookings, showActions) {
       <th>Deposit</th><th>Status</th>${showActions?'<th>Actions</th>':''}
     </tr></thead>
     <tbody>
-    ${bookings.map(b => `<tr>
+    ${bookings.map(b => `<tr${(b.status==='paid'||b.status==='complete')?' style="background:rgba(34,160,94,0.14)" data-paid="1"':''}>/*__cnkPaidGreen*/
       <td style="font-family:'Cormorant Garamond',serif;font-size:15px;color:var(--gold)">${b.id}</td>
       <td><div>${b.name}</div><div style="font-size:11px;margin-top:2px">${b.eventType}</div></td>
       <td>${formatDate(b.date)}</td>
