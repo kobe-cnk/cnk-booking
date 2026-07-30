@@ -4810,6 +4810,86 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
   if(document.readyState!=="loading") init(); else document.addEventListener("DOMContentLoaded",init);
 })();
 </script>
+<script>
+/* __cnkCallSheet: standalone blank 2-week call sheet. Pick a booking, fill while calling, submit -> saves to that booking. */
+(function(){
+  function esc(x){ return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function mount(){
+    var ov=document.getElementById('admin-overview');
+    if(!ov){ setTimeout(mount,600); return; }
+    if(document.getElementById('cnk-callsheet')) return;
+    var panel=document.createElement('div');
+    panel.id='cnk-callsheet';
+    panel.className='card';
+    panel.style.cssText='margin:16px 0;padding:18px 20px;';
+    var bookings=[];
+    try{ bookings=(typeof loadBookings==='function'?loadBookings():[]).slice(); }catch(e){ bookings=[]; }
+    var today=new Date(); today.setHours(0,0,0,0);
+    var upcoming=bookings.filter(function(b){ return b && String(b.id).indexOf('CNK-')===0 && b.status!=='cancelled' && new Date(b.date)>=today; })
+      .sort(function(a,b){ return new Date(a.date)-new Date(b.date); });
+    var opts='<option value="">— Select a booking —</option>';
+    upcoming.forEach(function(b){
+      var nm=esc(b.name||((b.first||'')+' '+(b.last||'')).trim()||b.id);
+      opts+='<option value="'+esc(b.id)+'">'+esc(b.date)+' · '+nm+'</option>';
+    });
+    panel.innerHTML=
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px;">'
+      +'<h3 style="margin:0;font-size:18px;">2-Week Confirmation Call Sheet</h3>'
+      +'<select id="cs-booking" style="min-width:260px;padding:8px 10px;border-radius:8px;">'+opts+'</select>'
+      +'</div>'
+      +'<div id="cs-body" style="display:none;">'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;">'
+      +'<label>Day-of contact name<input id="cs-contact" type="text" style="width:100%;padding:7px 9px;border-radius:8px;"></label>'
+      +'<label>Day-of contact phone<input id="cs-phone" type="text" style="width:100%;padding:7px 9px;border-radius:8px;"></label>'
+      +'<label>Event start time<input id="cs-start" type="text" placeholder="e.g. 6:00 PM" style="width:100%;padding:7px 9px;border-radius:8px;"></label>'
+      +'<label>Event end time<input id="cs-end" type="text" placeholder="e.g. 8:00 PM" style="width:100%;padding:7px 9px;border-radius:8px;"></label>'
+      +'<label style="grid-column:1/3;">Overlay / template they want<input id="cs-overlay" type="text" style="width:100%;padding:7px 9px;border-radius:8px;"></label>'
+      +'<label style="grid-column:1/3;">Venue address<input id="cs-address" type="text" style="width:100%;padding:7px 9px;border-radius:8px;"></label>'
+      +'</div>'
+      +'<div style="margin-top:14px;padding:12px 14px;border-radius:10px;background:rgba(196,152,58,0.10);border:1px solid rgba(196,152,58,0.3);">'
+      +'<div style="font-weight:600;margin-bottom:8px;color:#C4983A;">Say these on the call — check when told:</div>'
+      +'<label style="display:block;margin:6px 0;"><input type="checkbox" id="cs-wifi"> Ask about venue WiFi — if none, Starlink is <b>$35</b></label>'
+      +'<label style="display:block;margin:6px 0;"><input type="checkbox" id="cs-overage"> Extra hours are <b>$150/hour</b> if the event runs past the booked end time</label>'
+      +'<label style="display:block;margin:6px 0;"><input type="checkbox" id="cs-setup"> We arrive <b>45 minutes early</b> to set up</label>'
+      +'</div>'
+      +'<label style="display:block;margin-top:12px;">Notes<textarea id="cs-notes" rows="3" style="width:100%;padding:8px 10px;border-radius:8px;"></textarea></label>'
+      +'<div id="cs-msg" style="min-height:18px;font-size:13px;margin:8px 0;"></div>'
+      +'<button id="cs-submit" class="btn btn-primary" style="padding:10px 18px;">Submit call sheet</button>'
+      +'</div>';
+    var hd=ov.querySelector('.admin-header');
+    if(hd && hd.parentNode===ov){ ov.insertBefore(panel, hd.nextSibling); } else { ov.insertBefore(panel, ov.firstChild); }
+
+    var sel=panel.querySelector('#cs-booking');
+    var body=panel.querySelector('#cs-body');
+    sel.addEventListener('change',function(){ body.style.display = sel.value ? 'block':'none'; var mm=panel.querySelector('#cs-msg'); if(mm) mm.textContent=''; });
+
+    panel.querySelector('#cs-submit').addEventListener('click',function(){
+      var msg=panel.querySelector('#cs-msg');
+      var id=sel.value;
+      if(!id){ msg.style.color='#e05c70'; msg.textContent='Pick a booking first.'; return; }
+      var all=[]; try{ all=(typeof loadBookings==='function'?loadBookings():[]); }catch(e){}
+      var rec=all.filter(function(b){return String(b.id)===id;})[0];
+      if(!rec){ msg.style.color='#e05c70'; msg.textContent='Could not find that booking. Refresh and retry.'; return; }
+      var V=function(q){ var e=panel.querySelector(q); return e?String(e.value||'').trim():''; };
+      var C=function(q){ var e=panel.querySelector(q); return !!(e&&e.checked); };
+      var out=JSON.parse(JSON.stringify(rec));
+      out.callSheet={
+        contact:V('#cs-contact'), phone:V('#cs-phone'),
+        startTime:V('#cs-start'), endTime:V('#cs-end'),
+        overlay:V('#cs-overlay'), address:V('#cs-address'),
+        toldWifi:C('#cs-wifi'), toldOverage:C('#cs-overage'), toldSetup:C('#cs-setup'),
+        notes:V('#cs-notes'), submittedAt:new Date().toISOString()
+      };
+      msg.style.color='#aaa'; msg.textContent='Saving…';
+      fetch('/api/save-booking',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(out)})
+        .then(function(r){ return r.ok?r.json():Promise.reject(r.status); })
+        .then(function(){ msg.style.color='#3fbf6f'; msg.textContent='Saved to '+(rec.name||rec.id)+'.'; })
+        .catch(function(err){ msg.style.color='#e05c70'; msg.textContent='Save failed ('+err+'). Try again.'; });
+    });
+  }
+  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded',mount); } else { setTimeout(mount,400); }
+})();
+</script>
 </body>
 </html>
 
