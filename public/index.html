@@ -4862,7 +4862,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
 
     var sel=panel.querySelector('#cs-booking');
     var body=panel.querySelector('#cs-body');
-    sel.addEventListener('change',function(){ body.style.display = sel.value ? 'block':'none'; var mm=panel.querySelector('#cs-msg'); if(mm) mm.textContent=''; });
+    sel.addEventListener('change',function(){ /*__cnkCallSheetPrefill*/ body.style.display = sel.value ? 'block':'none'; var mm=panel.querySelector('#cs-msg'); if(mm) mm.textContent=''; if(sel.value){   var _all=[]; try{ _all=(typeof loadBookings==='function'?loadBookings():[]); }catch(e){}   var _b=_all.filter(function(x){return String(x.id)===sel.value;})[0]||{};   var _pw=_b.paperwork||{};   var _set=function(id,v){ var e=panel.querySelector(id); if(e) e.value=(v==null?'':v); };   _set('#cs-address', _b.location||_b.venueName||'');   _set('#cs-contact', _pw.dayContactName||_pw.dayContact||_b.name||'');   _set('#cs-phone', _pw.dayContactPhone||_b.phone||'');   _set('#cs-start', _pw.startTime||'');   _set('#cs-end', _pw.endTime||'');   _set('#cs-overlay', _pw.overlay||''); } });
 
     panel.querySelector('#cs-submit').addEventListener('click',function(){
       var msg=panel.querySelector('#cs-msg');
