@@ -1689,7 +1689,8 @@ function renderCalendar() {
 
   // This month's bookings
   const monthStr = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}`;
-  const monthBookings = bookings.filter(function(_cb){return !_cb||(_cb.status!=='cancelled');}).filter(b => b.date.startsWith(monthStr));
+  const monthBookings = bookings.filter(function(_cb){return !_cb||(_cb.status!=='cancelled');}).filter(b => b.date.startsWith(monthStr))
+      .filter(function(b){ /*__cnkMonthHidePast: drop events whose date already passed*/ var _t=today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0'); return String(b.date) >= _t; });
   document.getElementById('cal-month-bookings').innerHTML = monthBookings.length
     ? renderTable(monthBookings, true)
     : `<div class="empty-state"><div class="big">◻</div><p>No bookings this month</p></div>`;
