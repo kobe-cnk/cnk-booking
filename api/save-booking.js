@@ -77,11 +77,12 @@ module.exports = async function handler(req, res) {
       // Read the same way list-bookings does (SELECT data) — this path returns fresh rows
       // reliably — then match the date in JS so we don't depend on the event_date column.
       const { rows } = await sql`SELECT data FROM bookings`;
+      const __exists = rows.some(function(r){ return r && r.data && String(r.data.id)===String(b.id); }); /*__cnkUpdateSkipsConflict*/
       const sameDate = rows
         .map(function (r) { return r.data || {}; })
         .filter(function (x) { return x && String(x.date || '') === String(b.date) && String(x.id || '') !== String(b.id || ''); });
       // 1) Blocked date (event / trade show)
-      if (sameDate.some(function (x) { return String(x.status || '').toLowerCase() === 'blocked' || (String(x.id || '').indexOf('__BLOCK__') === 0 && ['cancelled','removed'].indexOf(String(x.status || '').toLowerCase()) === -1); })) {
+      if (!__exists && sameDate.some(function (x) { return String(x.status || '').toLowerCase() === 'blocked' || (String(x.id || '').indexOf('__BLOCK__') === 0 && ['cancelled','removed'].indexOf(String(x.status || '').toLowerCase()) === -1); })) {
         res.status(409).json({ error: 'date_unavailable', message: 'That date is unavailable. Please choose another date.', blocked: true });
         return;
       }
