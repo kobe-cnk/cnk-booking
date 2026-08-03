@@ -92,7 +92,7 @@ module.exports = async function handler(req, res) {
         return ['cancelled', 'canceled', 'declined', 'refunded', 'void', 'blocked'].indexOf(s) === -1
           && String(x.id || '').indexOf('__') !== 0;
       });
-      if (activeOnDate.length >= TOTAL_BOOTHS) {
+      if (!__exists && activeOnDate.length >= TOTAL_BOOTHS) { /*__cnkCapacitySkipsUpdate*/
         res.status(409).json({ error: 'date_unavailable', message: 'That date is already fully booked. Please choose another date.', booked: activeOnDate.length, booths: TOTAL_BOOTHS });
         return;
       }
