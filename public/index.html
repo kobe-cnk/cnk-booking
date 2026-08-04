@@ -1782,7 +1782,7 @@ function renderTable(bookings, showActions) {
         <button class="action-btn" onclick="openModal('${b.id}')">View</button>
         ${b.status==='pending'?`<button class="action-btn primary" onclick="updateStatus('${b.id}','confirmed')">Confirm</button>`:''}
         ${b.status==='confirmed'?`<button class="action-btn" onclick="updateStatus('${b.id}','balance_due')">Mark Balance Due</button>`:''}
-        ${b.status==='balance_due'?`<button class="action-btn primary" onclick="chargeBalance('${b.id}')">Charge Balance</button>`:''}
+        ${b.status==='balance_due'?`<button class="action-btn primary" onclick="chargeBalance('${b.id}')">Mark as Paid</button>`:''}
         ${b.status!=='complete'?`<button class="action-btn danger" onclick="cancelBooking('${b.id}')">Cancel</button>`:''}
       </td>`:''}
     </tr>`).join('')}
