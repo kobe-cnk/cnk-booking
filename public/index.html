@@ -1731,6 +1731,7 @@ function setFilter(f) {
 
 function filterBookings(query) {
   let bookings = loadBookings();
+  /*__cnkHidePastBookings*/ (function(){ var _t=new Date(); _t.setHours(0,0,0,0); bookings = bookings.filter(function(b){ return b && b.date && new Date(b.date) >= _t; }); })();
   if (activeFilter !== 'all') bookings = bookings.filter(b => b.status === activeFilter);
   if (query) {
     const q = query.toLowerCase();
