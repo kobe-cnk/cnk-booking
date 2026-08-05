@@ -951,7 +951,7 @@
     if(!val('cnk-first')||!val('cnk-last')){ err.textContent='Please enter your first and last name.'; return; }
     var em=val('cnk-email'); if(!em||!/^[^@]+@[^@]+\.[^@]+$/.test(em)){ err.textContent='Please enter a valid email address.'; return; }
     if(!val('cnk-phone')){ err.textContent='Please enter a phone number.'; return; }
-    if(!val('cnk-date')){ err.textContent='Please choose your event date.'; return; /*__cnkClosedSunday*/ (function(){ var _d=val('cnk-date'); if(_d){ var _p=_d.split('-'); var _dt=new Date(Number(_p[0]), Number(_p[1])-1, Number(_p[2])); if(_dt.getDay()===0){ err.textContent='We are closed on Sundays — please choose another day.'; window.scrollTo({top:0,behavior:'smooth'}); } } })(); if(err.textContent && err.textContent.indexOf('Sunday')>-1) return; }
+    if(!val('cnk-date')){ err.textContent='Please choose your event date.'; return; /*__cnkClosedSunday*/ (function(){ var _d=val('cnk-date'); if(_d){ var _p=_d.split('-'); var _dt=new Date(Number(_p[0]), Number(_p[1])-1, Number(_p[2])); if(_dt.getDay()===0){ err.textContent='We are closed on Sundays — please choose another day.'; window.scrollTo({top:0,behavior:'smooth'}); window.__cnkIsSunday=true; } else { window.__cnkIsSunday=false; } } })(); if(window.__cnkIsSunday){ window.__cnkIsSunday=false; return; } }
     fillSummary();
     cnkGoStep(2);
     setTimeout(mountCard, 150);
