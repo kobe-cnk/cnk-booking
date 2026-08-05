@@ -4174,7 +4174,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
   function pick(ds){ var input=document.getElementById('cnk-date'); if(input){ input.value=ds; try{ input.dispatchEvent(new Event('input',{bubbles:true})); input.dispatchEvent(new Event('change',{bubbles:true})); }catch(e){} } render(); }
   function render(){
     var w=ensureWrap(); if(!w) return; var input=document.getElementById('cnk-date');
-    if(typeof viewY==='undefined'){ var f=(input&&input.value)?input.value:FIRST; var p=f.split('-'); viewY=parseInt(p[0],10)||2026; viewM=(parseInt(p[1],10)||7)-1; }
+    if(typeof viewY==='undefined'){ /*__cnkPickerCurrentMonth*/ var _now=new Date(); var f=(input&&input.value)||''; if(f){ var p=f.split('-'); viewY=parseInt(p[0],10)||_now.getFullYear(); viewM=(parseInt(p[1],10)|| (_now.getMonth()+1))-1; } else { viewY=_now.getFullYear(); viewM=_now.getMonth(); } }
     var selected=(input&&input.value)||'';
     w.innerHTML='';
     var head=document.createElement('div'); head.style.cssText='display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;';
