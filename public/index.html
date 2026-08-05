@@ -471,6 +471,7 @@
     width: 4px; height: 4px; border-radius: 50%; background: var(--gold);
   }
   .cal-day.empty { cursor: default; opacity: 0; }
+  .cal-day.closed-sunday { background: rgba(60,60,66,0.5) !important; color: rgba(245,240,232,0.25) !important; cursor: not-allowed; position: relative; } .cal-day.closed-sunday::after{ content:'Closed'; position:absolute; bottom:3px; left:0; right:0; font-size:8px; text-align:center; color:rgba(245,240,232,0.35); } /*__cnkClosedSunday*/
   .cal-day.past { opacity: 0.3; cursor: default; }
 
   /* ─── BOOKINGS TABLE ──────────────────────────── */
@@ -950,7 +951,7 @@
     if(!val('cnk-first')||!val('cnk-last')){ err.textContent='Please enter your first and last name.'; return; }
     var em=val('cnk-email'); if(!em||!/^[^@]+@[^@]+\.[^@]+$/.test(em)){ err.textContent='Please enter a valid email address.'; return; }
     if(!val('cnk-phone')){ err.textContent='Please enter a phone number.'; return; }
-    if(!val('cnk-date')){ err.textContent='Please choose your event date.'; return; }
+    if(!val('cnk-date')){ err.textContent='Please choose your event date.'; return; /*__cnkClosedSunday*/ (function(){ var _d=val('cnk-date'); if(_d){ var _p=_d.split('-'); var _dt=new Date(Number(_p[0]), Number(_p[1])-1, Number(_p[2])); if(_dt.getDay()===0){ err.textContent='We are closed on Sundays — please choose another day.'; window.scrollTo({top:0,behavior:'smooth'}); } } })(); if(err.textContent && err.textContent.indexOf('Sunday')>-1) return; }
     fillSummary();
     cnkGoStep(2);
     setTimeout(mountCard, 150);
@@ -1681,7 +1682,8 @@ function renderCalendar() {
     const isPartial = count > 0 && count < boothCount;
     const isPast = new Date(dateStr) < today && !isToday;
     const isPaidDay = count > 0 && paidByDate[dateStr] === true;
-    const cls = [isToday?'today':'', isFull?'booked':'', isPartial?'partial':'', isPaidDay?'paid':'', isPast?'past':''].filter(Boolean).join(' ');
+    const isSunday = (function(){ var _p=String(dateStr).split('-'); return new Date(Number(_p[0]),Number(_p[1])-1,Number(_p[2])).getDay()===0; })(); /*__cnkClosedSunday*/
+    const cls = [isToday?'today':'', isFull?'booked':'', isPartial?'partial':'', isPaidDay?'paid':'', isSunday?'closed-sunday':'', isPast?'past':''].filter(Boolean).join(' ');
     const tooltip = isFull ? 'Fully Booked' : isPartial ? `${count}/${boothCount} booths booked` : '';
     grid += `<div class="cal-day ${cls}" title="${tooltip}" onclick="calDayClick('${dateStr}')">${d}</div>`;
   }
