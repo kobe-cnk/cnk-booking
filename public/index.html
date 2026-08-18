@@ -6094,3 +6094,35 @@ window.cnkRenderConfirmCalls=render;
   document.addEventListener('DOMContentLoaded', run);
 })();
 </script>
+
+<script>
+(function cnkFixPaidCollected(){
+  function money(n){ return '$'+(Number(n)||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}); }
+  function setRowValue(labelRe, val){
+    var all=document.querySelectorAll('span,div,td');
+    for(var i=0;i<all.length;i++){
+      var t=all[i].textContent.trim();
+      if(labelRe.test(t) && t.length<22){
+        var row=all[i].parentElement; if(!row) continue;
+        var vals=row.querySelectorAll('span,div,td');
+        for(var k=0;k<vals.length;k++){ if(/^\$/.test(vals[k].textContent.trim()) && vals[k]!==all[i]){ vals[k].textContent=val; return true; } }
+      }
+    }
+    return false;
+  }
+  function run(){
+    try{
+      if(typeof loadBookings!=='function') return;
+      var m=(document.body.innerText.match(/CNK-\d+/)||[])[0];
+      if(!m) return;
+      var b=loadBookings().find(function(x){return x.id===m;});
+      if(!b) return;
+      if(b.status==='paid'||b.status==='completed'){
+        setRowValue(/^TOTAL COLLECTED$/i, money(b.price));
+        setRowValue(/^BALANCE REMAINING$/i, money(0));
+      }
+    }catch(e){}
+  }
+  setInterval(run, 400);
+})();
+</script>
