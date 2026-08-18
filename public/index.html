@@ -6056,3 +6056,41 @@ window.cnkRenderConfirmCalls=render;
   document.addEventListener('DOMContentLoaded', addFleet);
 })();
 </script>
+
+<script>
+(function cnkHideOverviewSections(){
+  function hideByHeading(txt){
+    var all=document.querySelectorAll('h1,h2,h3,h4,div,span'); var h=null;
+    for(var i=0;i<all.length;i++){
+      var e=all[i]; var own='';
+      for(var j=0;j<e.childNodes.length;j++){ if(e.childNodes[j].nodeType===3) own+=e.childNodes[j].textContent.trim()+' '; }
+      if(own.trim()===txt){ h=e; break; }
+    }
+    if(!h) return false;
+    var el=h;
+    for(var k=0;k<6;k++){ var p=el.parentElement; if(!p) break; if(p.id==='admin-overview') break; el=p; }
+    el.style.display='none'; return true;
+  }
+  function hideUsesColumn(){
+    var ths=document.querySelectorAll('th'); var usesHeader=null;
+    for(var i=0;i<ths.length;i++){ if(ths[i].textContent.trim()==='Uses'){ usesHeader=ths[i]; break; } }
+    if(!usesHeader) return false;
+    var headRow=usesHeader.parentElement;
+    var colIdx=Array.prototype.indexOf.call(headRow.children, usesHeader);
+    usesHeader.style.display='none';
+    var table=usesHeader.closest('table');
+    if(table){ var rows=table.querySelectorAll('tr'); for(var r=0;r<rows.length;r++){ if(rows[r].children[colIdx]) rows[r].children[colIdx].style.display='none'; } }
+    return true;
+  }
+  function run(){
+    hideByHeading('Promo Usage');
+    hideByHeading('Emails');
+    hideByHeading('Rental Agreements');
+    hideByHeading('Balances Due');
+    hideUsesColumn();
+  }
+  // run repeatedly for a while so it catches JS-rendered sections
+  var n=0; var iv=setInterval(function(){ run(); n++; if(n>60) clearInterval(iv); }, 250);
+  document.addEventListener('DOMContentLoaded', run);
+})();
+</script>
