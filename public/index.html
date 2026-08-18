@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CNK Booths â Booking System</title>
+<title>CNK Booths — Booking System</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://web.squarecdn.com/v1/square.js"></script>
@@ -32,7 +32,7 @@
     overflow-x: hidden;
   }
 
-  /* âââ NAV âââââââââââââââââââââââââââââââââââââââ */
+  /* ─── NAV ─────────────────────────────────────── */
   nav {
     position: fixed; top: 0; left: 0; right: 0; z-index: 100;
     background: rgba(26,26,24,0.92);
@@ -57,11 +57,11 @@
   .nav-tab:hover { color: var(--cream); background: var(--cream-dimmer); }
   .nav-tab.active { color: var(--charcoal); background: var(--gold); font-weight: 500; }
 
-  /* âââ VIEWS âââââââââââââââââââââââââââââââââââââ */
+  /* ─── VIEWS ───────────────────────────────────── */
   .view { display: none; padding-top: 64px; min-height: 100vh; }
   .view.active { display: block; }
 
-  /* âââ BOOKING PAGE ââââââââââââââââââââââââââââââ */
+  /* ─── BOOKING PAGE ────────────────────────────── */
   .booking-hero {
     background: linear-gradient(160deg, #1A1A18 0%, #252520 50%, #1A1518 100%);
     padding: 80px 40px 60px;
@@ -91,7 +91,7 @@
     max-width: 400px; margin: 0 auto;
   }
 
-  /* âââ PACKAGES ââââââââââââââââââââââââââââââââââ */
+  /* ─── PACKAGES ────────────────────────────────── */
   .packages-section {
     padding: 60px 40px;
     max-width: 1100px; margin: 0 auto;
@@ -110,7 +110,7 @@
   }
   @media (max-width: 768px) { .packages-grid { grid-template-columns: 1fr; } }
 
-  /* âââ ADDON HOURS BAR ââââââââââââââââââââââââââ */
+  /* ─── ADDON HOURS BAR ────────────────────────── */
   .addon-hours-bar {
     background: var(--charcoal-soft);
     border: 1px solid rgba(196,152,58,0.3);
@@ -180,7 +180,7 @@
     font-size: 13px; color: var(--cream-dim); padding: 6px 0;
     display: flex; align-items: center; gap: 10px;
   }
-  .pkg-features li::before { content: 'â¦'; color: var(--gold); font-size: 8px; flex-shrink: 0; }
+  .pkg-features li::before { content: '✦'; color: var(--gold); font-size: 8px; flex-shrink: 0; }
   .pkg-select-btn {
     width: 100%; margin-top: 24px; padding: 12px;
     background: transparent; border: 1px solid rgba(245,240,232,0.2);
@@ -193,7 +193,7 @@
     color: var(--charcoal); font-weight: 500;
   }
 
-  /* âââ BOOKING FORM ââââââââââââââââââââââââââââââ */
+  /* ─── BOOKING FORM ────────────────────────────── */
   .form-wrapper {
     background: var(--charcoal-soft);
     border: 1px solid rgba(245,240,232,0.08);
@@ -242,7 +242,7 @@
   }
   .deposit-note { font-size: 12px; color: var(--cream-dim); max-width: 300px; }
 
-  /* âââ EXTRA HOURS âââââââââââââââââââââââââââââââ */
+  /* ─── EXTRA HOURS ─────────────────────────────── */
   .extra-hours-row {
     display: flex; align-items: center; justify-content: space-between;
     margin-top: 20px; padding: 12px 14px; border-radius: 6px;
@@ -262,7 +262,7 @@
   .eh-count { font-size: 16px; color: var(--cream); min-width: 20px; text-align: center; font-weight: 500; }
   .extra-hours-price { font-size: 11px; color: var(--gold); letter-spacing: 0.05em; }
 
-  /* âââ PRICE BREAKDOWN ââââââââââââââââââââââââââ */
+  /* ─── PRICE BREAKDOWN ────────────────────────── */
   .price-breakdown {
     background: var(--charcoal-mid);
     border: 1px solid rgba(196,152,58,0.25);
@@ -290,7 +290,7 @@
   .pb-deposit { color: var(--gold) !important; font-family: 'Cormorant Garamond', serif; font-size: 22px !important; font-weight: 300; }
   .pb-note { font-size: 11px; color: rgba(245,240,232,0.35); margin-top: 16px; line-height: 1.5; }
 
-  /* âââ STRIPE CARD ELEMENT âââââââââââââââââââââââ */
+  /* ─── STRIPE CARD ELEMENT ─────────────────────── */
   #stripe-card-element {
     background: var(--charcoal-mid);
     border: 1px solid rgba(245,240,232,0.1);
@@ -333,7 +333,7 @@
   .submit-btn:active { transform: translateY(0); }
   .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
-  /* âââ SUCCESS âââââââââââââââââââââââââââââââââââ */
+  /* ─── SUCCESS ─────────────────────────────────── */
   .success-screen {
     display: none; text-align: center; padding: 80px 40px;
     max-width: 600px; margin: 0 auto;
@@ -364,7 +364,7 @@
   }
   .success-back:hover { border-color: var(--cream-dim); color: var(--cream); }
 
-  /* âââ BOOTH COUNT SETTING âââââââââââââââââââââââ */
+  /* ─── BOOTH COUNT SETTING ─────────────────────── */
   .booth-count-setting {
     background: var(--charcoal-soft);
     border: 1px solid rgba(196,152,58,0.25);
@@ -390,7 +390,7 @@
   }
   .booth-count-note { font-size: 11px; color: var(--cream-dim); }
 
-  /* âââ ADMIN DASHBOARD âââââââââââââââââââââââââââ */
+  /* ─── ADMIN DASHBOARD ─────────────────────────── */
   .admin-layout {
     display: grid; grid-template-columns: 260px 1fr;
     min-height: calc(100vh - 64px);
@@ -437,7 +437,7 @@
   .stat-gold .stat-value { color: var(--gold); }
   .stat-red .stat-value { color: #e05c70; }
 
-  /* âââ CALENDAR ââââââââââââââââââââââââââââââââââ */
+  /* ─── CALENDAR ────────────────────────────────── */
   .calendar-section { background: var(--charcoal-soft); border: 1px solid rgba(245,240,232,0.07); border-radius: 10px; padding: 32px; margin-bottom: 32px; }
   .calendar-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
   .cal-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 300; }
@@ -474,7 +474,7 @@
   .cal-day.closed-sunday { background: rgba(60,60,66,0.5) !important; color: rgba(245,240,232,0.25) !important; cursor: not-allowed; position: relative; } .cal-day.closed-sunday::after{ content:'Closed'; position:absolute; bottom:3px; left:0; right:0; font-size:8px; text-align:center; color:rgba(245,240,232,0.35); } /*__cnkClosedSunday*/
   .cal-day.past { opacity: 0.3; cursor: default; }
 
-  /* âââ BOOKINGS TABLE ââââââââââââââââââââââââââââ */
+  /* ─── BOOKINGS TABLE ──────────────────────────── */
   .table-wrapper { background: var(--charcoal-soft); border: 1px solid rgba(245,240,232,0.07); border-radius: 10px; overflow: hidden; }
   .table-header { padding: 24px 28px; border-bottom: 1px solid rgba(245,240,232,0.06); display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
   .table-search {
@@ -517,7 +517,7 @@
   .action-btn.primary { background: var(--gold); border-color: var(--gold); color: var(--charcoal); font-weight: 500; }
   .action-btn.primary:hover { background: var(--gold-light); border-color: var(--gold-light); color: var(--charcoal); }
 
-  /* âââ MODAL âââââââââââââââââââââââââââââââââââââ */
+  /* ─── MODAL ───────────────────────────────────── */
   .modal-overlay {
     position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
     z-index: 200; display: none; align-items: center; justify-content: center; padding: 20px;
@@ -545,7 +545,7 @@
   .detail-key { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--cream-dim); }
   .detail-val { font-size: 14px; color: var(--cream); text-align: right; max-width: 60%; }
 
-  /* âââ TOAST âââââââââââââââââââââââââââââââââââââ */
+  /* ─── TOAST ───────────────────────────────────── */
   .toast {
     position: fixed; bottom: 24px; right: 24px; z-index: 300;
     background: var(--charcoal-soft); border: 1px solid rgba(196,152,58,0.3);
@@ -556,7 +556,7 @@
   .toast.show { transform: translateY(0); opacity: 1; }
   .toast .icon { color: var(--gold); font-size: 16px; flex-shrink: 0; }
 
-  /* âââ ADMIN VIEWS âââââââââââââââââââââââââââââââ */
+  /* ─── ADMIN VIEWS ─────────────────────────────── */
   .admin-view { display: none; }
   .admin-view.active { display: block; }
 
@@ -577,7 +577,7 @@
   .charge-title { font-size: 13px; text-transform: uppercase; letter-spacing: 0.1em; color: #e05c70; margin-bottom: 12px; }
   .charge-amount { font-family: 'Cormorant Garamond', serif; font-size: 36px; color: var(--cream); margin-bottom: 16px; }
 
-  /* âââ RESPONSIVE ADMIN ââââââââââââââââââââââââââ */
+  /* ─── RESPONSIVE ADMIN ────────────────────────── */
   @media (max-width: 900px) {
     .admin-layout { grid-template-columns: 1fr; }
     .admin-sidebar { display: flex; overflow-x: auto; padding: 12px; border-right: none; border-bottom: 1px solid rgba(245,240,232,0.06); }
@@ -618,16 +618,16 @@
 </head>
 <body>
 
-<!-- âââ NAV âââââââââââââââââââââââââââââââââââââââ -->
+<!-- ─── NAV ─────────────────────────────────────── -->
 <nav>
   <div class="nav-logo">CNK<span> Booths</span></div>
   <div class="nav-tabs">
     <button class="nav-tab active" onclick="showView('booking')">Book a Booth</button>
-    <button class="nav-tab" onclick="showView('admin')">Admin â</button>
+    <button class="nav-tab" onclick="showView('admin')">Admin ↗</button>
   </div>
 </nav>
 
-<!-- âââ BOOKING VIEW âââââââââââââââââââââââââââââ -->
+<!-- ─── BOOKING VIEW ───────────────────────────── -->
 <div id="view-booking" class="view active">
 
 <style>
@@ -672,7 +672,7 @@
   <!-- ===== STEP 1 ===== -->
   <section class="cnk-stage active" id="cnk-s1">
     <div class="booking-hero" style="padding:48px 40px 32px;">
-      <div class="hero-eyebrow">Premium Photo Booth Rentals â Utah</div>
+      <div class="hero-eyebrow">Premium Photo Booth Rentals — Utah</div>
       <h1 class="hero-title">Reserve Your <em>Experience</em></h1>
       <p class="hero-sub">Fully managed photo booths for weddings, corporate events, and celebrations</p>
     </div>
@@ -692,7 +692,7 @@
             <div style="font-size:13px;color:var(--cream);margin-bottom:4px;font-weight:500;">How many hours?</div>
             <div style="font-size:11px;color:var(--cream-dim);margin-bottom:12px;">Need more coverage? Choose Half Day or Full Day</div>
             <div style="display:flex;align-items:center;justify-content:center;gap:16px;">
-              <button type="button" class="addon-btn" onclick="event.stopPropagation();cnkHours(-1)">â</button>
+              <button type="button" class="addon-btn" onclick="event.stopPropagation();cnkHours(-1)">−</button>
               <div style="text-align:center;"><span id="cnk-hours" style="font-family:'Cormorant Garamond',serif;font-size:32px;color:var(--cream);">1</span><div style="font-size:10px;letter-spacing:0.15em;color:var(--cream-dim);">HOURS</div></div>
               <button type="button" class="addon-btn" onclick="event.stopPropagation();cnkHours(1)">+</button>
             </div>
@@ -726,10 +726,10 @@
       <div class="addon-hours-bar" style="margin-bottom:40px;">
         <div class="addon-hours-info">
           <div class="addon-hours-title">Need more time? Add extra hours at $150/hr</div>
-          <div class="addon-hours-sub">Added directly to your invoice â no separate booking needed</div>
+          <div class="addon-hours-sub">Added directly to your invoice — no separate booking needed</div>
         </div>
         <div class="addon-hours-ctrl">
-          <button type="button" class="addon-btn" onclick="cnkAddon(-1)">â</button>
+          <button type="button" class="addon-btn" onclick="cnkAddon(-1)">−</button>
           <div class="addon-count-wrap"><span class="addon-count" id="cnk-addon">0</span><span class="addon-count-label">Add'l Hrs</span></div>
           <button type="button" class="addon-btn" onclick="cnkAddon(1)">+</button>
         </div>
@@ -746,7 +746,7 @@
           <div class="form-group"><label class="form-label">Event Date</label><input class="form-input" id="cnk-date" type="date"></div>
           <div class="form-group"><label class="form-label">Event Type</label>
             <select class="form-select" id="cnk-type">
-              <option value="">Select event typeâ¦</option>
+              <option value="">Select event type…</option>
               <option>Wedding</option><option>Corporate Event</option><option>Birthday Party</option>
               <option>Graduation</option><option>School Event</option><option>Festival / Expo</option>
               <option>Nonprofit / Charity</option><option>Other</option>
@@ -757,14 +757,14 @@
           <div class="form-group form-full"><label class="form-label">Special Requests or Notes</label><textarea class="form-textarea" id="cnk-notes" placeholder="Custom overlay design, specific setup requirements, themed props, etc."></textarea></div>
           <div class="form-group form-full"><label class="form-label">How did you hear about us?</label>
             <select class="form-select" id="cnk-source">
-              <option value="">Selectâ¦</option>
+              <option value="">Select…</option>
               <option>Google Search</option><option>Instagram</option><option>Facebook</option>
               <option>Friend / Referral</option><option>Wedding Planner</option><option>Cynthia (wedding planner)</option><option>Max</option><option>Venue Recommendation</option><option>Other</option>
             </select>
           </div>
         </div>
         <div class="cnk-err" id="cnk-s1-err"></div>
-        <button type="button" class="submit-btn" onclick="cnkToPayment()">Continue to Payment â</button>
+        <button type="button" class="submit-btn" onclick="cnkToPayment()">Continue to Payment →</button>
       </div>
     </div>
   </section>
@@ -796,10 +796,10 @@
           <div class="cnk-err" id="cnk-card-err"></div>
         </div>
 
-        <div class="cnk-processing" id="cnk-processing"><div class="stripe-spinner"></div> Processing your paymentâ¦</div>
+        <div class="cnk-processing" id="cnk-processing"><div class="stripe-spinner"></div> Processing your payment…</div>
 
         <button type="button" class="submit-btn" id="cnk-pay-btn" onclick="cnkPay()">Pay Deposit <span id="cnk-pay-amt"></span></button>
-        <button type="button" class="cnk-back" onclick="cnkGoStep(1)">â Back to details</button>
+        <button type="button" class="cnk-back" onclick="cnkGoStep(1)">← Back to details</button>
       </div>
     </div>
   </section>
@@ -809,7 +809,7 @@
     <div class="packages-section" style="max-width:760px;">
       <div class="section-label">Rental Agreement &amp; Event Details</div>
       <div class="form-wrapper">
-        <div class="mb-success show" id="cnk-paid-banner" style="margin-bottom:24px;"><!--__cnkAgreementFullPay-->Payment received â thank you! Please review the agreement and confirm your event details below.</div>
+        <div class="mb-success show" id="cnk-paid-banner" style="margin-bottom:24px;"><!--__cnkAgreementFullPay-->Payment received — thank you! Please review the agreement and confirm your event details below.</div>
 
         <div class="cnk-contract" id="cnk-contract">
           <div style="text-align:center;margin-bottom:8px;">
@@ -821,11 +821,11 @@
 
           <div class="cnk-sec-title">Event Details</div>
           <table class="cnk-doc-table">
-            <tr><td class="k">Client Name</td><td class="v" id="cnk-doc-name">â</td><td class="k">Event Date</td><td class="v" id="cnk-doc-date">â</td></tr>
-            <tr><td class="k">Event Type</td><td class="v" id="cnk-doc-type">â</td><td class="k">Venue / Location</td><td class="v" id="cnk-doc-venue">â</td></tr>
-            <tr><td class="k">Event Start</td><td class="v" id="cnk-doc-start">â</td><td class="k">Event End</td><td class="v" id="cnk-doc-end">â</td></tr>
-            <tr><td class="k">Set Up Time</td><td class="v">60 min prior to event start</td><td class="k">Rental Duration</td><td class="v" id="cnk-doc-duration">â</td></tr>
-            <tr><td class="k">Outdoor Setup?</td><td class="v" id="cnk-doc-outdoor">â</td><td class="k">Power &amp; WiFi Confirmed?</td><td class="v" id="cnk-doc-power">â</td></tr>
+            <tr><td class="k">Client Name</td><td class="v" id="cnk-doc-name">—</td><td class="k">Event Date</td><td class="v" id="cnk-doc-date">—</td></tr>
+            <tr><td class="k">Event Type</td><td class="v" id="cnk-doc-type">—</td><td class="k">Venue / Location</td><td class="v" id="cnk-doc-venue">—</td></tr>
+            <tr><td class="k">Event Start</td><td class="v" id="cnk-doc-start">—</td><td class="k">Event End</td><td class="v" id="cnk-doc-end">—</td></tr>
+            <tr><td class="k">Set Up Time</td><td class="v">60 min prior to event start</td><td class="k">Rental Duration</td><td class="v" id="cnk-doc-duration">—</td></tr>
+            <tr><td class="k">Outdoor Setup?</td><td class="v" id="cnk-doc-outdoor">—</td><td class="k">Power &amp; WiFi Confirmed?</td><td class="v" id="cnk-doc-power">—</td></tr>
           </table>
 
           <div class="cnk-sec-title">What's Included</div>
@@ -840,14 +840,14 @@
 
           <div class="cnk-sec-title">Pricing &amp; Payment</div>
           <table class="cnk-doc-table">
-            <tr><td class="k" colspan="3">Package</td><td class="v" id="cnk-doc-pkg">â</td></tr>
-            <tr id="cnk-doc-extra-row" style="display:none;"><td class="k" colspan="3">Extra Hours</td><td class="v" id="cnk-doc-extra">â</td></tr>
-            <tr><td class="k" colspan="3">Subtotal</td><td class="v" id="cnk-doc-sub">â</td></tr>
-            <tr><td class="k" colspan="3">Sales Tax (7.45%)</td><td class="v" id="cnk-doc-tax">â</td></tr>
-            <tr><td class="k" colspan="3">Card Processing (3%)</td><td class="v" id="cnk-doc-cc">â</td></tr>
-            <tr class="cnk-doc-total"><td class="k" colspan="3">Total Rental Fee</td><td class="v" id="cnk-doc-total">â</td></tr>
-            <tr><td class="k" colspan="3">Paid in Full><td class="v" id="cnk-doc-dep">â</td></tr>
-            <tr><td class="k" colspan="3">Amount Paid><td class="v" id="cnk-doc-bal">â</td></tr>
+            <tr><td class="k" colspan="3">Package</td><td class="v" id="cnk-doc-pkg">—</td></tr>
+            <tr id="cnk-doc-extra-row" style="display:none;"><td class="k" colspan="3">Extra Hours</td><td class="v" id="cnk-doc-extra">—</td></tr>
+            <tr><td class="k" colspan="3">Subtotal</td><td class="v" id="cnk-doc-sub">—</td></tr>
+            <tr><td class="k" colspan="3">Sales Tax (7.45%)</td><td class="v" id="cnk-doc-tax">—</td></tr>
+            <tr><td class="k" colspan="3">Card Processing (3%)</td><td class="v" id="cnk-doc-cc">—</td></tr>
+            <tr class="cnk-doc-total"><td class="k" colspan="3">Total Rental Fee</td><td class="v" id="cnk-doc-total">—</td></tr>
+            <tr><td class="k" colspan="3">Paid in Full><td class="v" id="cnk-doc-dep">—</td></tr>
+            <tr><td class="k" colspan="3">Amount Paid><td class="v" id="cnk-doc-bal">—</td></tr>
           </table>
           <p><strong>Accepted Payment Methods:</strong> Venmo, Cash, or Credit Card.</p>
           <p><strong>Payment:</strong> Full payment is collected at the time of booking, so no balance remains outstanding before the event.</p>
@@ -872,15 +872,15 @@
           <div class="form-group"><label class="form-label">Event End Time</label><input class="form-input" id="cnk-pw-end" type="time"></div>
           <div class="form-group form-full"><label class="form-label">Setup Location / Room within Venue</label><input class="form-input" id="cnk-pw-setup" placeholder="e.g. Main ballroom, north wall near entrance"></div>
           <div class="form-group form-full"><label class="form-label">Power Outlet Available within 25 ft?</label>
-            <select class="form-select" id="cnk-pw-power"><option value="">Selectâ¦</option><option>Yes</option><option>No / Not sure â please advise</option></select>
+            <select class="form-select" id="cnk-pw-power"><option value="">Select…</option><option>Yes</option><option>No / Not sure — please advise</option></select>
           </div>
           <div class="form-group form-full"><label class="form-label">Stable WiFi Available at Venue?</label>
-            <select class="form-select" id="cnk-pw-wifi"><option value="">Selectâ¦</option><option>Yes</option><option>No / Not sure â please advise</option></select>
+            <select class="form-select" id="cnk-pw-wifi"><option value="">Select…</option><option>Yes</option><option>No / Not sure — please advise</option></select>
           </div>
           <div class="form-group form-full"><label class="form-label">Is this an Outdoor Setup?</label>
-            <select class="form-select" id="cnk-pw-outdoor"><option value="">Selectâ¦</option><option>No â indoor</option><option>Yes â covered &amp; level space provided</option><option>Yes â need to discuss coverage</option></select>
+            <select class="form-select" id="cnk-pw-outdoor"><option value="">Select…</option><option>No — indoor</option><option>Yes — covered &amp; level space provided</option><option>Yes — need to discuss coverage</option></select>
           </div>
-          <div class="form-group form-full"><label class="form-label">Custom Overlay / Theme Details</label><textarea class="form-textarea" id="cnk-pw-overlay" placeholder="Names, date, colors, logo, theme for the photo strip designâ¦"></textarea></div>
+          <div class="form-group form-full"><label class="form-label">Custom Overlay / Theme Details</label><textarea class="form-textarea" id="cnk-pw-overlay" placeholder="Names, date, colors, logo, theme for the photo strip design…"></textarea></div>
           <div class="form-group form-full"><label class="form-label">Day-of Contact Name</label><input class="form-input" id="cnk-pw-contact" placeholder="e.g. Sarah Jones"></div><div class="form-group form-full"><label class="form-label">Day-of Contact Phone</label><input class="form-input" id="cnk-pw-contact-phone" type="tel" placeholder="e.g. (801) 555-0123"></div>
         </div>
 
@@ -901,7 +901,7 @@
   <!-- ===== DONE ===== -->
   <section class="cnk-stage" id="cnk-done">
     <div class="success-screen show" style="display:block;">
-      <div class="success-icon">â</div>
+      <div class="success-icon">✓</div>
       <h2 class="success-title">You're all set!</h2>
       <p class="success-sub" id="cnk-done-sub">Your booking is confirmed and your deposit has been received. We've saved your event details and agreement. Our team will reach out with next steps.</p>
       <div class="success-ref" id="cnk-done-ref">CNK-000000</div>
@@ -951,7 +951,7 @@
     if(!val('cnk-first')||!val('cnk-last')){ err.textContent='Please enter your first and last name.'; return; }
     var em=val('cnk-email'); if(!em||!/^[^@]+@[^@]+\.[^@]+$/.test(em)){ err.textContent='Please enter a valid email address.'; return; }
     if(!val('cnk-phone')){ err.textContent='Please enter a phone number.'; return; }
-    if(!val('cnk-date')){ err.textContent='Please choose your event date.'; return; /*__cnkClosedSunday*/ (function(){ var _d=val('cnk-date'); if(_d){ var _p=_d.split('-'); var _dt=new Date(Number(_p[0]), Number(_p[1])-1, Number(_p[2])); if(_dt.getDay()===0){ err.textContent='We are closed on Sundays â please choose another day.'; window.scrollTo({top:0,behavior:'smooth'}); window.__cnkIsSunday=true; } else { window.__cnkIsSunday=false; } } })(); if(window.__cnkIsSunday){ window.__cnkIsSunday=false; return; } }
+    if(!val('cnk-date')){ err.textContent='Please choose your event date.'; return; /*__cnkClosedSunday*/ (function(){ var _d=val('cnk-date'); if(_d){ var _p=_d.split('-'); var _dt=new Date(Number(_p[0]), Number(_p[1])-1, Number(_p[2])); if(_dt.getDay()===0){ err.textContent='We are closed on Sundays — please choose another day.'; window.scrollTo({top:0,behavior:'smooth'}); window.__cnkIsSunday=true; } else { window.__cnkIsSunday=false; } } })(); if(window.__cnkIsSunday){ window.__cnkIsSunday=false; return; } }
     fillSummary();
     cnkGoStep(2);
     setTimeout(mountCard, 150);
@@ -962,20 +962,20 @@
     document.getElementById('cnk-sum-pkg').textContent = PKG[state.pkg].label;
     document.getElementById('cnk-sum-base').textContent = money(c.base);
     var ar=document.getElementById('cnk-sum-addon-row');
-    if(state.addon>0){ ar.style.display='flex'; document.getElementById('cnk-sum-addon-label').textContent='Extra hours ('+state.addon+' Ã $'+((window.CNK_PRICING&&window.CNK_PRICING.hour)||150)+')'; document.getElementById('cnk-sum-addon').textContent=money(c.addonCost); }
+    if(state.addon>0){ ar.style.display='flex'; document.getElementById('cnk-sum-addon-label').textContent='Extra hours ('+state.addon+' × $'+((window.CNK_PRICING&&window.CNK_PRICING.hour)||150)+')'; document.getElementById('cnk-sum-addon').textContent=money(c.addonCost); }
     else ar.style.display='none';
     document.getElementById('cnk-sum-tax').textContent=money(c.tax);
     document.getElementById('cnk-sum-cc').textContent=money(c.cc); var __dr=document.getElementById('cnk-sum-delivery-row'),__de=document.getElementById('cnk-sum-delivery'); if(__de)__de.textContent=money(c.delivery||0); if(__dr)__dr.style.display=((c.delivery||0)>0)?'flex':'none';
     document.getElementById('cnk-sum-total').textContent=money(c.total);
     document.getElementById('cnk-sum-deposit').textContent=money(c.deposit);
     document.getElementById('cnk-sum-balance').textContent=money(c.balance);
-    /*__cnkFillSummarySafe*/(function(){var _pa=document.getElementById('cnk-pay-amt');if(_pa)_pa.textContent=' Â· '+money(c.deposit);})();
+    /*__cnkFillSummarySafe*/(function(){var _pa=document.getElementById('cnk-pay-amt');if(_pa)_pa.textContent=' · '+money(c.deposit);})();
   }
 
   async function mountCard(){
     if(cardMounted) return;
     try{
-      if(!window.Square){ document.getElementById('cnk-card-err').textContent='Payment system loadingâ¦ please wait a moment and try again.'; return; }
+      if(!window.Square){ document.getElementById('cnk-card-err').textContent='Payment system loading… please wait a moment and try again.'; return; }
       sqPayments = sqPayments || window.Square.payments(APP_ID, LOC_ID);
       sqCard = await sqPayments.card();
       await sqCard.attach('#cnk-card');
@@ -987,7 +987,7 @@
 
   window.cnkPay=async function(){
     var err=document.getElementById('cnk-card-err'); err.textContent='';
-    if(!cardMounted||!sqCard){ err.textContent='Card form not ready yet â one moment.'; mountCard(); return; }
+    if(!cardMounted||!sqCard){ err.textContent='Card form not ready yet — one moment.'; mountCard(); return; }
     var btn=document.getElementById('cnk-pay-btn'); var proc=document.getElementById('cnk-processing');
     btn.disabled=true; proc.classList.add('show');
     try{
@@ -1001,7 +1001,7 @@
       var resp=await fetch('/api/charge',{
         method:'POST', headers:{'Content-Type':'application/json'},
         body:JSON.stringify({ nonce:result.token, amount:depositCents, currency:'USD',
-          description:'CNK Booths â '+PKG[state.pkg].label+' deposit ('+bookingId+')',
+          description:'CNK Booths – '+PKG[state.pkg].label+' deposit ('+bookingId+')',
           email:val('cnk-email'), name:name, bookingId:bookingId })
       });
       var data=await resp.json().catch(function(){return {};});
@@ -1086,7 +1086,7 @@
 </div><!-- end booking view -->
 
 
-<!-- âââ ADMIN VIEW âââââââââââââââââââââââââââââââ -->
+<!-- ─── ADMIN VIEW ─────────────────────────────── -->
 <div id="view-admin" class="view">
   <div class="admin-layout">
 
@@ -1094,22 +1094,22 @@
       <div class="sidebar-section">
         <div class="sidebar-title">Manage</div>
         <button class="sidebar-btn active" onclick="showAdminView('overview')">
-          <span class="icon">â</span> Overview
+          <span class="icon">◈</span> Overview
         </button>
         <button class="sidebar-btn" onclick="showAdminView('calendar')">
-          <span class="icon">â»</span> Calendar
+          <span class="icon">◻</span> Calendar
         </button>
         <button class="sidebar-btn" onclick="showAdminView('bookings')">
-          <span class="icon">â¡</span> All Bookings
+          <span class="icon">≡</span> All Bookings
         </button>
         <button class="sidebar-btn" onclick="showAdminView('upcoming')">
-          <span class="icon">â</span> Upcoming
+          <span class="icon">→</span> Upcoming
         </button>
         <button class="sidebar-btn" onclick="showAdminView('newbooking')">
           <span class="icon">+</span> New Booking
         </button>
         <button class="sidebar-btn" onclick="cnkAdminLogout()" style="margin-top:24px;color:var(--cream-dim);">
-          <span class="icon">â</span> Log Out
+          <span class="icon">⎋</span> Log Out
         </button>
       </div>
     </div>
@@ -1119,15 +1119,15 @@
       <!-- Overview -->
       <div class="admin-view active" id="admin-overview">
         <div class="admin-header">
-          <h2 class="admin-title">Good morning â <span>CNK Booths</span></h2>
+          <h2 class="admin-title">Good morning — <span>CNK Booths</span></h2>
           <div class="booth-count-setting">
             <label class="booth-count-label">Active Booths Available</label>
             <div class="booth-count-ctrl">
-              <button class="booth-count-btn" onclick="changeBoothCount(-1)">â</button>
+              <button class="booth-count-btn" onclick="changeBoothCount(-1)">−</button>
               <span class="booth-count-val" id="booth-count-display">1</span>
               <button class="booth-count-btn" onclick="changeBoothCount(1)">+</button>
             </div>
-            <div class="booth-count-note">Booths available per day â controls double booking</div>
+            <div class="booth-count-note">Booths available per day — controls double booking</div>
           </div>
         </div>
         <div class="stats-grid" id="stats-grid"></div>
@@ -1142,9 +1142,9 @@
         </div>
         <div class="calendar-section">
           <div class="calendar-nav">
-            <button class="cal-nav-btn" onclick="changeMonth(-1)">â¹</button>
+            <button class="cal-nav-btn" onclick="changeMonth(-1)">‹</button>
             <div class="cal-title" id="cal-month-title"></div>
-            <button class="cal-nav-btn" onclick="changeMonth(1)">âº</button>
+            <button class="cal-nav-btn" onclick="changeMonth(1)">›</button>
           </div>
           <div class="cal-grid" id="cal-grid"></div>
         </div>
@@ -1175,7 +1175,7 @@
         </div>
         <div class="table-wrapper">
           <div class="table-header">
-            <input type="text" class="table-search" placeholder="Search by name, ref, dateâ¦" oninput="filterBookings(this.value)" />
+            <input type="text" class="table-search" placeholder="Search by name, ref, date…" oninput="filterBookings(this.value)" />
             <div class="filter-row" id="status-filters"></div>
           </div>
           <div id="bookings-table-container"></div>
@@ -1194,22 +1194,22 @@
   </div>
 </div><!-- end admin view -->
 
-<!-- âââ BOOKING DETAIL MODAL âââââââââââââââââââââ -->
+<!-- ─── BOOKING DETAIL MODAL ───────────────────── -->
 <div class="modal-overlay" id="booking-modal">
   <div class="modal">
-    <button class="modal-close" onclick="closeModal()">Ã</button>
+    <button class="modal-close" onclick="closeModal()">×</button>
     <div id="modal-content"></div>
   </div>
 </div>
 
-<!-- âââ TOAST ââââââââââââââââââââââââââââââââââââ -->
+<!-- ─── TOAST ──────────────────────────────────── -->
 <div class="toast" id="toast">
-  <span class="icon">â¦</span>
+  <span class="icon">✦</span>
   <span id="toast-msg"></span>
 </div>
 
 <script>
-// âââ STATE âââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ─── STATE ─────────────────────────────────────────────────────
 let selectedPackage = null;
 let selectedPrice = 0;
 let currentMonth = new Date().getMonth();
@@ -1217,7 +1217,7 @@ let currentYear = new Date().getFullYear();
 let activeFilter = 'all';
 let editingId = null;
 
-// Booth count â persisted in localStorage so it survives page refresh
+// Booth count — persisted in localStorage so it survives page refresh
 function getBoothCount() {
   return parseInt(localStorage.getItem('cnk_booth_count') || '1', 10);
 }
@@ -1258,17 +1258,17 @@ function seedDemo() {
     return { basePrice: base, tax, ccFee: cc, price: total, deposit: ((window.cnkFullPayNow&&window.cnkFullPayNow())?total:total/2), balance: total/2 };
   }
   const demos = [
-    { id:'CNK-100291', name:'Sarah Mitchell', email:'sarah@example.com', phone:'(801) 555-0191', date:'2026-06-14', package:'fullday', ...demoPrice(699), status:'confirmed', eventType:'Wedding', location:'Grand America Hotel, SLC', guests:'100 â 250 guests', notes:'Champagne-themed overlay, gold props', source:'Wedding Planner', created: Date.now()-7*86400000 },
-    { id:'CNK-100292', name:'James & Co Events', email:'james@jamesevents.com', phone:'(801) 555-0200', date:'2026-06-21', package:'halfday', ...demoPrice(399), status:'balance_due', eventType:'Corporate Event', location:'Silicon Slopes, Lehi', guests:'250 â 500 guests', notes:'Company branding required', source:'Google Search', created: Date.now()-5*86400000 },
-    { id:'CNK-100293', name:'Taylor Brooks', email:'taylor@example.com', phone:'(435) 555-0301', date:'2026-07-04', package:'hourly', ...demoPrice(150), status:'pending', eventType:'Birthday Party', location:'Private Residence, Provo', guests:'50 â 100 guests', notes:'', source:'Instagram', created: Date.now()-2*86400000 },
-    { id:'CNK-100294', name:'Olivia Nguyen', email:'olivia@example.com', phone:'(801) 555-0402', date:'2026-07-12', package:'fullday', ...demoPrice(699), status:'confirmed', eventType:'Wedding', location:'Sundance Resort, Provo Canyon', guests:'100 â 250 guests', notes:'Boho theme, floral overlay', source:'Friend / Referral', created: Date.now()-1*86400000 },
-    { id:'CNK-100295', name:'Marcus Williams', email:'marcus@example.com', phone:'(801) 555-0503', date:'2026-05-30', package:'halfday', ...demoPrice(399), deposit: demoPrice(399).price, balance: 0, status:'complete', eventType:'Graduation', location:'University of Utah', guests:'100 â 250 guests', notes:'', source:'Google Search', created: Date.now()-14*86400000 },
+    { id:'CNK-100291', name:'Sarah Mitchell', email:'sarah@example.com', phone:'(801) 555-0191', date:'2026-06-14', package:'fullday', ...demoPrice(699), status:'confirmed', eventType:'Wedding', location:'Grand America Hotel, SLC', guests:'100 – 250 guests', notes:'Champagne-themed overlay, gold props', source:'Wedding Planner', created: Date.now()-7*86400000 },
+    { id:'CNK-100292', name:'James & Co Events', email:'james@jamesevents.com', phone:'(801) 555-0200', date:'2026-06-21', package:'halfday', ...demoPrice(399), status:'balance_due', eventType:'Corporate Event', location:'Silicon Slopes, Lehi', guests:'250 – 500 guests', notes:'Company branding required', source:'Google Search', created: Date.now()-5*86400000 },
+    { id:'CNK-100293', name:'Taylor Brooks', email:'taylor@example.com', phone:'(435) 555-0301', date:'2026-07-04', package:'hourly', ...demoPrice(150), status:'pending', eventType:'Birthday Party', location:'Private Residence, Provo', guests:'50 – 100 guests', notes:'', source:'Instagram', created: Date.now()-2*86400000 },
+    { id:'CNK-100294', name:'Olivia Nguyen', email:'olivia@example.com', phone:'(801) 555-0402', date:'2026-07-12', package:'fullday', ...demoPrice(699), status:'confirmed', eventType:'Wedding', location:'Sundance Resort, Provo Canyon', guests:'100 – 250 guests', notes:'Boho theme, floral overlay', source:'Friend / Referral', created: Date.now()-1*86400000 },
+    { id:'CNK-100295', name:'Marcus Williams', email:'marcus@example.com', phone:'(801) 555-0503', date:'2026-05-30', package:'halfday', ...demoPrice(399), deposit: demoPrice(399).price, balance: 0, status:'complete', eventType:'Graduation', location:'University of Utah', guests:'100 – 250 guests', notes:'', source:'Google Search', created: Date.now()-14*86400000 },
   ];
   saveBookings(demos);
 }
 
-// âââ SQUARE SETUP âââââââââââââââââââââââââââââââââââââââââââââââ
-// âï¸  PASTE YOUR SQUARE CREDENTIALS HERE
+// ─── SQUARE SETUP ───────────────────────────────────────────────
+// ⚙️  PASTE YOUR SQUARE CREDENTIALS HERE
 const SQUARE_APP_ID   = 'sq0idp-ch7FwGd6cjBOMX_SzQ3UPA';   // sq0idp-...
 const SQUARE_LOCATION = 'LF3G4CFPFPKDV';       // L...
 
@@ -1313,7 +1313,7 @@ async function mountSquareCard() {
   }
 }
 
-// âââ BOOKING FORM âââââââââââââââââââââââââââââââââââââââââââââââ
+// ─── BOOKING FORM ───────────────────────────────────────────────
 const SALES_TAX = 0.0745;
 const CC_FEE = 0.03;
 const EXTRA_HOUR_RATE = 150;
@@ -1335,9 +1335,9 @@ function calcPricing(pkg, extraHrs) {
 
 function updatePriceDisplay(p) {
   const fmt = n => '$' + n.toFixed(2);
-  // For hourly, show "X hrs Ã $150" as the base label
+  // For hourly, show "X hrs × $150" as the base label
   if (selectedPackage === 'hourly') {
-    document.getElementById('pb-base').textContent = hourlyQty + ' hr' + (hourlyQty > 1 ? 's' : '') + ' Ã $150 = ' + fmt(p.base);
+    document.getElementById('pb-base').textContent = hourlyQty + ' hr' + (hourlyQty > 1 ? 's' : '') + ' × $150 = ' + fmt(p.base);
   } else {
     document.getElementById('pb-base').textContent = fmt(p.base);
   }
@@ -1345,7 +1345,7 @@ function updatePriceDisplay(p) {
   if (p.extra > 0) {
     extraRow.style.display = 'flex';
     document.getElementById('pb-extra').textContent =
-      p.addHours + ' hr' + (p.addHours > 1 ? 's' : '') + ' Ã $150 = ' + fmt(p.extra);
+      p.addHours + ' hr' + (p.addHours > 1 ? 's' : '') + ' × $150 = ' + fmt(p.extra);
   } else {
     extraRow.style.display = 'none';
   }
@@ -1458,8 +1458,8 @@ async function submitBooking() {
   const bookingsOnDate = bookings.filter(b => b.date === date && b.status !== 'complete').length;
   if (bookingsOnDate >= boothCount) {
     showToast(boothCount === 1
-      ? 'â  That date is already booked. Please choose another.'
-      : `â  All ${boothCount} booths are booked on that date. Please choose another.`
+      ? '⚠ That date is already booked. Please choose another.'
+      : `⚠ All ${boothCount} booths are booked on that date. Please choose another.`
     );
     return;
   }
@@ -1467,7 +1467,7 @@ async function submitBooking() {
   // Disable button and show processing
   const btn = document.getElementById('submit-btn');
   btn.disabled = true;
-  btn.textContent = 'Processing paymentâ¦';
+  btn.textContent = 'Processing payment…';
 
   // Tokenize card with Square
   let tokenResult;
@@ -1502,7 +1502,7 @@ async function submitBooking() {
         nonce,
         amount: depositCents,
         currency: 'USD',
-        description: `CNK Booths â ${pkgLabel[selectedPackage]} deposit (${bookingId})`,
+        description: `CNK Booths – ${pkgLabel[selectedPackage]} deposit (${bookingId})`,
         email: email,
         name: fname + ' ' + lname,
         bookingId
@@ -1519,7 +1519,7 @@ async function submitBooking() {
       return;
     }
 
-    // Payment successful â save booking
+    // Payment successful — save booking
     // Build delivery fee into the saved booking totals (delivery is known after the address lookup; mirrors the order-summary math). Also fixes the legacy balance calc.
     var __dlvSave = (window._cnkState && Number(window._cnkState.delivery)) || 0;
     if (selectedPricing && __dlvSave > 0) {
@@ -1596,7 +1596,7 @@ function resetBooking() {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// âââ VIEW SWITCHING âââââââââââââââââââââââââââââââââââââââââââââ
+// ─── VIEW SWITCHING ─────────────────────────────────────────────
 function showView(view) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
@@ -1613,7 +1613,7 @@ function showView(view) {
   }
 }
 
-// âââ ADMIN VIEWS ââââââââââââââââââââââââââââââââââââââââââââââââ
+// ─── ADMIN VIEWS ────────────────────────────────────────────────
 function showAdminView(view) {
   document.querySelectorAll('.admin-view').forEach(v => v.classList.remove('active'));
   document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
@@ -1622,7 +1622,7 @@ function showAdminView(view) {
   if (view === 'calendar') renderBlockedDates();
 }
 
-// âââ OVERVIEW âââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ─── OVERVIEW ───────────────────────────────────────────────────
 function renderOverview() {
   const bookings = loadBookings();
   const today = new Date(); today.setHours(0,0,0,0);
@@ -1650,7 +1650,7 @@ function renderOverview() {
   document.getElementById('recent-table-wrapper').innerHTML = renderTable(recent, true);
 }
 
-// âââ CALENDAR âââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ─── CALENDAR ───────────────────────────────────────────────────
 function renderCalendar() {
   const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   document.getElementById('cal-month-title').textContent = months[currentMonth] + ' ' + currentYear;
@@ -1695,7 +1695,7 @@ function renderCalendar() {
       .filter(function(b){ /*__cnkMonthHidePast: drop events whose date already passed*/ var _t=today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0'); return String(b.date) >= _t; });
   document.getElementById('cal-month-bookings').innerHTML = monthBookings.length
     ? renderTable(monthBookings, true)
-    : `<div class="empty-state"><div class="big">â»</div><p>No bookings this month</p></div>`;
+    : `<div class="empty-state"><div class="big">◻</div><p>No bookings this month</p></div>`;
 }
 
 function changeMonth(dir) {
@@ -1711,7 +1711,7 @@ function calDayClick(dateStr) {
   if (found) openModal(found.id);
 }
 
-// âââ ALL BOOKINGS ââââââââââââââââââââââââââââââââââââââââââââââââ
+// ─── ALL BOOKINGS ────────────────────────────────────────────────
 function renderAllBookings() {
   renderStatusFilters();
   filterBookings('');
@@ -1744,10 +1744,10 @@ function filterBookings(query) {
   }
   document.getElementById('bookings-table-container').innerHTML = bookings.length
     ? renderTable(bookings, true)
-    : `<div class="empty-state"><div class="big">â¡</div><p>No bookings match your search</p></div>`;
+    : `<div class="empty-state"><div class="big">≡</div><p>No bookings match your search</p></div>`;
 }
 
-// âââ UPCOMING âââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ─── UPCOMING ───────────────────────────────────────────────────
 function renderUpcoming() {
   const today = new Date(); today.setHours(0,0,0,0);
   const upcoming = loadBookings()
@@ -1755,10 +1755,10 @@ function renderUpcoming() {
     .sort((a,b) => new Date(a.date) - new Date(b.date));
   document.getElementById('upcoming-table').innerHTML = upcoming.length
     ? renderTable(upcoming, true)
-    : `<div class="empty-state"><div class="big">â</div><p>No upcoming events</p></div>`;
+    : `<div class="empty-state"><div class="big">→</div><p>No upcoming events</p></div>`;
 }
 
-// âââ TABLE RENDERER ââââââââââââââââââââââââââââââââââââââââââââââ
+// ─── TABLE RENDERER ──────────────────────────────────────────────
 function renderTable(bookings, showActions) {
   const pkgLabel = { hourly:'2 Hours', halfday:'Half Day', fullday:'Full Day' };
   const statusBadge = {
@@ -1792,7 +1792,7 @@ function renderTable(bookings, showActions) {
   </table>`;
 }
 
-// âââ MODAL âââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ─── MODAL ───────────────────────────────────────────────────────
 function openModal(id) {
   const b = loadBookings().find(b => b.id === id);
   if (!b) return;
@@ -1800,7 +1800,7 @@ function openModal(id) {
   const balance = b.price - b.deposit;
   document.getElementById('modal-content').innerHTML = `
     <div class="modal-title">${b.name}</div>
-    <div class="modal-sub">${b.id} Â· Booked ${new Date(b.created).toLocaleDateString()}</div>
+    <div class="modal-sub">${b.id} · Booked ${new Date(b.created).toLocaleDateString()}</div>
     <div style="margin:12px 0">
       <button class="action-btn" onclick="resendConfirmation('${b.id}')">Resend confirmation email</button>
     </div>
@@ -1817,19 +1817,19 @@ function openModal(id) {
       ['Event Type', b.eventType],
       ['Location', b.location],
       ['Guests', b.guests],
-      ['Package', pkgLabel[b.package] + (b.hourlyQty ? ' â ' + b.hourlyQty + ' hr' + (b.hourlyQty > 1 ? 's' : '') : '')],
+      ['Package', pkgLabel[b.package] + (b.hourlyQty ? ' — ' + b.hourlyQty + ' hr' + (b.hourlyQty > 1 ? 's' : '') : '')],
       ['Base Price', `$${(b.basePrice||b.price).toFixed(2)}`],
-      ...(b.extraHours > 0 ? [['Additional Hours', `${b.extraHours} hr${b.extraHours > 1 ? 's' : ''} Ã $150 = $${(b.extraCost||0).toFixed(2)}`]] : []),
+      ...(b.extraHours > 0 ? [['Additional Hours', `${b.extraHours} hr${b.extraHours > 1 ? 's' : ''} × $150 = $${(b.extraCost||0).toFixed(2)}`]] : []),
       ['Sales Tax (7.45%)', `$${(b.tax || 0).toFixed(2)}`],
       ['CC Fee (3%)', `$${(b.ccFee || 0).toFixed(2)}`],
       ['Total Price', `$${b.price.toFixed(2)}`],
       ['Deposit Paid', `$${b.deposit.toFixed(2)}`],
       ['Balance Remaining', `$${(b.balance || b.price - b.deposit).toFixed(2)}`],
-      ['Card', b.cardBrand ? `${b.cardBrand} Â·Â·Â·Â·${b.cardLast4}` : 'â'],
+      ['Card', b.cardBrand ? `${b.cardBrand} ····${b.cardLast4}` : '—'],
       ['Email', b.email],
       ['Phone', b.phone],
-      ['How They Found Us', b.source || 'â'],
-      ['Notes', b.notes || 'â'],
+      ['How They Found Us', b.source || '—'],
+      ['Notes', b.notes || '—'],
     ].map(([k,v]) => `
       <div class="detail-row">
         <div class="detail-key">${k}</div>
@@ -1855,7 +1855,7 @@ async function resendConfirmation(id) {
   const b = loadBookings().find(b => b.id === id);
   if (!b) return;
   if (!b.email || b.email.indexOf('@') === -1) { showToast('No email on this reservation'); return; }
-  showToast('Sending confirmation to ' + b.email + 'â¦');
+  showToast('Sending confirmation to ' + b.email + '…');
   try {
     const r = await fetch('/api/confirm-booking', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ booking: b }) });
     const j = await r.json().catch(function(){ return {}; });
@@ -1864,7 +1864,7 @@ async function resendConfirmation(id) {
   } catch (e) { showToast('Could not send: ' + (e && e.message || e)); }
 }
 
-// âââ BLOCKED DATES (events / trade shows) ââââââââââââââââââââââââ
+// ─── BLOCKED DATES (events / trade shows) ────────────────────────
 async function fetchBlockedDates() {
   try {
     const j = await fetch('/api/list-bookings?t='+Date.now(), {cache:'no-store'}).then(r=>r.json());
@@ -1877,12 +1877,12 @@ async function fetchBlockedDates() {
 async function renderBlockedDates() {
   const el = document.getElementById('blocked-dates-list');
   if (!el) return;
-  el.innerHTML = '<div style="font-size:13px;color:var(--cream-dim);">Loadingâ¦</div>';
+  el.innerHTML = '<div style="font-size:13px;color:var(--cream-dim);">Loading…</div>';
   const list = await fetchBlockedDates();
   if (!list.length) { el.innerHTML = '<div style="font-size:13px;color:var(--cream-dim);">No blocked dates.</div>'; return; }
   el.innerHTML = list.map(x =>
     '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 10px;border:1px solid rgba(196,152,58,0.15);border-radius:6px;margin-bottom:6px;">'
-    + '<div><strong style="color:#F5F0E8;">' + formatDate(x.date) + '</strong>' + (x.reason ? ' <span style="color:var(--cream-dim);font-size:13px;">â ' + String(x.reason).replace(/</g,'&lt;') + '</span>' : '') + '</div>'
+    + '<div><strong style="color:#F5F0E8;">' + formatDate(x.date) + '</strong>' + (x.reason ? ' <span style="color:var(--cream-dim);font-size:13px;">— ' + String(x.reason).replace(/</g,'&lt;') + '</span>' : '') + '</div>'
     + '<button class="action-btn danger" onclick="removeBlockedDate(\'' + x.date + '\')">Unblock</button>'
     + '</div>'
   ).join('');
@@ -1893,7 +1893,7 @@ async function addBlockedDate() {
   const date = di && di.value;
   if (!date) { showToast('Pick a date to block'); return; }
   const reason = (ri && ri.value || '').trim();
-  showToast('Blocking ' + date + 'â¦');
+  showToast('Blocking ' + date + '…');
   const rec = { id:'__BLOCK__'+date, date:date, status:'blocked', name: reason||'Blocked (event)', eventType:'Blocked', source:'blocked', notes:reason, price:0, deposit:0, balance:0, created:Date.now() };
   try {
     await fetch('/api/save-booking', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(rec) });
@@ -1903,7 +1903,7 @@ async function addBlockedDate() {
   } catch(e) { showToast('Could not block date: ' + (e && e.message || e)); }
 }
 async function removeBlockedDate(date) {
-  showToast('Unblocking ' + date + 'â¦');
+  showToast('Unblocking ' + date + '…');
   try {
     await fetch('/api/delete-booking', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id:'__BLOCK__'+date }) });
     showToast('Unblocked ' + date);
@@ -1911,21 +1911,21 @@ async function removeBlockedDate(date) {
   } catch(e) { showToast('Could not unblock: ' + (e && e.message || e)); }
 }
 
-// âââ ACTIONS âââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ─── ACTIONS ─────────────────────────────────────────────────────
 function updateStatus(id, status) {
   const bookings = loadBookings();
   const b = bookings.find(b => b.id === id);
   if (!b) return;
   b.status = status;
   saveBookings(bookings);
-  showToast(`Booking ${id} â ${status.replace('_',' ')}`);
+  showToast(`Booking ${id} → ${status.replace('_',' ')}`);
   closeModal();
   renderOverview(); renderCalendar(); renderAllBookings(); renderUpcoming();
 }
 
 function chargeBalance(id) {
   updateStatus(id, 'complete');
-  showToast('â¦ Balance marked as paid â booking complete');
+  showToast('✦ Balance marked as paid — booking complete');
 }
 
 function cancelBooking(id) {
@@ -1937,7 +1937,7 @@ function cancelBooking(id) {
   renderOverview(); renderCalendar(); renderAllBookings(); renderUpcoming();
 }
 
-// âââ UTILS âââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ─── UTILS ───────────────────────────────────────────────────────
 function formatDate(d) {
   const [y,m,day] = d.split('-');
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -2045,10 +2045,10 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
 
     <div class="deposit-info" style="margin-top:24px;">
       <div>
-        <div class="deposit-label">Total (no card fee â manual payment)</div>
+        <div class="deposit-label">Total (no card fee — manual payment)</div>
         <div class="deposit-amount" id="mb-total">$399.00</div>
       </div>
-      <div class="deposit-note">Manual bookings record the full amount as the agreed price. No deposit or card processing is applied â mark balance as paid below if already collected.</div>
+      <div class="deposit-note">Manual bookings record the full amount as the agreed price. No deposit or card processing is applied — mark balance as paid below if already collected.</div>
     </div>
 
     <div class="extra-hours-row" style="margin-top:16px;">
@@ -2117,7 +2117,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
     });
     var id = 'CNK-' + (maxNum + 1);
 
-    var noteFull = (notes ? notes + ' ' : '') + '[Manual booking Â· ' + pay + (paid ? ' Â· PAID IN FULL' : ' Â· UNPAID') + ']';
+    var noteFull = (notes ? notes + ' ' : '') + '[Manual booking · ' + pay + (paid ? ' · PAID IN FULL' : ' · UNPAID') + ']';
 
     var booking = {
       id: id,
@@ -2152,7 +2152,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
     try { if (typeof renderCalendar === 'function') renderCalendar(); } catch(e){}
 
     var sx = document.getElementById('mb-success');
-    sx.textContent = 'Booking ' + id + ' created for ' + booking.name + ' â $' + c.total.toFixed(2) + ' (' + pay + (paid?', paid':', unpaid') + ').';
+    sx.textContent = 'Booking ' + id + ' created for ' + booking.name + ' — $' + c.total.toFixed(2) + ' (' + pay + (paid?', paid':', unpaid') + ').';
     sx.classList.add('show');
 
     // Clear form
@@ -2279,7 +2279,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
   .cnk-doc-table tr.cnk-doc-total td { color:var(--gold); font-weight:600; font-size:14px; }
   .cnk-doc-list { list-style:none; margin:8px 0 8px; padding:0; }
   .cnk-doc-list li { font-size:13px; color:var(--cream-dim); padding-left:16px; position:relative; margin-bottom:6px; line-height:1.5; }
-  .cnk-doc-list li:before { content:'â¢'; color:var(--gold); position:absolute; left:0; }
+  .cnk-doc-list li:before { content:'•'; color:var(--gold); position:absolute; left:0; }
 </style>
 
 
@@ -2289,9 +2289,9 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
   var DUR={hourly:'2 hours',halfday:'Up to 4 hours',fullday:'Up to 8 hours'};
   function money(n){ return '$'+(n||0).toFixed(2); }
   function val(id){ var e=document.getElementById(id); return e?e.value.trim():''; }
-  function set(id,v){ var e=document.getElementById(id); if(e) e.textContent=v||'â'; }
+  function set(id,v){ var e=document.getElementById(id); if(e) e.textContent=v||'—'; }
   function fmtTime(t){ if(!t) return 'TBD'; var p=t.split(':'); if(p.length<2) return t; var h=parseInt(p[0],10); var m=p[1]; var ap=h>=12?'PM':'AM'; var hh=h%12; if(hh===0)hh=12; return hh+':'+m+' '+ap; }
-  function fmtDate(d){ if(!d) return 'â'; try{ var dt=new Date(d+'T00:00:00'); return dt.toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}); }catch(e){ return d; } }
+  function fmtDate(d){ if(!d) return '—'; try{ var dt=new Date(d+'T00:00:00'); return dt.toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}); }catch(e){ return d; } }
 
   // Recompute pricing the same way the flow does
   function calcFromState(){
@@ -2315,12 +2315,12 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
     var dur = c.pkg==='hourly' ? (c.hours+' hour'+(c.hours>1?'s':'')) : DUR[c.pkg];
     if(c.addon>0) dur += ' (+'+c.addon+' extra hr'+(c.addon>1?'s':'')+')';
     set('cnk-doc-duration',dur);
-    set('cnk-doc-outdoor',val('cnk-pw-outdoor')||'â');
+    set('cnk-doc-outdoor',val('cnk-pw-outdoor')||'—');
     var pw=val('cnk-pw-power'), wf=val('cnk-pw-wifi');
-    set('cnk-doc-power', (pw?('Power: '+pw):'') + (wf?('  Â·  WiFi: '+wf):'') || 'â');
-    set('cnk-doc-pkg', PKG[c.pkg].label + (c.pkg==='hourly'?(' Â· '+c.hours+'hr'):'') + ' â '+money(c.base));
+    set('cnk-doc-power', (pw?('Power: '+pw):'') + (wf?('  ·  WiFi: '+wf):'') || '—');
+    set('cnk-doc-pkg', PKG[c.pkg].label + (c.pkg==='hourly'?(' · '+c.hours+'hr'):'') + ' — '+money(c.base));
     var er=document.getElementById('cnk-doc-extra-row');
-    if(c.addon>0){ er.style.display=''; set('cnk-doc-extra', c.addon+' Ã $150 = '+money(c.addonCost)); } else er.style.display='none';
+    if(c.addon>0){ er.style.display=''; set('cnk-doc-extra', c.addon+' × $150 = '+money(c.addonCost)); } else er.style.display='none';
     set('cnk-doc-sub',money(c.sub));
     set('cnk-doc-tax',money(c.tax));
     set('cnk-doc-cc',money(c.cc));
@@ -2458,8 +2458,8 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
   function getBookings(){ try{ return JSON.parse(localStorage.getItem('cnk_bookings')||'[]'); }catch(e){ return []; } }
   function saveBookings(arr){ localStorage.setItem('cnk_bookings', JSON.stringify(arr)); }
   function find(id){ return getBookings().filter(function(b){return b.id===id;})[0]; }
-  function fmtTime(t){ if(!t) return 'â'; var p=String(t).split(':'); if(p.length<2) return t; var h=parseInt(p[0],10); var m=p[1]; var ap=h>=12?'PM':'AM'; var hh=h%12; if(hh===0)hh=12; return hh+':'+m+' '+ap; }
-  function fmtDate(d){ if(!d) return 'â'; try{ return new Date(d+'T00:00:00').toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}); }catch(e){ return d; } }
+  function fmtTime(t){ if(!t) return '—'; var p=String(t).split(':'); if(p.length<2) return t; var h=parseInt(p[0],10); var m=p[1]; var ap=h>=12?'PM':'AM'; var hh=h%12; if(hh===0)hh=12; return hh+':'+m+' '+ap; }
+  function fmtDate(d){ if(!d) return '—'; try{ return new Date(d+'T00:00:00').toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}); }catch(e){ return d; } }
   function openOverlay(){ var m=document.getElementById('booking-modal'); if(m) m.classList.add('open'); }
   function rerender(){ try{loadBookings();}catch(e){} ['renderOverview','renderAllBookings','renderUpcoming','renderCalendar'].forEach(function(fn){ try{ if(typeof window[fn]==='function') window[fn](); }catch(e){} }); }
   function row(label, val){ return '<div class="cnk-mrow"><span class="ml">'+label+'</span><span class="mv">'+val+'</span></div>'; }
@@ -2474,30 +2474,30 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
     }).join('');
     var html = '';
     html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:6px;">';
-    html += '<div><div style="font-family:Cormorant Garamond,serif;font-size:26px;color:var(--cream);">'+esc(b.name||'â')+'</div>';
-    html += '<div style="font-size:12px;color:var(--cream-dim);letter-spacing:0.05em;">'+esc(b.id)+' Â· '+esc(b.source||'')+'</div></div>';
-    html += '<button class="cnk-mbtn cnk-mbtn-back" onclick="closeModal()">â Close</button></div>';
+    html += '<div><div style="font-family:Cormorant Garamond,serif;font-size:26px;color:var(--cream);">'+esc(b.name||'—')+'</div>';
+    html += '<div style="font-size:12px;color:var(--cream-dim);letter-spacing:0.05em;">'+esc(b.id)+' · '+esc(b.source||'')+'</div></div>';
+    html += '<button class="cnk-mbtn cnk-mbtn-back" onclick="closeModal()">✕ Close</button></div>';
     html += '<div class="cnk-modal-actions" style="margin-top:14px;margin-bottom:6px;">'+statusBtns+'</div>';
     html += '<div class="cnk-modal-sec"><div class="cnk-modal-sec-title">Event</div>';
-    html += row('Event Date', fmtDate(b.date))+row('Event Type', esc(b.eventType||'â'))+row('Venue / Location', esc(b.location||'â'))+row('Guests', esc(b.guests||'â'))+row('Package', esc(PKG[b.package]||b.package||'â'))+'</div>';
+    html += row('Event Date', fmtDate(b.date))+row('Event Type', esc(b.eventType||'—'))+row('Venue / Location', esc(b.location||'—'))+row('Guests', esc(b.guests||'—'))+row('Package', esc(PKG[b.package]||b.package||'—'))+'</div>';
     html += '<div class="cnk-modal-sec"><div class="cnk-modal-sec-title">Pricing</div>';
     html += row('Base Price', money(b.basePrice))+row('Sales Tax (7.45%)', money(b.tax))+row('Card Fee (3%)', money(b.ccFee))+row('Total', '<strong>'+money(b.price)+'</strong>')+row('Deposit Paid', money(b.deposit))+row('Balance Remaining', money(b.balance))+'</div>';
     html += '<div class="cnk-modal-sec"><div class="cnk-modal-sec-title">Contact</div>';
-    html += row('Email', esc(b.email||'â'))+row('Phone', esc(b.phone||'â'));
+    html += row('Email', esc(b.email||'—'))+row('Phone', esc(b.phone||'—'));
     if (b.notes) html += row('Notes', esc(b.notes));
     html += '</div>';
     if (pw && (pw.signature || pw.agreedAt || pw.startTime)) {
       html += '<div class="cnk-modal-sec"><div class="cnk-modal-sec-title">Signed Agreement &amp; Paperwork</div>';
-      html += row('Signature', '<span class="cnk-sign">'+esc(pw.signature||'â')+'</span>');
-      html += row('Signed On', pw.agreedAt ? new Date(pw.agreedAt).toLocaleString('en-US') : 'â');
-      html += row('Event Start', fmtTime(pw.startTime))+row('Event End', fmtTime(pw.endTime))+row('Setup Location', esc(pw.setup||'â'))+row('Power within 25ft', esc(pw.power||'â'))+row('WiFi Available', esc(pw.wifi||'â'))+row('Outdoor Setup', esc(pw.outdoor||'â'))+row('Overlay / Theme', esc(pw.overlay||'â'))+row('Day-of Contact', esc(pw.dayContact||'â'));
+      html += row('Signature', '<span class="cnk-sign">'+esc(pw.signature||'—')+'</span>');
+      html += row('Signed On', pw.agreedAt ? new Date(pw.agreedAt).toLocaleString('en-US') : '—');
+      html += row('Event Start', fmtTime(pw.startTime))+row('Event End', fmtTime(pw.endTime))+row('Setup Location', esc(pw.setup||'—'))+row('Power within 25ft', esc(pw.power||'—'))+row('WiFi Available', esc(pw.wifi||'—'))+row('Outdoor Setup', esc(pw.outdoor||'—'))+row('Overlay / Theme', esc(pw.overlay||'—'))+row('Day-of Contact', esc(pw.dayContact||'—'));
       html += row('Photo Marketing Release', pw.mediaRelease ? '<span class="cnk-badge-ok">Allowed</span>' : '<span class="cnk-badge-no">Opted out</span>');
       html += '</div>';
     } else {
       html += '<div class="cnk-modal-sec"><div class="cnk-modal-sec-title">Signed Agreement &amp; Paperwork</div><div style="font-size:13px;color:var(--cream-dim);padding:8px 0;">No signed paperwork on file (manual booking or not yet completed).</div></div>';
     }
     html += '<div class="cnk-modal-actions">';
-    html += '<button class="cnk-mbtn cnk-mbtn-edit" onclick="editBooking(\''+b.id+'\')">â Edit Booking</button>';
+    html += '<button class="cnk-mbtn cnk-mbtn-edit" onclick="editBooking(\''+b.id+'\')">✎ Edit Booking</button>';
     html += '<button class="cnk-mbtn cnk-mbtn-cancel" onclick="cancelBooking(\''+b.id+'\')">Cancel / Delete</button>';
     html += '</div>';
     document.getElementById('modal-content').innerHTML = html;
@@ -2511,8 +2511,8 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
     function opt(v,sel){ return '<option'+(v===sel?' selected':'')+'>'+v+'</option>'; }
     var html = '';
     html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">';
-    html += '<div style="font-family:Cormorant Garamond,serif;font-size:24px;color:var(--cream);">Edit Â· '+esc(b.id)+'</div>';
-    html += '<button class="cnk-mbtn cnk-mbtn-back" onclick="openModal(\''+b.id+'\')">â</button></div>';
+    html += '<div style="font-family:Cormorant Garamond,serif;font-size:24px;color:var(--cream);">Edit · '+esc(b.id)+'</div>';
+    html += '<button class="cnk-mbtn cnk-mbtn-back" onclick="openModal(\''+b.id+'\')">✕</button></div>';
     html += '<div class="cnk-edit-grid">';
     html += '<div><label>Name</label><input id="eb-name" value="'+esc(b.name)+'"></div>';
     html += '<div><label>Event Date</label><input id="eb-date" type="date" value="'+esc(b.date)+'"></div>';
@@ -2529,7 +2529,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
     html += '<div class="full"><label>Setup Location</label><input id="eb-setup" value="'+esc(pw.setup||'')+'"></div>';
     html += '<div class="full"><label>Overlay / Theme</label><input id="eb-overlay" value="'+esc(pw.overlay||'')+'"></div>';
     html += '<div class="full"><label>Day-of Contact</label><input id="eb-contact" value="'+esc(pw.dayContact||'')+'"></div>';
-    html += '<div class="full"><label>Round-Trip Distance (miles) â first 50 mi free, then $1.25/mi</label><input id="eb-miles" type="number" min="0" step="1" value="'+(Number(b.deliveryMiles)||0)+'" oninput="cnkEbDeliveryCalc()"></div>';
+    html += '<div class="full"><label>Round-Trip Distance (miles) — first 50 mi free, then $1.25/mi</label><input id="eb-miles" type="number" min="0" step="1" value="'+(Number(b.deliveryMiles)||0)+'" oninput="cnkEbDeliveryCalc()"></div>';
     html += '<div class="full"><div id="eb-delivery-calc" style="font-size:12px;color:var(--cream-dim);margin-top:-6px;">Current delivery fee: $'+(Number(b.deliveryFee)||0).toFixed(2)+'</div></div';
     html += '</div>';
     html += '<div class="cnk-modal-actions">';
@@ -2627,7 +2627,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
     if(grid){
       var wrap=document.createElement('div');
       wrap.className='form-group form-full';
-      wrap.innerHTML='<label class="form-label">Round-Trip Distance (miles) â first 50 mi included, then $1.25/mi</label><input type="number" id="mb-miles" class="form-input" value="0" min="0" step="1" placeholder="e.g. 80"><div id="mb-delivery-calc" style="margin-top:6px;font-size:12px;color:var(--cream-dim);">Delivery fee: $0.00 <span style="opacity:0.7;">(0 billable mi)</span></div>';
+      wrap.innerHTML='<label class="form-label">Round-Trip Distance (miles) — first 50 mi included, then $1.25/mi</label><input type="number" id="mb-miles" class="form-input" value="0" min="0" step="1" placeholder="e.g. 80"><div id="mb-delivery-calc" style="margin-top:6px;font-size:12px;color:var(--cream-dim);">Delivery fee: $0.00 <span style="opacity:0.7;">(0 billable mi)</span></div>';
       grid.appendChild(wrap);
       var el=document.getElementById('mb-miles');
       if(el) el.addEventListener('input', function(){ if(typeof updateDeliveryCalc==='function') updateDeliveryCalc(); if(typeof cnkMbRecalc==='function') cnkMbRecalc(); });
@@ -2718,7 +2718,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
     if(!built.complete){ if(res) res.innerHTML=''; if(window._cnkState){window._cnkState.delivery=0;window._cnkState.deliveryMiles=null;} lastAddr=''; return Promise.resolve(); }
     if(!force && addr===lastAddr){ return Promise.resolve(); } // already computed for this address
     lastAddr=addr;
-    if(res) res.innerHTML='<span style="color:var(--cream-dim);">Calculating delivery distanceâ¦</span>';
+    if(res) res.innerHTML='<span style="color:var(--cream-dim);">Calculating delivery distance…</span>';
     return fetch('/api/distance',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({address:addr, cityFallback: (window.__cnkCityFallback?window.__cnkCityFallback():"")})})
       .then(function(r){return r.json();})
       .then(function(d){
@@ -2731,9 +2731,9 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
         if(window._cnkState){ window._cnkState.delivery=d.fee; window._cnkState.deliveryMiles=d.roundTripMiles; window._cnkState.deliveryAddr=d.address; }
         if(!res) return;
         if(d.fee>0){
-          res.innerHTML='<div style="padding:10px 12px;background:rgba(196,152,58,0.08);border:1px solid rgba(196,152,58,0.25);border-radius:6px;"><strong style="color:var(--gold);">Delivery fee: '+money(d.fee)+'</strong><br><span style="color:var(--cream-dim);font-size:12px;">'+d.roundTripMiles+' mi round-trip Â· '+d.billableMiles+' billable mi beyond the 50 included</span></div>';
+          res.innerHTML='<div style="padding:10px 12px;background:rgba(196,152,58,0.08);border:1px solid rgba(196,152,58,0.25);border-radius:6px;"><strong style="color:var(--gold);">Delivery fee: '+money(d.fee)+'</strong><br><span style="color:var(--cream-dim);font-size:12px;">'+d.roundTripMiles+' mi round-trip · '+d.billableMiles+' billable mi beyond the 50 included</span></div>';
         } else {
-          res.innerHTML='<div style="padding:10px 12px;background:rgba(94,204,136,0.08);border:1px solid rgba(94,204,136,0.25);border-radius:6px;color:#5ecc88;">Within the included range â no delivery fee ('+d.roundTripMiles+' mi round-trip).</div>';
+          res.innerHTML='<div style="padding:10px 12px;background:rgba(94,204,136,0.08);border:1px solid rgba(94,204,136,0.25);border-radius:6px;color:#5ecc88;">Within the included range — no delivery fee ('+d.roundTripMiles+' mi round-trip).</div>';
         }
       })
       .catch(function(){ if(res) res.innerHTML='<span style="color:#e0a05c;">Delivery lookup failed; it will be confirmed before payment.</span>'; lastAddr=''; });
@@ -2761,7 +2761,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
       totalEl.textContent=money(baseTotal+d);
       depEl.textContent=money(baseDep+depShare);
       balEl.textContent=money(baseBal+(d-depShare));
-      if(payEl) payEl.textContent=' Â· '+money(baseDep+depShare);
+      if(payEl) payEl.textContent=' · '+money(baseDep+depShare);
     }
   }
 
@@ -2878,7 +2878,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
       + '<div class="form-group"><label class="form-label">Payment Method</label><select id="cnk-adm-method" class="form-input"><option>Cash</option><option>Venmo</option><option>Zelle</option><option>Check</option><option>Card (in person)</option><option>Bank transfer</option><option>Other</option></select></div>'
       + '<div class="form-group"><label class="form-label">Amount Collected Now ($)</label><input type="number" id="cnk-adm-paid" class="form-input" min="0" step="0.01" placeholder="0.00"></div>'
       + '<div class="form-group form-full"><label class="form-label">Payment Note (optional)</label><input type="text" id="cnk-adm-paynote" class="form-input" placeholder="e.g. Venmo @handle, check #1234"></div>'
-      + '<button type="button" id="cnk-adm-record" class="cnk-pay-btn" style="margin-top:8px;">Continue to Paperwork â</button>';
+      + '<button type="button" id="cnk-adm-record" class="cnk-pay-btn" style="margin-top:8px;">Continue to Paperwork →</button>';
     wrapper.appendChild(panel);
     document.getElementById('cnk-adm-discount').addEventListener('input', patchAdminSummary);
     document.getElementById('cnk-adm-record').addEventListener('click', function(){
@@ -2975,8 +2975,8 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
         b.amountPaid=paid;
         var extra=[];
         if(disc>0) extra.push('Discount '+money(disc));
-        extra.push(method+' '+money(paid)+(note?(' Â· '+note):''));
-        b.notes=(b.notes?b.notes+' ':'')+'['+extra.join(' Â· ')+']';
+        extra.push(method+' '+money(paid)+(note?(' · '+note):''));
+        b.notes=(b.notes?b.notes+' ':'')+'['+extra.join(' · ')+']';
         arr[arr.length-1]=b;
         localStorage.setItem('cnk_bookings',JSON.stringify(arr));
         if(typeof window.cnkDbSave==='function') window.cnkDbSave(b);
@@ -3030,7 +3030,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
           btn.type='button';
           btn.className='cnk-pay-btn';
           btn.style.cssText='margin-top:12px;background:rgba(196,152,58,0.18);color:var(--gold);border:1px solid rgba(196,152,58,0.45);';
-          btn.textContent='â Back to Admin Dashboard';
+          btn.textContent='← Back to Admin Dashboard';
           btn.addEventListener('click', window.cnkBackToAdmin);
           // place it near the existing "Book Another Event" button
           var another=[...done.querySelectorAll('button')].filter(function(b){return /book another/i.test(b.textContent);})[0];
@@ -3134,7 +3134,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
       + '<div style="font-size:13px;color:var(--cream-dim);margin-bottom:10px;">Charging '+money(bal)+' to the customer\'s card. Enter their card below.</div>'
       + '<div id="cnk-bal-card" style="background:#fff;border-radius:8px;padding:14px;min-height:48px;"></div>'
       + '<div id="cnk-bal-err" style="color:#e0a05c;font-size:12px;margin-top:6px;"></div>'
-      + '<div id="cnk-bal-processing" style="display:none;color:var(--cream-dim);font-size:13px;margin-top:8px;">Processingâ¦</div>'
+      + '<div id="cnk-bal-processing" style="display:none;color:var(--cream-dim);font-size:13px;margin-top:8px;">Processing…</div>'
       + '<div class="cnk-modal-actions"><button class="cnk-mbtn cnk-mbtn-save" id="cnk-bal-charge">Charge '+money(bal)+'</button>'
       + '<button class="cnk-mbtn cnk-mbtn-back" id="cnk-bal-cancel">Cancel</button></div>';
     content.appendChild(panel);
@@ -3145,7 +3145,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
 
   function initBalCard(b, bal){
     var errEl=document.getElementById('cnk-bal-err');
-    if(typeof Square==='undefined'){ if(errEl) errEl.textContent='Payment library not loaded â refresh and try again.'; return; }
+    if(typeof Square==='undefined'){ if(errEl) errEl.textContent='Payment library not loaded — refresh and try again.'; return; }
     var payments, card;
     (async function(){
       try{
@@ -3163,10 +3163,10 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
           if(result.status!=='OK'){ throw new Error('Card not accepted. Check the details.'); }
           var cents=Math.round(bal*100);
           var resp=await fetch('/api/charge',{method:'POST',headers:{'Content-Type':'application/json'},
-            body:JSON.stringify({ nonce:result.token, amount:cents, currency:'USD', description:'Balance â '+b.id, email:b.email, name:b.name, bookingId:b.id })});
+            body:JSON.stringify({ nonce:result.token, amount:cents, currency:'USD', description:'Balance — '+b.id, email:b.email, name:b.name, bookingId:b.id })});
           var out=await resp.json();
           if(!resp.ok || out.error){ throw new Error(out.error||('HTTP '+resp.status)); }
-          // success: update booking â balance paid in full
+          // success: update booking — balance paid in full
           var arr=getBookings();
           var bb=arr.filter(function(x){return x.id===b.id;})[0];
           if(bb){
@@ -3309,7 +3309,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
       list.slice(0,3).forEach(function(b){
         var tag=document.createElement('div');
         tag.textContent=calLabel(b);
-        tag.title=calLabel(b)+' â '+(b.package||'')+' ('+calMoney(b.price)+')';
+        tag.title=calLabel(b)+' — '+(b.package||'')+' ('+calMoney(b.price)+')';
         tag.style.cssText='font-size:9.5px;line-height:1.25;background:rgba(196,152,58,0.22);color:var(--gold,#c4983a);border-radius:3px;padding:1px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;';
         tag.addEventListener('click', function(ev){ ev.stopPropagation(); if(typeof window.openModal==='function') window.openModal(b.id); });
         wrap.appendChild(tag);
@@ -3391,9 +3391,9 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
         if(window._cnkSort.col===idx){ window._cnkSort.dir*=-1; } else { window._cnkSort.col=idx; window._cnkSort.dir=1; }
         applySort(table);
         // update arrows
-        ths.forEach(function(h){ var b=h.getAttribute('data-base')||h.textContent.replace(/[â²â¼]\s*$/,'').trim(); h.setAttribute('data-base',b); h.textContent=b; });
+        ths.forEach(function(h){ var b=h.getAttribute('data-base')||h.textContent.replace(/[▲▼]\s*$/,'').trim(); h.setAttribute('data-base',b); h.textContent=b; });
         th.setAttribute('data-base', baseLabel);
-        th.textContent=baseLabel+(window._cnkSort.dir>0?'  â²':'  â¼');
+        th.textContent=baseLabel+(window._cnkSort.dir>0?'  ▲':'  ▼');
       });
     });
     if(window._cnkSort.col!==null) applySort(table);
@@ -3467,7 +3467,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
       var name=b.name||id;
       var msg='Cancel the booking for '+name+' ('+id+')?';
       if(pid && paid>0){ msg+='\n\nThis will REFUND $'+paid.toFixed(2)+' to their card via Square, then remove the booking. This cannot be undone.'; }
-      else if(paid>0){ msg+='\n\n$'+paid.toFixed(2)+' was collected by '+(b.paymentMethod||b.source||'a non-card method')+'. No automatic refund can be issued â you will need to refund that manually. The booking will be removed.'; }
+      else if(paid>0){ msg+='\n\n$'+paid.toFixed(2)+' was collected by '+(b.paymentMethod||b.source||'a non-card method')+'. No automatic refund can be issued — you will need to refund that manually. The booking will be removed.'; }
       else { msg+='\n\nNo payment was collected. The booking will be removed.'; }
       if(!window.confirm(msg)) return;
       // process refund first if we have a square payment id
@@ -3573,7 +3573,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
     var b=mGetBooking(id); if(!b){ alert('Booking not found.'); return; }
     var pw=b.paperwork||{};
     var pkgName={hourly:'2 Hours',halfday:'Half Day',fullday:'Full Day'}[b.package]||b.package||'';
-    function row(k,v){ return '<tr><td style="padding:5px 14px 5px 0;color:#666;white-space:nowrap;vertical-align:top;">'+mEsc(k)+'</td><td style="padding:5px 0;color:#111;font-weight:600;">'+mEsc(v||'â')+'</td></tr>'; }
+    function row(k,v){ return '<tr><td style="padding:5px 14px 5px 0;color:#666;white-space:nowrap;vertical-align:top;">'+mEsc(k)+'</td><td style="padding:5px 0;color:#111;font-weight:600;">'+mEsc(v||'—')+'</td></tr>'; }
     var clauses=[
       ['1. Parties & Equipment','CNK Booths LLC ("Company") agrees to provide photo booth rental services to the Client named below for the event described herein.'],
       ['2. Rental Period','The rental period and event timing are as specified below. Additional hours are billed at $150/hour.'],
@@ -3588,7 +3588,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
       ['11. Force Majeure','Neither party is liable for failure to perform due to events beyond reasonable control.'],
       ['12. Governing Law','This agreement is governed by the laws of the State of Utah, with venue in the courts of Utah County, Utah.']
     ];
-    var html='<!doctype html><html><head><meta charset="utf-8"><title>Rental Agreement â '+mEsc(b.name)+' ('+mEsc(b.id)+')</title>'
+    var html='<!doctype html><html><head><meta charset="utf-8"><title>Rental Agreement — '+mEsc(b.name)+' ('+mEsc(b.id)+')</title>'
       +'<style>body{font-family:Georgia,serif;max-width:760px;margin:32px auto;padding:0 24px;color:#1a1a1a;line-height:1.5;}'
       +'h1{font-size:24px;color:#b8893a;margin-bottom:2px;}h2{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#888;margin:24px 0 8px;border-bottom:1px solid #ddd;padding-bottom:4px;}'
       +'table{border-collapse:collapse;font-size:14px;}.clause{margin:10px 0;font-size:13.5px;}.clause b{display:block;margin-bottom:2px;color:#222;}'
@@ -3597,16 +3597,16 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
       +'.btn{background:#b8893a;color:#fff;border:none;padding:10px 18px;border-radius:6px;font-size:14px;cursor:pointer;font-family:Arial;}'
       +'</style></head><body>'
       +'<div class="noprint" style="text-align:right;margin-bottom:12px;"><button class="btn" onclick="window.print()">Download / Print (Save as PDF)</button></div>'
-      +'<h1>CNK Booths LLC â Photo Booth Rental Agreement</h1>'
-      +'<div class="muted">Reference '+mEsc(b.id)+' Â· Generated '+new Date().toLocaleDateString()+'</div>'
+      +'<h1>CNK Booths LLC — Photo Booth Rental Agreement</h1>'
+      +'<div class="muted">Reference '+mEsc(b.id)+' · Generated '+new Date().toLocaleDateString()+'</div>'
       +'<h2>Client & Event</h2><table>'
       +row('Client', b.name)+row('Email', b.email)+row('Phone', b.phone)
       +row('Event date', b.date)+row('Event type', b.eventType)+row('Location', b.location)
       +row('Guests', b.guests)+row('Package', pkgName)
-      +row('Start / End', (pw.startTime||'â')+' â '+(pw.endTime||'â'))
+      +row('Start / End', (pw.startTime||'—')+' – '+(pw.endTime||'—'))
       +row('Setup', pw.setup)+row('Day-of contact', pw.dayContact)
-      +row('Power / Wi-Fi', (pw.power||'â')+' / '+(pw.wifi||'â'))+row('Outdoor', pw.outdoor)
-      +row('Media release', pw.mediaRelease?'Yes â granted':'No')
+      +row('Power / Wi-Fi', (pw.power||'—')+' / '+(pw.wifi||'—'))+row('Outdoor', pw.outdoor)
+      +row('Media release', pw.mediaRelease?'Yes — granted':'No')
       +'</table>'
       +'<h2>Pricing</h2><table>'
       +row('Base price', mMoney(b.basePrice))+row('Sales tax', mMoney(b.tax))
@@ -3619,7 +3619,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
       +clauses.map(function(c){return '<div class="clause"><b>'+mEsc(c[0])+'</b>'+mEsc(c[1])+'</div>';}).join('')
       +'<div class="sign"><table>'
       +row('Signed by', pw.signature)
-      +row('Agreed at', pw.agreedAt?new Date(pw.agreedAt).toLocaleString():'â')
+      +row('Agreed at', pw.agreedAt?new Date(pw.agreedAt).toLocaleString():'—')
       +'</table><p class="muted">Electronically agreed via the CNK Booths booking system.</p></div>'
       +'</body></html>';
     var w=window.open('','_blank');
@@ -4062,7 +4062,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
   function getB(id){ try{ return JSON.parse(localStorage.getItem('cnk_bookings')||'[]').filter(function(x){return String(x.id)===String(id);})[0]; }catch(e){ return null; } }
   function mkCell(id,label,val,full,ro){ var d=document.createElement('div'); if(full) d.className='full'; var l=document.createElement('label'); l.textContent=label; var inp=document.createElement('input'); inp.id=id; inp.type='number'; inp.step='0.01'; inp.value=(val!=null?val:''); if(ro) inp.readOnly=true; d.appendChild(l); d.appendChild(inp); return d; }
   function recompute(){ var id=bid(); var b=id?getB(id):null; if(!b) return; var base=Number(b.basePrice)||0, extra=Number(b.extraCost)||0; var tax=Number(b.tax); if(isNaN(tax)) tax=(base+extra)*0.0745; if(tax>0){ var __be=Math.round((tax/0.0745)*100)/100; base=__be-extra; } var dEl=document.getElementById('eb-delivery'), discEl=document.getElementById('eb-discount'); var delivery=dEl?(parseFloat(dEl.value)||0):(Number(b.deliveryFee)||0); var discount=discEl?(parseFloat(discEl.value)||0):(Number(b.discount)||0); var hadCard=(Number(b.ccFee)||0)>0; var cc=hadCard?Math.round((base+extra+tax+delivery-discount)*0.03*100)/100:0; var total=Math.round((base+extra+tax+delivery-discount+cc)*100)/100; var pEl=document.getElementById('eb-deposit'); var paid=pEl?(parseFloat(pEl.value)||0):(Number(b.amountPaid!=null?b.amountPaid:b.deposit)||0); var tEl=document.getElementById('eb-total-disp'); if(tEl) tEl.value=total.toFixed(2); var balEl=document.getElementById('eb-balance'); if(balEl) balEl.value=Math.max(0,Math.round((total-paid)*100)/100).toFixed(2); }
-  function enhance(){ var grid=document.querySelector('.cnk-edit-grid'); if(!grid) return; var ov=document.getElementById('eb-overlay'); if(!ov||ov.style.display==='none') return; var balEl=document.getElementById('eb-balance'); if(!balEl) return; var balCell=balEl.parentElement; var id=bid(); var b=id?getB(id):null; if(!document.getElementById('eb-total-disp')){ var t=mkCell('eb-total-disp','Total ($) â auto', b?(Number(b.price)||0):'', true, true); grid.insertBefore(t, balCell); } if(!document.getElementById('eb-delivery')){ var d=mkCell('eb-delivery','Delivery Fee ($)', b?(Number(b.deliveryFee)||0):''); grid.insertBefore(d, balCell); document.getElementById('eb-delivery').addEventListener('input', recompute); } if(!document.getElementById('eb-discount')){ var dc=mkCell('eb-discount','Discount ($)', b?(Number(b.discount)||0):''); grid.insertBefore(dc, balCell); document.getElementById('eb-discount').addEventListener('input', recompute); } if(!document.getElementById('eb-deposit')){ var p=mkCell('eb-deposit','Amount Collected ($)', b?(Number(b.amountPaid!=null?b.amountPaid:b.deposit)||0):''); grid.insertBefore(p, balCell); document.getElementById('eb-deposit').addEventListener('input', recompute); } var miles=document.getElementById('eb-miles'); if(miles&&!miles.__cnkW){ miles.__cnkW=true; miles.addEventListener('input', function(){ var mi=parseFloat(miles.value)||0; var fee=Math.max(0,mi-50)*1.25; var dd=document.getElementById('eb-delivery'); if(dd){ dd.value=fee.toFixed(2); recompute(); } }); } recompute(); }
+  function enhance(){ var grid=document.querySelector('.cnk-edit-grid'); if(!grid) return; var ov=document.getElementById('eb-overlay'); if(!ov||ov.style.display==='none') return; var balEl=document.getElementById('eb-balance'); if(!balEl) return; var balCell=balEl.parentElement; var id=bid(); var b=id?getB(id):null; if(!document.getElementById('eb-total-disp')){ var t=mkCell('eb-total-disp','Total ($) — auto', b?(Number(b.price)||0):'', true, true); grid.insertBefore(t, balCell); } if(!document.getElementById('eb-delivery')){ var d=mkCell('eb-delivery','Delivery Fee ($)', b?(Number(b.deliveryFee)||0):''); grid.insertBefore(d, balCell); document.getElementById('eb-delivery').addEventListener('input', recompute); } if(!document.getElementById('eb-discount')){ var dc=mkCell('eb-discount','Discount ($)', b?(Number(b.discount)||0):''); grid.insertBefore(dc, balCell); document.getElementById('eb-discount').addEventListener('input', recompute); } if(!document.getElementById('eb-deposit')){ var p=mkCell('eb-deposit','Amount Collected ($)', b?(Number(b.amountPaid!=null?b.amountPaid:b.deposit)||0):''); grid.insertBefore(p, balCell); document.getElementById('eb-deposit').addEventListener('input', recompute); } var miles=document.getElementById('eb-miles'); if(miles&&!miles.__cnkW){ miles.__cnkW=true; miles.addEventListener('input', function(){ var mi=parseFloat(miles.value)||0; var fee=Math.max(0,mi-50)*1.25; var dd=document.getElementById('eb-delivery'); if(dd){ dd.value=fee.toFixed(2); recompute(); } }); } recompute(); }
   document.addEventListener('click', function(){ setTimeout(enhance,120); }, true);
   setInterval(enhance, 700);
 })();
@@ -4410,7 +4410,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
       var btn=document.createElement('button');
       btn.className='sidebar-btn'; btn.id='cnk-removed-navbtn';
       btn.setAttribute('onclick',"showAdminView('removed')");
-      btn.innerHTML='<span class="icon">ð</span> Removed';
+      btn.innerHTML='<span class="icon">🗑</span> Removed';
       if(logout && logout.parentNode===firstSection){ firstSection.insertBefore(btn, logout); }
       else { firstSection.appendChild(btn); }
     }
@@ -4484,7 +4484,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
   function blockedName(b){
     var n = (b.name||'').trim();
     if(n && n.toLowerCase()!=='blocked') return n;
-    return b.notes ? ('Blocked â '+b.notes) : 'Blocked (event/unavailable)';
+    return b.notes ? ('Blocked — '+b.notes) : 'Blocked (event/unavailable)';
   }
 
   // ---- 1) ALL BOOKINGS: keep blocked visible, drop removed (loadBookings already drops removed).
@@ -4585,7 +4585,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
         var date=m[1];
         if(blockedByDate[date]){
           cell.classList.add('cnk-blocked-day');
-          cell.setAttribute('title','Blocked â unavailable');
+          cell.setAttribute('title','Blocked — unavailable');
           // remove the gold enhancer event-tags on blocked days (they'd show the internal block record)
           cell.querySelectorAll('[data-cnk-ev]').forEach(function(e){ e.remove(); });
           if(!cell.querySelector('[data-cnk-blocked-tag]')){
@@ -4658,7 +4658,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
   window.cnkLoadPartnerships = function(){
     ensurePartnerView();
     var wrap=document.getElementById('partner-table-wrapper');
-    if(wrap && !wrap.innerHTML){ wrap.innerHTML='<p style="color:var(--cream-dim);padding:20px;">Loadingâ¦</p>'; }
+    if(wrap && !wrap.innerHTML){ wrap.innerHTML='<p style="color:var(--cream-dim);padding:20px;">Loading…</p>'; }
     fetch('/api/list-bookings?type=partnerships&t='+Date.now(), {cache:'no-store'})
       .then(function(r){ return r.json(); })
       .then(function(j){ window.__cnkPartners = (j && j.partnerships) || []; renderPartners(); })
@@ -4681,7 +4681,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
           '<td>'+esc(p.email||'')+'</td>'+
           '<td>'+esc(p.phone||'')+'</td>'+
           '<td>'+esc(p.signDate||'')+'</td>'+
-          '<td><button class="action-btn" onclick="cnkViewPartner('+i+')">View</button><button class="sidebar-btn" onclick="(function(){var p=document.getElementById('admin-fleet');if(!p){p=document.createElement('div');p.id='admin-fleet';p.className='admin-view';p.innerHTML='<div style=\'height:calc(100vh - 130px);padding:0;\'><iframe src=\'https://cnk-fleet-monitoring-1.vercel.app/dashboard.html\' style=\'width:100%;height:100%;border:none;border-radius:12px;\' title=\'Fleet Monitor\'></iframe></div>';var ref=document.getElementById('admin-overview');ref.parentElement.appendChild(p);}document.querySelectorAll('.admin-view').forEach(function(v){v.classList.remove('active');});p.classList.add('active');})();"><span>&#128225;</span> Fleet Monitor</button> '+
+          '<td><button class="action-btn" onclick="cnkViewPartner('+i+')">View</button> '+
           '<button class="action-btn" onclick="cnkDeletePartner(\''+esc(p.id)+'\')">Remove</button></td>'+
           '</tr>';
       }).join('')+'</tbody></table>';
@@ -4831,10 +4831,10 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
     var today=new Date(); today.setHours(0,0,0,0);
     var upcoming=bookings.filter(function(b){ return b && String(b.id).indexOf('CNK-')===0 && b.status!=='cancelled' && new Date(b.date)>=today; })
       .sort(function(a,b){ return new Date(a.date)-new Date(b.date); });
-    var opts='<option value="">â Select a booking â</option>';
+    var opts='<option value="">— Select a booking —</option>';
     upcoming.forEach(function(b){
       var nm=esc(b.name||((b.first||'')+' '+(b.last||'')).trim()||b.id);
-      opts+='<option value="'+esc(b.id)+'">'+esc(b.date)+' Â· '+nm+'</option>';
+      opts+='<option value="'+esc(b.id)+'">'+esc(b.date)+' · '+nm+'</option>';
     });
     panel.innerHTML=
       '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px;">'
@@ -4851,8 +4851,8 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
       +'<label style="grid-column:1/3;">Venue address<input id="cs-address" type="text" style="width:100%;padding:7px 9px;border-radius:8px;"></label>'
       +'</div>'
       +'<div style="margin-top:14px;padding:12px 14px;border-radius:10px;background:rgba(196,152,58,0.10);border:1px solid rgba(196,152,58,0.3);">'
-      +'<div style="font-weight:600;margin-bottom:8px;color:#C4983A;">Say these on the call â check when told:</div>'
-      +'<label style="display:block;margin:6px 0;"><input type="checkbox" id="cs-wifi"> Ask about venue WiFi â if none, Starlink is <b>$35</b></label>'
+      +'<div style="font-weight:600;margin-bottom:8px;color:#C4983A;">Say these on the call — check when told:</div>'
+      +'<label style="display:block;margin:6px 0;"><input type="checkbox" id="cs-wifi"> Ask about venue WiFi — if none, Starlink is <b>$35</b></label>'
       +'<label style="display:block;margin:6px 0;"><input type="checkbox" id="cs-overage"> Extra hours are <b>$150/hour</b> if the event runs past the booked end time</label>'
       +'<label style="display:block;margin:6px 0;"><input type="checkbox" id="cs-setup"> We arrive <b>45 minutes early</b> to set up</label>'
       +'</div>'
@@ -4884,7 +4884,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
         toldWifi:C('#cs-wifi'), toldOverage:C('#cs-overage'), toldSetup:C('#cs-setup'),
         notes:V('#cs-notes'), submittedAt:new Date().toISOString()
       };
-      msg.style.color='#aaa'; msg.textContent='Savingâ¦';
+      msg.style.color='#aaa'; msg.textContent='Saving…';
       fetch('/api/save-booking',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(out)})
         .then(function(r){ return r.ok?r.json():Promise.reject(r.status); })
         .then(function(){ msg.style.color='#3fbf6f'; msg.textContent='Saved to '+(rec.name||rec.id)+'.'; })
@@ -4908,8 +4908,8 @@ window.cnkPromoValidate=function(code){var cc=norm(code);if(!cc)return{valid:fal
 window.cnkPromoActive=function(){var ap=window.__cnkAppliedPromo;if(!ap)return null;var v=window.cnkPromoValidate(ap.code);if(!v.valid)return null;return{valid:true,code:norm(ap.code),promo:v.promo};};
 window.cnkPromoDiscountFor=function(sub){var a=window.cnkPromoActive();if(!a)return 0;var p=a.promo,d=0;if(p.type==='pct'){d=sub*(Number(p.value)||0)/100;}else{d=Number(p.value)||0;}if(d<0)d=0;if(d>sub)d=sub;return Math.round(d*100)/100;};
 function refresh(){try{if(window.cnkFillSummary)window.cnkFillSummary();}catch(e){}drawRow();}
-function drawRow(){try{var box=document.querySelector('.price-breakdown');if(!box)return;var row=document.getElementById('cnk-sum-promo-row');var d=(window.__cnkDisc&&window.__cnkDisc.discount)||0;var code=(window.__cnkDisc&&window.__cnkDisc.promo)||'';if(d>0&&code){if(!row){row=document.createElement('div');row.id='cnk-sum-promo-row';row.className='pb-row';row.style.cssText='display:flex;justify-content:space-between;color:#2e7d32;';var taxEl=document.getElementById('cnk-sum-tax');var taxRow=taxEl?taxEl.closest('div'):null;if(taxRow&&taxRow.parentElement){taxRow.parentElement.insertBefore(row,taxRow);}else{box.appendChild(row);}}row.innerHTML='<span class="pb-label">Promo '+code+'</span><span class="pb-val">â$'+d.toFixed(2)+'</span>';row.style.display='flex';}else if(row){row.style.display='none';}}catch(e){}}
-function applyClicked(){var inp=document.getElementById('cnk-promo-input');var msg=document.getElementById('cnk-promo-msg');var code=norm(inp&&inp.value);if(!code){window.__cnkAppliedPromo=null;refresh();if(msg)msg.textContent='';return;}if(msg){msg.style.color='#666';msg.textContent='Checkingâ¦';}window.cnkPromoLoad().then(function(){var v=window.cnkPromoValidate(code);if(!v.valid){window.__cnkAppliedPromo=null;refresh();if(msg){msg.style.color='#c62828';msg.textContent=v.reason;}return;}window.__cnkAppliedPromo={code:code};refresh();var d=(window.__cnkDisc&&window.__cnkDisc.discount)||0;if(msg){msg.style.color='#2e7d32';msg.textContent='Applied â you save $'+d.toFixed(2);}});}
+function drawRow(){try{var box=document.querySelector('.price-breakdown');if(!box)return;var row=document.getElementById('cnk-sum-promo-row');var d=(window.__cnkDisc&&window.__cnkDisc.discount)||0;var code=(window.__cnkDisc&&window.__cnkDisc.promo)||'';if(d>0&&code){if(!row){row=document.createElement('div');row.id='cnk-sum-promo-row';row.className='pb-row';row.style.cssText='display:flex;justify-content:space-between;color:#2e7d32;';var taxEl=document.getElementById('cnk-sum-tax');var taxRow=taxEl?taxEl.closest('div'):null;if(taxRow&&taxRow.parentElement){taxRow.parentElement.insertBefore(row,taxRow);}else{box.appendChild(row);}}row.innerHTML='<span class="pb-label">Promo '+code+'</span><span class="pb-val">−$'+d.toFixed(2)+'</span>';row.style.display='flex';}else if(row){row.style.display='none';}}catch(e){}}
+function applyClicked(){var inp=document.getElementById('cnk-promo-input');var msg=document.getElementById('cnk-promo-msg');var code=norm(inp&&inp.value);if(!code){window.__cnkAppliedPromo=null;refresh();if(msg)msg.textContent='';return;}if(msg){msg.style.color='#666';msg.textContent='Checking…';}window.cnkPromoLoad().then(function(){var v=window.cnkPromoValidate(code);if(!v.valid){window.__cnkAppliedPromo=null;refresh();if(msg){msg.style.color='#c62828';msg.textContent=v.reason;}return;}window.__cnkAppliedPromo={code:code};refresh();var d=(window.__cnkDisc&&window.__cnkDisc.discount)||0;if(msg){msg.style.color='#2e7d32';msg.textContent='Applied — you save $'+d.toFixed(2);}});}
 window.cnkApplyPromo=function(code){var inp=document.getElementById('cnk-promo-input');if(inp)inp.value=code;applyClicked();};
 function mount(){try{var box=document.querySelector('.price-breakdown');if(!box)return;if(document.getElementById('cnk-promo-wrap'))return;var wrap=document.createElement('div');wrap.id='cnk-promo-wrap';wrap.style.cssText='margin:12px 0;display:flex;gap:8px;align-items:center;flex-wrap:wrap;';wrap.innerHTML='<input id="cnk-promo-input" placeholder="Promo code" style="flex:1;min-width:120px;padding:10px;border:1px solid #ccc;border-radius:8px;text-transform:uppercase;" /><button id="cnk-promo-apply" type="button" style="padding:10px 16px;border:none;border-radius:8px;background:#111;color:#fff;cursor:pointer;">Apply</button><div id="cnk-promo-msg" style="width:100%;font-size:13px;margin-top:2px;"></div>';box.parentElement.insertBefore(wrap,box);document.getElementById('cnk-promo-apply').addEventListener('click',applyClicked);document.getElementById('cnk-promo-input').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();applyClicked();}});drawRow();}catch(e){}}
 try{var mo=new MutationObserver(function(){mount();});mo.observe(document.documentElement,{childList:true,subtree:true});}catch(e){}
@@ -4940,14 +4940,14 @@ function api(path,body){return fetch(path,{method:'POST',headers:{'Content-Type'
 function loadPromos(){return fetch('/api/list-bookings?z='+Date.now(),{cache:'no-store'}).then(function(r){return r.json();}).then(function(j){var all=(j&&j.bookings)||j||[];return all.filter(function(b){return b&&String(b.id).indexOf('__PROMO__')===0;});});}
 function render(){
  var list=document.getElementById('cnk-pa-list'); if(!list)return;
- list.innerHTML='<div style="color:#888;padding:8px;">Loadingâ¦</div>';
+ list.innerHTML='<div style="color:#888;padding:8px;">Loading…</div>';
  loadPromos().then(function(codes){
   if(!codes.length){ list.innerHTML='<div style="color:#888;padding:8px;">No codes yet. Create one below.</div>'; return; }
   codes.sort(function(a,b){return (b.created||0)-(a.created||0);});
   var html='<table style="width:100%;border-collapse:collapse;font-size:14px;"><tr style="text-align:left;color:#888;"><th style="padding:6px;">Code</th><th>Discount</th><th>Expires</th><th>Uses</th><th>Status</th><th></th></tr>';
   codes.forEach(function(p){
    var disc=p.type==='pct'?((Number(p.value)||0)+'%'):('$'+(Number(p.value)||0));
-   var exp=p.expires?esc(p.expires):'â';
+   var exp=p.expires?esc(p.expires):'—';
    var uses=(p.uses||0)+((p.maxUses&&Number(p.maxUses)>0)?(' / '+p.maxUses):'');
    var active=p.active!==false;
    html+='<tr style="border-top:1px solid #eee;"><td style="padding:6px;font-weight:600;">'+esc(p.code)+'</td><td>'+disc+'</td><td>'+exp+'</td><td>'+uses+'</td><td><span style="color:'+(active?'#2e7d32':'#999')+';">'+(active?'Active':'Inactive')+'</span></td><td style="text-align:right;white-space:nowrap;"><button data-act="toggle" data-id="'+esc(p.id)+'" style="margin-right:6px;padding:4px 8px;border:1px solid #ccc;border-radius:6px;background:#fff;cursor:pointer;">'+(active?'Disable':'Enable')+'</button><button data-act="del" data-id="'+esc(p.id)+'" data-code="'+esc(p.code)+'" style="padding:4px 8px;border:1px solid #e0b4b4;border-radius:6px;background:#fff;color:#c62828;cursor:pointer;">Delete</button></td></tr>';
@@ -4974,7 +4974,7 @@ function createCode(){
  if(value<=0){msg.style.color='#c62828';msg.textContent='Enter a discount amount';return;}
  if(type==='pct'&&value>100){msg.style.color='#c62828';msg.textContent='Percent cannot exceed 100';return;}
  var rec={id:'__PROMO__'+code,code:code,type:type,value:value,expires:expires,maxUses:maxUses,uses:0,active:true,status:'promo',source:'promo',created:Date.now()};
- msg.style.color='#666';msg.textContent='Savingâ¦';
+ msg.style.color='#666';msg.textContent='Saving…';
  api('/api/save-booking',rec).then(function(r){
   if(r&&r.ok){msg.style.color='#2e7d32';msg.textContent='Created '+code;['cnk-pa-code','cnk-pa-value','cnk-pa-exp','cnk-pa-max'].forEach(function(i){var e=document.getElementById(i);if(e)e.value='';});render();}
   else{msg.style.color='#c62828';msg.textContent='Save failed';}
@@ -5019,7 +5019,7 @@ if(window.__cnkAdminPricing)return;window.__cnkAdminPricing=true;
 function api(path,body){return fetch(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){return r.json();});}
 function loadCfg(){return fetch('/api/list-bookings?z='+Date.now(),{cache:'no-store'}).then(function(r){return r.json();}).then(function(j){var all=(j&&j.bookings)||j||[];var rec=all.filter(function(b){return b&&String(b.id)==='__SETTINGS__pricing';})[0];return (rec&&rec.pricing)||{pkg:{hourly:549,halfday:799,fullday:999},hour:150};});}
 function fill(){loadCfg().then(function(c){var g=function(id){return document.getElementById(id);};if(g('cnk-pr-2hr'))g('cnk-pr-2hr').value=(c.pkg&&c.pkg.hourly)||549;if(g('cnk-pr-half'))g('cnk-pr-half').value=(c.pkg&&c.pkg.halfday)||799;if(g('cnk-pr-full'))g('cnk-pr-full').value=(c.pkg&&c.pkg.fullday)||999;if(g('cnk-pr-hour'))g('cnk-pr-hour').value=c.hour||150;});}
-function save(){var g=function(id){return Number((document.getElementById(id)||{}).value)||0;};var msg=document.getElementById('cnk-pr-msg');var h=g('cnk-pr-2hr'),hd=g('cnk-pr-half'),fd=g('cnk-pr-full'),hr=g('cnk-pr-hour');if(h<=0||hd<=0||fd<=0||hr<=0){msg.style.color='#c62828';msg.textContent='All prices must be greater than 0';return;}msg.style.color='#666';msg.textContent='Savingâ¦';api('/api/save-booking',{id:'__SETTINGS__pricing',status:'settings',source:'settings',pricing:{pkg:{hourly:h,halfday:hd,fullday:fd},hour:hr},created:Date.now()}).then(function(r){if(r&&r.ok){msg.style.color='#2e7d32';msg.textContent='Saved â new prices are live';if(window.cnkLoadPricing)window.cnkLoadPricing();}else{msg.style.color='#c62828';msg.textContent='Save failed';}});}
+function save(){var g=function(id){return Number((document.getElementById(id)||{}).value)||0;};var msg=document.getElementById('cnk-pr-msg');var h=g('cnk-pr-2hr'),hd=g('cnk-pr-half'),fd=g('cnk-pr-full'),hr=g('cnk-pr-hour');if(h<=0||hd<=0||fd<=0||hr<=0){msg.style.color='#c62828';msg.textContent='All prices must be greater than 0';return;}msg.style.color='#666';msg.textContent='Saving…';api('/api/save-booking',{id:'__SETTINGS__pricing',status:'settings',source:'settings',pricing:{pkg:{hourly:h,halfday:hd,fullday:fd},hour:hr},created:Date.now()}).then(function(r){if(r&&r.ok){msg.style.color='#2e7d32';msg.textContent='Saved — new prices are live';if(window.cnkLoadPricing)window.cnkLoadPricing();}else{msg.style.color='#c62828';msg.textContent='Save failed';}});}
 function mount(){var av=document.querySelector('.admin-view');if(!av)return;if(document.getElementById('cnk-pricing-admin'))return;var sec=document.createElement('div');sec.id='cnk-pricing-admin';sec.style.cssText='margin:24px 0;padding:16px;border:1px solid #eee;border-radius:12px;background:#fff;';var fld=function(label,id,val){return '<label style="display:flex;flex-direction:column;font-size:13px;color:#666;gap:4px;">'+label+'<div style="display:flex;align-items:center;gap:4px;"><span style="color:#999;">$</span><input id="'+id+'" type="number" value="'+val+'" style="padding:8px;border:1px solid #ccc;border-radius:6px;width:90px;" /></div></label>';};sec.innerHTML='<div class="section-label" style="font-weight:700;margin-bottom:12px;">Pricing</div><div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end;">'+fld('2 Hours','cnk-pr-2hr',549)+fld('Half Day','cnk-pr-half',799)+fld('Full Day','cnk-pr-full',999)+fld('Extra hour / hr','cnk-pr-hour',150)+'<button id="cnk-pr-save" style="padding:9px 16px;border:none;border-radius:6px;background:#111;color:#fff;cursor:pointer;height:38px;">Save prices</button></div><div id="cnk-pr-msg" style="font-size:13px;margin-top:10px;"></div><div style="font-size:12px;color:#999;margin-top:6px;">Changes apply to the customer booking site immediately.</div>';var promo=document.getElementById('cnk-promo-admin');if(promo&&promo.parentElement){promo.parentElement.insertBefore(sec,promo);}else{av.appendChild(sec);}var sb=document.getElementById('cnk-pr-save');if(sb)sb.addEventListener('click',save);fill();}
 try{var mo=new MutationObserver(function(){mount();});mo.observe(document.documentElement,{childList:true,subtree:true});}catch(e){}
 if(document.readyState!=='loading'){mount();}else{document.addEventListener('DOMContentLoaded',mount);}
@@ -5340,11 +5340,11 @@ var TPL=[
  {n:'New booking alert',who:'You ('+ADMIN+')',sub:'New booking: {name} - {date} ({id})',trig:'A customer completes a booking',src:'notify-booking.js',flag:'newBooking'},
  {n:'Rental agreement to sign',who:'Customer',sub:'Please sign your CNK Booths rental agreement ({id})',trig:'Agreement is sent to the customer',src:'send-agreement.js',flag:'agreementSentAt'},
  {n:'Signed agreement received',who:'You ('+ADMIN+')',sub:'Signed agreement - {name} ({date})',trig:'Customer signs the agreement',src:'sign-agreement.js',flag:'signed'},
- {n:'Balance due â heads up',who:'You ('+ADMIN+')',sub:'Final payment due in 2 weeks: {name} ({id})',trig:'2 weeks before the event',src:'cron-reminders.js',flag:'finalReminderSent'},
- {n:'Balance due â customer',who:'Customer',sub:'Your CNK Booths balance is due - event on {date}',trig:'Balance reminder to the customer',src:'cron-reminders.js',flag:'clientReminderSent'},
+ {n:'Balance due — heads up',who:'You ('+ADMIN+')',sub:'Final payment due in 2 weeks: {name} ({id})',trig:'2 weeks before the event',src:'cron-reminders.js',flag:'finalReminderSent'},
+ {n:'Balance due — customer',who:'Customer',sub:'Your CNK Booths balance is due - event on {date}',trig:'Balance reminder to the customer',src:'cron-reminders.js',flag:'clientReminderSent'},
  {n:'Final payment due',who:'Customer',sub:'Final payment due for your CNK Booths event on {date}',trig:'Final payment reminder',src:'cron-reminders.js',flag:'finalPayment'},
  {n:'Booking cancelled',who:'Customer',sub:'Your CNK Booths reservation has been cancelled',trig:'You cancel a booking',src:'confirm-booking.js',flag:'cancelled'},
- {n:'Venue partnership signed',who:'Venue + you',sub:'Signed Venue Partnership Agreement â {venue}',trig:'A venue signs the partnership page',src:'confirm-booking.js',flag:'partner'}
+ {n:'Venue partnership signed',who:'Venue + you',sub:'Signed Venue Partnership Agreement — {venue}',trig:'A venue signs the partnership page',src:'confirm-booking.js',flag:'partner'}
 ];
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 function stats(){
@@ -5370,7 +5370,7 @@ function render(){
  stats().then(function(st){
   var rows=TPL.map(function(t){
    var v=st[t.flag];
-   var cnt=(v==null)?'<span style="color:#8a8a82">â</span>':('<strong style="color:#C4983A">'+v+'</strong>');
+   var cnt=(v==null)?'<span style="color:#8a8a82">—</span>':('<strong style="color:#C4983A">'+v+'</strong>');
    return '<tr style="border-top:1px solid #3a3a36">'
     +'<td style="padding:10px 8px;color:#F5F0E8"><strong>'+esc(t.n)+'</strong><div style="color:#9a9a92;font-size:12px;margin-top:2px">'+esc(t.trig)+'</div></td>'
     +'<td style="padding:10px 8px;color:#F5F0E8;font-size:13px">'+esc(t.who)+'</td>'
@@ -5409,7 +5409,7 @@ window.cnkRenderEmails=render;
 
 
 <style>
-/* __cnkCalMobile â stop the admin calendar from re-measuring itself on every month change */
+/* __cnkCalMobile — stop the admin calendar from re-measuring itself on every month change */
 @media (max-width: 600px){
   .cal-grid{
     grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
