@@ -4681,7 +4681,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
           '<td>'+esc(p.email||'')+'</td>'+
           '<td>'+esc(p.phone||'')+'</td>'+
           '<td>'+esc(p.signDate||'')+'</td>'+
-          '<td><button class="action-btn" onclick="cnkViewPartner('+i+')">View</button><button class="sidebar-btn" onclick="(function(){var p=document.getElementById('admin-fleet');if(!p){p=document.createElement('div');p.id='admin-fleet';p.className='admin-view';p.innerHTML='<div style=\'height:calc(100vh - 130px);padding:0;\'><iframe src=\'https://cnk-fleet-monitoring-1.vercel.app/dashboard.html\' style=\'width:100%;height:100%;border:none;border-radius:12px;\' title=\'Fleet Monitor\'></iframe></div>';var ref=document.getElementById('admin-overview');ref.parentElement.appendChild(p);}document.querySelectorAll('.admin-view').forEach(function(v){v.classList.remove('active');});p.classList.add('active');})();"><span>Fleet</span> Fleet Monitor</button> '+
+          '<td><button class="action-btn" onclick="cnkViewPartner('+i+')">View</button> '+
           '<button class="action-btn" onclick="cnkDeletePartner(\''+esc(p.id)+'\')">Remove</button></td>'+
           '</tr>';
       }).join('')+'</tbody></table>';
