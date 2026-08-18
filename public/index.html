@@ -6025,3 +6025,34 @@ setTimeout(mount,1500); setTimeout(mount,3400);
 window.cnkRenderConfirmCalls=render;
 })();
 </script>
+
+<script>
+(function(){
+  function addFleet(){
+    if (document.getElementById('cnk-fleet-btn')) return true;
+    var btns = document.querySelectorAll('button.sidebar-btn');
+    var removedBtn = null;
+    for (var i=0;i<btns.length;i++){ if(/Removed/.test(btns[i].textContent)){ removedBtn=btns[i]; break; } }
+    if (!removedBtn) return false;
+    var section = removedBtn.parentElement;
+    var b = document.createElement('button');
+    b.className='sidebar-btn'; b.id='cnk-fleet-btn';
+    b.innerHTML='<span>&#128225;</span> Fleet Monitor';
+    b.onclick=function(){
+      var p=document.getElementById('admin-fleet');
+      if(!p){ p=document.createElement('div'); p.id='admin-fleet'; p.className='admin-view';
+        p.innerHTML='<div style="height:calc(100vh - 130px);padding:0;"><iframe src="https://cnk-fleet-monitoring-1.vercel.app/ops.html" style="width:100%;height:100%;border:none;border-radius:12px;"></iframe></div>';
+        document.getElementById('admin-overview').parentElement.appendChild(p); }
+      document.querySelectorAll('.admin-view').forEach(function(v){v.classList.remove('active');});
+      p.classList.add('active');
+      document.querySelectorAll('button.sidebar-btn').forEach(function(x){x.classList.remove('active');});
+      b.classList.add('active');
+    };
+    section.insertBefore(b, removedBtn);
+    return true;
+  }
+  var tries=0;
+  var iv=setInterval(function(){ tries++; if(addFleet()||tries>40){ clearInterval(iv); } }, 300);
+  document.addEventListener('DOMContentLoaded', addFleet);
+})();
+</script>
