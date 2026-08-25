@@ -801,7 +801,7 @@
         <div class="price-breakdown" style="margin-bottom:28px;">
           <div class="pb-title">Order Summary</div>
           <div class="pb-row"><span class="pb-label" id="cnk-sum-pkg">Package</span><span class="pb-val" id="cnk-sum-base">$0</span></div>
-          <div class="pb-row" id="cnk-sum-addon-row" style="display:none;"><span class="pb-label" id="cnk-sum-addon-label">Extra hours</span><span class="pb-val" id="cnk-sum-addon">$0</span></div>
+          <div class="pb-row" id="cnk-sum-addon-row" style="display:none;"><span class="pb-label" id="cnk-sum-addon-label">Extra hours</span><span class="pb-val" id="cnk-sum-addon">$0</span></div><div class="pb-row" id="cnk-sum-overlay-row" style="display:none;"><span class="pb-label">Custom overlay</span><span class="pb-val" id="cnk-sum-overlay">$0</span></div>
           <div class="pb-row" id="cnk-sum-delivery-row" style="display:none;"><span class="pb-label">Delivery</span><span class="pb-val" id="cnk-sum-delivery">$0</span></div><div class="pb-row"><span class="pb-label">Sales tax (7.45%)</span><span class="pb-val" id="cnk-sum-tax">$0</span></div>
           <div class="pb-row"><span class="pb-label">Card processing (3%)</span><span class="pb-val" id="cnk-sum-cc">$0</span></div>
           <div class="pb-divider"></div>
@@ -985,6 +985,7 @@
     var ar=document.getElementById('cnk-sum-addon-row');
     if(state.addon>0){ ar.style.display='flex'; document.getElementById('cnk-sum-addon-label').textContent='Extra hours ('+state.addon+' × $'+((window.CNK_PRICING&&window.CNK_PRICING.hour)||150)+')'; document.getElementById('cnk-sum-addon').textContent=money(c.addonCost); }
     else ar.style.display='none';
+    var ovr=document.getElementById('cnk-sum-overlay-row'); if(ovr){ if(window.cnkOverlayCustom){ ovr.style.display='flex'; var ovv=document.getElementById('cnk-sum-overlay'); if(ovv) ovv.textContent=money(25); } else { ovr.style.display='none'; } }
     document.getElementById('cnk-sum-tax').textContent=money(c.tax);
     document.getElementById('cnk-sum-cc').textContent=money(c.cc); var __dr=document.getElementById('cnk-sum-delivery-row'),__de=document.getElementById('cnk-sum-delivery'); if(__de)__de.textContent=money(c.delivery||0); if(__dr)__dr.style.display=((c.delivery||0)>0)?'flex':'none';
     document.getElementById('cnk-sum-total').textContent=money(c.total);
@@ -1345,7 +1346,7 @@ let hourlyQty = 1;
 function calcPricing(pkg, extraHrs) {
   const base = pkg === 'hourly' ? (hourlyQty * 150) : basePrices[pkg];
   const extra = (extraHrs || 0) * EXTRA_HOUR_RATE;
-  const subtotal = base + extra;
+  const subtotal = base + extra + (window.cnkOverlayCustom ? 25 : 0);
   const tax = subtotal * SALES_TAX;
   const cc = (subtotal + tax) * CC_FEE;
   const total = subtotal + tax + cc;
@@ -1383,7 +1384,7 @@ function updatePriceDisplay(p) {
 function selectPackage(pkg) {
   selectedPackage = pkg;
   selectedPrice = basePrices[pkg];
-  ['hourly', 'halfday', 'fullday'].forEach(p =>
+  ['hourly', 'threehour', 'halfday', 'fullday'].forEach(p =>
     document.getElementById('pkg-' + p).classList.remove('selected')
   );
   document.getElementById('pkg-' + pkg).classList.add('selected');
@@ -4897,6 +4898,27 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
   if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded',mount); } else { setTimeout(mount,400); }
 })();
 </script>
+
+<script>/* cnk-overlay-ui */
+(function(){
+ if(window.__cnkOvUI) return; window.__cnkOvUI=true;
+ window.cnkOverlayCustom=false; window.cnkOverlayType='names'; window.cnkOverlayText='';
+ function recompute(){ try{ if(typeof selectedPackage!=='undefined' && selectedPackage && typeof selectPackage==='function'){ selectPackage(selectedPackage); } }catch(e){} }
+ function inject(){
+  if(document.getElementById('cnk-ov-field')) return;
+  var notes=document.getElementById('cnk-notes'); if(!notes) return;
+  var host=notes.closest('div')||notes.parentElement;
+  var w=document.createElement('div'); w.id='cnk-ov-field'; w.style.cssText='margin-top:20px;';
+  w.innerHTML='<label style="display:block;font-size:12px;letter-spacing:1px;color:#c9a24a;text-transform:uppercase;margin-bottom:8px;">Photo Overlay Style</label><div style="display:flex;gap:10px;flex-wrap:wrap;"><button type="button" data-ov="names" class="cnk-ovb">Names <span style=opacity:.6>(included)</span></button><button type="button" data-ov="date" class="cnk-ovb">Event Date <span style=opacity:.6>(included)</span></button><button type="button" data-ov="custom" class="cnk-ovb">Custom <span style=opacity:.75>+$25</span></button></div><input id="cnk-ov-text" type="text" placeholder="Enter the names for your overlay" style="margin-top:10px;width:100%;padding:12px;background:rgba(255,255,255,.04);border:1px solid rgba(201,162,74,.3);border-radius:8px;color:#f5f0e8;font-size:15px;box-sizing:border-box;"><div id="cnk-ov-note" style="margin-top:8px;font-size:12px;color:#8a8474;">Block-letter overlay with your names — included free.</div>';
+  host.parentNode.insertBefore(w, host.nextSibling);
+  var st=document.createElement('style'); st.textContent='.cnk-ovb{flex:1;min-width:110px;padding:12px;background:rgba(255,255,255,.03);border:1px solid rgba(201,162,74,.25);border-radius:8px;color:#e9e4d8;font-size:14px;cursor:pointer}.cnk-ovb:hover{border-color:#c9a24a}.cnk-ovb.sel{background:rgba(201,162,74,.15);border-color:#c9a24a;color:#f5f0e8;font-weight:600}'; document.head.appendChild(st);
+  function pick(t){ window.cnkOverlayType=t; window.cnkOverlayCustom=(t==='custom'); w.querySelectorAll('.cnk-ovb').forEach(function(b){b.classList.toggle('sel',b.getAttribute('data-ov')===t)}); var tx=document.getElementById('cnk-ov-text'),nt=document.getElementById('cnk-ov-note'); if(t==='custom'){tx.style.display='none';nt.textContent='Custom overlay: our team will reach out to design your artwork. (+$25)';} else {tx.style.display='';if(t==='names'){tx.placeholder='Enter the names (e.g. Jane & John)';nt.textContent='Block-letter overlay with your names — included free.';}if(t==='date'){tx.placeholder='Enter the date (e.g. 06.14.2026)';nt.textContent='Block-letter overlay with your event date — included free.';var d=document.getElementById('cnk-date');if(d&&d.value&&!tx.value){tx.value=d.value;window.cnkOverlayText=d.value;}}} recompute(); }
+  w.querySelectorAll('.cnk-ovb').forEach(function(b){b.addEventListener('click',function(){pick(b.getAttribute('data-ov'))})});
+  document.getElementById('cnk-ov-text').addEventListener('input',function(e){window.cnkOverlayText=e.target.value});
+  pick('names');
+ }
+ var n=0,iv=setInterval(function(){n++;inject();if(document.getElementById('cnk-ov-field')||n>50)clearInterval(iv)},300); inject();
+})();</script>
 </body>
 </html>
 
