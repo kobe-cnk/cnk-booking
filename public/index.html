@@ -438,8 +438,8 @@
   .stat-red .stat-value { color: #e05c70; }
 
   /* ─── CALENDAR ────────────────────────────────── */
-  .calendar-section { background: var(--charcoal-soft); border: 1px solid rgba(245,240,232,0.07); border-radius: 10px; padding: 32px; margin-bottom: 32px; }
-  .calendar-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
+  .calendar-section { background: var(--charcoal-soft); border: 1px solid rgba(245,240,232,0.07); border-radius: 10px; padding: 20px; margin-bottom: 20px; }
+  .calendar-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
   .cal-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 300; }
   .cal-nav-btn {
     width: 36px; height: 36px; border-radius: 6px;
@@ -448,10 +448,10 @@
     transition: all 0.2s; display: flex; align-items: center; justify-content: center;
   }
   .cal-nav-btn:hover { border-color: var(--gold); color: var(--gold); }
-  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
-  .cal-day-label { text-align: center; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--cream-dim); padding: 8px 0; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .cal-day-label { text-align: center; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--cream-dim); padding: 4px 0; }
   .cal-day {
-    aspect-ratio: 1; border-radius: 6px; display: flex; flex-direction: column;
+    height: 34px; border-radius: 6px; display: flex; flex-direction: column;
     align-items: center; justify-content: center; cursor: pointer;
     font-size: 13px; transition: all 0.15s; position: relative;
     border: 1px solid transparent;
