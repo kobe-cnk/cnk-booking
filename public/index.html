@@ -58,13 +58,13 @@
   .nav-tab.active { color: var(--charcoal); background: var(--gold); font-weight: 500; }
 
   /* ─── VIEWS ───────────────────────────────────── */
-  .view { display: none; padding-top: 64px; min-height: 100vh; }
+  .view { display: none; padding-top: 40px; min-height: auto; }
   .view.active { display: block; }
 
   /* ─── BOOKING PAGE ────────────────────────────── */
   .booking-hero {
     background: linear-gradient(160deg, #1A1A18 0%, #252520 50%, #1A1518 100%);
-    padding: 80px 40px 60px;
+    padding: 44px 40px 32px;
     text-align: center;
     position: relative;
     overflow: hidden;
@@ -93,12 +93,12 @@
 
   /* ─── PACKAGES ────────────────────────────────── */
   .packages-section {
-    padding: 60px 40px;
+    padding: 36px 40px;
     max-width: 1100px; margin: 0 auto;
   }
   .section-label {
     font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase;
-    color: var(--gold); margin-bottom: 32px; display: flex; align-items: center; gap: 12px;
+    color: var(--gold); margin-bottom: 18px; display: flex; align-items: center; gap: 12px;
   }
   .section-label::after {
     content: ''; flex: 1; height: 1px; background: rgba(196,152,58,0.25);
@@ -142,7 +142,7 @@
   .package-card {
     background: var(--charcoal-soft);
     border: 1px solid rgba(245,240,232,0.08);
-    border-radius: 8px; padding: 32px 28px;
+    border-radius: 8px; padding: 24px 28px;
     cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden;
   }
   .package-card::before {
@@ -197,8 +197,8 @@
   .form-wrapper {
     background: var(--charcoal-soft);
     border: 1px solid rgba(245,240,232,0.08);
-    border-radius: 12px; padding: 48px;
-    max-width: 1100px; margin: 0 auto 60px;
+    border-radius: 12px; padding: 32px;
+    max-width: 1100px; margin: 0 auto 32px;
   }
   .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
   .form-full { grid-column: 1 / -1; }
