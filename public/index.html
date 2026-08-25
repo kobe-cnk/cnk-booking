@@ -801,7 +801,7 @@
         <div class="price-breakdown" style="margin-bottom:28px;">
           <div class="pb-title">Order Summary</div>
           <div class="pb-row"><span class="pb-label" id="cnk-sum-pkg">Package</span><span class="pb-val" id="cnk-sum-base">$0</span></div>
-          <div class="pb-row" id="cnk-sum-addon-row" style="display:none;"><span class="pb-label" id="cnk-sum-addon-label">Extra hours</span><span class="pb-val" id="cnk-sum-addon">$0</span></div><div class="pb-row" id="cnk-sum-overlay-row" style="display:none;"><span class="pb-label">Custom overlay</span><span class="pb-val" id="cnk-sum-overlay">$0</span></div>
+          <div class="pb-row" id="cnk-sum-addon-row" style="display:none;"><span class="pb-label" id="cnk-sum-addon-label">Extra hours</span><span class="pb-val" id="cnk-sum-addon">$0</span></div><div class="pb-row" id="cnk-sum-overlay-row" style="display:none;"><span class="pb-label">Custom overlay</span><span class="pb-val" id="cnk-sum-overlay">$0</span></div><div class="pb-row" id="cnk-sum-tent-row" style="display:none;"><span class="pb-label">Tent (shade)</span><span class="pb-val" id="cnk-sum-tent">$0</span></div>
           <div class="pb-row" id="cnk-sum-delivery-row" style="display:none;"><span class="pb-label">Delivery</span><span class="pb-val" id="cnk-sum-delivery">$0</span></div><div class="pb-row"><span class="pb-label">Sales tax (7.45%)</span><span class="pb-val" id="cnk-sum-tax">$0</span></div>
           <div class="pb-row"><span class="pb-label">Card processing (3%)</span><span class="pb-val" id="cnk-sum-cc">$0</span></div>
           <div class="pb-divider"></div>
@@ -985,7 +985,7 @@
     var ar=document.getElementById('cnk-sum-addon-row');
     if(state.addon>0){ ar.style.display='flex'; document.getElementById('cnk-sum-addon-label').textContent='Extra hours ('+state.addon+' × $'+((window.CNK_PRICING&&window.CNK_PRICING.hour)||150)+')'; document.getElementById('cnk-sum-addon').textContent=money(c.addonCost); }
     else ar.style.display='none';
-    var ovr=document.getElementById('cnk-sum-overlay-row'); if(ovr){ if(window.cnkOverlayCustom){ ovr.style.display='flex'; var ovv=document.getElementById('cnk-sum-overlay'); if(ovv) ovv.textContent=money(25); } else { ovr.style.display='none'; } }
+    var ovr=document.getElementById('cnk-sum-overlay-row'); if(ovr){ if(window.cnkOverlayCustom){ ovr.style.display='flex'; var ovv=document.getElementById('cnk-sum-overlay'); if(ovv) ovv.textContent=money(25); } else { ovr.style.display='none'; } } var tnt=document.getElementById('cnk-sum-tent-row'); if(tnt){ if(window.cnkTentAdd){ tnt.style.display='flex'; var tnv=document.getElementById('cnk-sum-tent'); if(tnv) tnv.textContent=money(15); } else { tnt.style.display='none'; } }
     document.getElementById('cnk-sum-tax').textContent=money(c.tax);
     document.getElementById('cnk-sum-cc').textContent=money(c.cc); var __dr=document.getElementById('cnk-sum-delivery-row'),__de=document.getElementById('cnk-sum-delivery'); if(__de)__de.textContent=money(c.delivery||0); if(__dr)__dr.style.display=((c.delivery||0)>0)?'flex':'none';
     document.getElementById('cnk-sum-total').textContent=money(c.total);
@@ -1346,7 +1346,7 @@ let hourlyQty = 1;
 function calcPricing(pkg, extraHrs) {
   const base = pkg === 'hourly' ? (hourlyQty * 150) : basePrices[pkg];
   const extra = (extraHrs || 0) * EXTRA_HOUR_RATE;
-  const subtotal = base + extra + (window.cnkOverlayCustom ? 25 : 0);
+  const subtotal = base + extra + (window.cnkOverlayCustom ? 25 : 0) + (window.cnkTentAdd ? 15 : 0);
   const tax = subtotal * SALES_TAX;
   const cc = (subtotal + tax) * CC_FEE;
   const total = subtotal + tax + cc;
@@ -4918,6 +4918,25 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
   pick('names');
  }
  var n=0,iv=setInterval(function(){n++;inject();if(document.getElementById('cnk-ov-field')||n>50)clearInterval(iv)},300); inject();
+})();</script>
+
+<script>/* cnk-tent-ui */
+(function(){
+ if(window.__cnkTentUI) return; window.__cnkTentUI=true;
+ window.cnkTentAdd=false; window.cnkShaded='';
+ function recompute(){ try{ if(typeof selectedPackage!=='undefined' && selectedPackage && typeof selectPackage==='function'){ selectPackage(selectedPackage); } }catch(e){} }
+ function inject(){
+  if(document.getElementById('cnk-tent-field')) return;
+  var ov=document.getElementById('cnk-ov-field'); if(!ov) return;
+  var w=document.createElement('div'); w.id='cnk-tent-field'; w.style.cssText='margin-top:20px;';
+  w.innerHTML='<label style="display:block;font-size:12px;letter-spacing:1px;color:#c9a24a;text-transform:uppercase;margin-bottom:8px;">Is your setup location shaded?</label><div style="display:flex;gap:10px;flex-wrap:wrap;"><button type="button" data-sh="yes" class="cnk-shb">Yes, it\u2019s shaded</button><button type="button" data-sh="no" class="cnk-shb">No / not sure</button></div><div id="cnk-tent-opt" style="display:none;margin-top:12px;padding:14px;background:rgba(201,162,74,.08);border:1px solid rgba(201,162,74,.25);border-radius:8px;"><label style="display:flex;align-items:center;gap:10px;cursor:pointer;color:#f5f0e8;font-size:15px;"><input type="checkbox" id="cnk-tent-check" style="width:18px;height:18px;accent-color:#c9a24a;"> Add a tent for shade <strong style="color:#c9a24a">+$15</strong></label><div style="margin-top:6px;font-size:12px;color:#8a8474;">Recommended for outdoor daytime events — keeps guests and the booth cool.</div></div>';
+  ov.parentNode.insertBefore(w, ov.nextSibling);
+  var st=document.createElement('style'); st.textContent='.cnk-shb{flex:1;min-width:120px;padding:12px;background:rgba(255,255,255,.03);border:1px solid rgba(201,162,74,.25);border-radius:8px;color:#e9e4d8;font-size:14px;cursor:pointer}.cnk-shb:hover{border-color:#c9a24a}.cnk-shb.sel{background:rgba(201,162,74,.15);border-color:#c9a24a;color:#f5f0e8;font-weight:600}'; document.head.appendChild(st);
+  function pickShade(v){ window.cnkShaded=v; w.querySelectorAll('.cnk-shb').forEach(function(b){b.classList.toggle('sel',b.getAttribute('data-sh')===v)}); var opt=document.getElementById('cnk-tent-opt'); if(v==='no'){ opt.style.display='block'; } else { opt.style.display='none'; var c=document.getElementById('cnk-tent-check'); if(c)c.checked=false; window.cnkTentAdd=false; } recompute(); }
+  w.querySelectorAll('.cnk-shb').forEach(function(b){b.addEventListener('click',function(){pickShade(b.getAttribute('data-sh'))})});
+  document.getElementById('cnk-tent-check').addEventListener('change',function(e){window.cnkTentAdd=e.target.checked;recompute()});
+ }
+ var n=0,iv=setInterval(function(){n++;inject();if(document.getElementById('cnk-tent-field')||n>50)clearInterval(iv)},300); inject();
 })();</script>
 </body>
 </html>
