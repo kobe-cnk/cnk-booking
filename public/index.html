@@ -1626,7 +1626,7 @@ function showView(view) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
   document.getElementById('view-'+view).classList.add('active');
-  event.target.classList.add('active');
+  try{ if(typeof event!=='undefined' && event && event.target && event.target.classList) event.target.classList.add('active'); }catch(e){}
   if (view === 'admin') {
     seedDemo();
     syncBoothCountDisplay();
@@ -1643,7 +1643,7 @@ function showAdminView(view) {
   document.querySelectorAll('.admin-view').forEach(v => v.classList.remove('active'));
   document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('admin-'+view).classList.add('active');
-  event.currentTarget.classList.add('active');
+  try{ if(typeof event!=='undefined' && event && event.currentTarget && event.currentTarget.classList) event.currentTarget.classList.add('active'); }catch(e){}
   if (view === 'calendar') renderBlockedDates();
 }
 
