@@ -4948,6 +4948,113 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
  function apply(){ try{ var d=document.getElementById('cnk-date'); if(!d) return false; var grp=d.closest('.form-group'); if(!grp) return false; var grid=grp.closest('.form-grid'); if(grid) grid.style.alignItems='start'; grp.style.gridRow='span 2'; return true; }catch(e){ return false; } }
  var n=0,iv=setInterval(function(){n++; if(apply()||n>50) clearInterval(iv);},300); apply();
 })();</script>
+
+<script>/* cnk-availability : multi-slot booking with 2-hour gap (backend-checked) */
+(function(){
+  if(window.__cnkAvail) return; window.__cnkAvail=true;
+  var API='https://cnk-fleet-monitoring-1.vercel.app/api/availability';
+  var GAP=2; // hours, for messaging
+
+  // package -> base hours
+  var PKG_HOURS={ hourly:2, threehour:3, halfday:4, fullday:8 };
+
+  function pkgDurationHours(){
+    try{
+      var p=(window.state&&window.state.pkg)||window.selectedPackage||null;
+      var base=PKG_HOURS[p]||2;
+      // add any extra hours the customer selected
+      var extra=0;
+      if(window.state && typeof window.state.addHours==='number') extra=window.state.addHours;
+      else if(typeof window.cnkAddHours==='number') extra=window.cnkAddHours;
+      return base+extra;
+    }catch(e){ return 2; }
+  }
+  function addHoursToTime(hhmm, hrs){
+    var pt=hhmm.split(':'); var m=(+pt[0])*60+(+pt[1])+Math.round(hrs*60);
+    m=((m%1440)+1440)%1440; var h=Math.floor(m/60), mm=m%60;
+    return String(h).padStart(2,'0')+':'+String(mm).padStart(2,'0');
+  }
+  function fmt(t){ var p=t.split(':'); var h=+p[0], m=p[1]; var ap=h>=12?'PM':'AM'; var h12=h%12; if(h12===0)h12=12; return h12+':'+m+' '+ap; }
+
+  // ---- inject Start Time field into Step 1, right after the date field ----
+  function injectStart(){
+    if(document.getElementById('cnk-s1-start')) return true;
+    var dateEl=document.getElementById('cnk-date'); if(!dateEl) return false;
+    var grp=dateEl.closest('.form-group'); if(!grp) return false;
+    var w=document.createElement('div'); w.className='form-group';
+    w.innerHTML='<label class="form-label">Event Start Time</label><input class="form-input" id="cnk-s1-start" type="time">';
+    grp.parentNode.insertBefore(w, grp.nextSibling);
+    return true;
+  }
+  (function tryInject(n){ if(injectStart()||n>40) return; setTimeout(function(){tryInject(n+1);},300); })(0);
+
+  // ---- availability check ----
+  async function checkSlot(date, start, end){
+    try{
+      var u=API+'?action=check&date='+encodeURIComponent(date)+'&start='+encodeURIComponent(start)+'&end='+encodeURIComponent(end);
+      var r=await fetch(u); if(!r.ok) return {available:true, _softfail:true}; // don't hard-block on API error
+      return await r.json();
+    }catch(e){ return {available:true, _softfail:true}; }
+  }
+
+  // ---- wrap cnkToPayment to gate on availability ----
+  function wrapGate(){
+    if(typeof window.cnkToPayment!=='function'){ setTimeout(wrapGate,300); return; }
+    if(window.cnkToPayment.__av) return;
+    var orig=window.cnkToPayment;
+    window.cnkToPayment=async function(){
+      var err=document.getElementById('cnk-s1-err');
+      var date=(document.getElementById('cnk-date')||{}).value;
+      var start=(document.getElementById('cnk-s1-start')||{}).value;
+      // require start time now that we collect it up front
+      if(date && !start){ if(err) err.textContent='Please choose your event start time.'; return; }
+      if(date && start){
+        var dur=pkgDurationHours();
+        var end=addHoursToTime(start, dur);
+        // mirror the chosen start into the step-3 paperwork start field
+        var pw=document.getElementById('cnk-pw-start'); if(pw) pw.value=start;
+        var pwe=document.getElementById('cnk-pw-end'); if(pwe) pwe.value=end;
+        window.__cnkSlot={date:date,start:start,end:end};
+        var res=await checkSlot(date,start,end);
+        if(res && res.available===false){
+          var c=(res.conflicts&&res.conflicts[0]);
+          var msg='That time isn\u2019t available \u2014 we need a '+GAP+'-hour gap between rentals.';
+          if(c) msg+=' There is already a booking from '+fmt(c.start)+' to '+fmt(c.end)+' that day. Please choose another time or date.';
+          if(err) err.textContent=msg;
+          window.scrollTo({top:0,behavior:'smooth'});
+          return;
+        }
+      }
+      return orig.apply(this, arguments);
+    };
+    window.cnkToPayment.__av=true;
+  }
+  wrapGate();
+
+  // ---- wrap cnkFinish to persist the booking to backend ----
+  function wrapFinish(){
+    if(typeof window.cnkFinish!=='function'){ setTimeout(wrapFinish,300); return; }
+    if(window.cnkFinish.__av) return;
+    var orig=window.cnkFinish;
+    window.cnkFinish=function(){
+      var r=orig.apply(this, arguments);
+      try{
+        var slot=window.__cnkSlot;
+        if(slot && slot.date && slot.start && slot.end){
+          var id=window._cnkBookingId||('CNK-'+Math.floor(100000+Math.random()*900000));
+          var cust='';
+          try{ cust=((document.getElementById('cnk-first')||{}).value||'')+' '+((document.getElementById('cnk-last')||{}).value||''); }catch(e){}
+          fetch(API+'?action=book',{method:'POST',headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({id:id,date:slot.date,start:slot.start,end:slot.end,customer:cust.trim()})}).catch(function(){});
+        }
+      }catch(e){}
+      return r;
+    };
+    window.cnkFinish.__av=true;
+  }
+  wrapFinish();
+})();
+</script>
 </body>
 </html>
 
