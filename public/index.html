@@ -5080,6 +5080,52 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
   apply();
 })();
 </script>
+
+<script>/* cnk-endtime-autofill : auto-populate end time from start time + package duration */
+(function(){
+  if(window.__cnkEndFill) return; window.__cnkEndFill=true;
+  var PKG_HOURS={ hourly:2, threehour:3, halfday:4, fullday:8 };
+  function durHours(){
+    try{
+      var p=(window.state&&window.state.pkg)||window.selectedPackage||null;
+      var base=PKG_HOURS[p]||null; if(base===null) return null;
+      var extra=0;
+      if(window.state && typeof window.state.hours==='number' && p==='hourly'){ base=window.state.hours; }
+      if(window.state && typeof window.state.addHours==='number') extra=window.state.addHours;
+      return base+extra;
+    }catch(e){ return null; }
+  }
+  function addH(hhmm,hrs){ var p=hhmm.split(':'); var m=(+p[0])*60+(+p[1])+Math.round(hrs*60); m=((m%1440)+1440)%1440; var h=Math.floor(m/60),mm=m%60; return String(h).padStart(2,'0')+':'+String(mm).padStart(2,'0'); }
+  function fill(force){
+    var s=document.getElementById('cnk-s1-start'); var e=document.getElementById('cnk-s1-end');
+    if(!s||!e||!s.value) return;
+    var d=durHours(); if(d===null) return; // no package chosen yet
+    // only overwrite if end is empty OR user hasn't manually edited it OR force (package/start changed)
+    if(force || !e.value || e.dataset.cnkAuto==='1'){
+      e.value=addH(s.value,d);
+      e.dataset.cnkAuto='1';
+      e.dispatchEvent(new Event('input',{bubbles:true}));
+      e.dispatchEvent(new Event('change',{bubbles:true}));
+    }
+  }
+  function wire(){
+    var s=document.getElementById('cnk-s1-start'); var e=document.getElementById('cnk-s1-end');
+    if(!s||!e){ setTimeout(wire,300); return; }
+    if(s.__cnkWired) return; s.__cnkWired=true;
+    s.addEventListener('change', function(){ fill(true); });
+    s.addEventListener('input', function(){ fill(true); });
+    // if the user manually edits the end time, stop auto-overwriting it
+    e.addEventListener('input', function(){ e.dataset.cnkAuto='0'; });
+    // when package changes, re-fill. Wrap cnkPick.
+    if(typeof window.cnkPick==='function' && !window.cnkPick.__endfill){
+      var orig=window.cnkPick;
+      window.cnkPick=function(pkg){ var r=orig.apply(this,arguments); setTimeout(function(){ fill(true); },50); return r; };
+      window.cnkPick.__endfill=true;
+    }
+  }
+  wire();
+})();
+</script>
 </body>
 </html>
 
