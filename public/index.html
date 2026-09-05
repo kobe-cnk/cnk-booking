@@ -5555,7 +5555,7 @@ function place(){try{
  var btn=document.getElementById('cnk-pay-btn'); if(!btn)return;
  if(document.getElementById('cnk-dep-notice'))return;
  var d=document.createElement('div'); d.id='cnk-dep-notice';
- d.innerHTML='<strong>Your 50% deposit is non-refundable.</strong> By paying, you agree that this deposit is non-refundable at the time of payment and will not be returned if you cancel, as stated in the rental agreement you signed.';
+ d.innerHTML='<strong>Refund policy:</strong> Payment is collected in full at the time of booking. If you cancel more than 14 days before your event, half of your total is refundable; cancellations within 14 days are final and non-refundable. By paying, you agree to this refund policy as stated in the rental agreement you signed.';
  btn.parentNode.insertBefore(d, btn);
 }catch(e){}}
 [300,900,2000].forEach(function(t){setTimeout(place,t);});
@@ -6024,8 +6024,8 @@ function sync(){
 
   if(full){
    setText(lbl,'lbl','Payment in full due today');
-   setText(note,'note','Payment is collected in full at the time of booking. Cancellations 14 days or fewer before the event are final and non-refundable.');
-   setText(st,'st','This payment is non-refundable.');
+   setText(note,'note','Payment is collected in full at the time of booking. If you cancel more than 14 days before your event, half of your total is refundable; cancellations within 14 days are final and non-refundable. By paying, you agree to this refund policy as stated in the rental agreement you signed.');
+   setText(st,'st','Half refundable if you cancel 14+ days before your event; final within 14 days.');
    if(btn){
     var a1=(btn.textContent||'').match(/\$[\d,.]+/);
     var want='Pay in Full  \u00b7 '+(a1?a1[0]:'');
