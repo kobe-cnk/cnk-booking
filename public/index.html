@@ -892,8 +892,8 @@
         </div>
 
         <div class="form-grid" style="margin-top:24px;">
-          <div class="form-group"><label class="form-label">Event Start Time</label><input class="form-input" id="cnk-pw-start" type="time"></div>
-          <div class="form-group"><label class="form-label">Event End Time</label><input class="form-input" id="cnk-pw-end" type="time"></div>
+          <div class="form-group"><label class="form-label">Event Start Time</label><input class="form-input" id="cnk-pw-start" type="time" step="60"></div>
+          <div class="form-group"><label class="form-label">Event End Time</label><input class="form-input" id="cnk-pw-end" type="time" step="60"></div>
           <div class="form-group form-full"><label class="form-label">Setup Location / Room within Venue</label><input class="form-input" id="cnk-pw-setup" placeholder="e.g. Main ballroom, north wall near entrance"></div>
           <div class="form-group form-full"><label class="form-label">Power Outlet Available within 25 ft?</label>
             <select class="form-select" id="cnk-pw-power"><option value="">Select…</option><option>Yes</option><option>No / Not sure — please advise</option></select>
@@ -2549,8 +2549,8 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
     html += '<div><label>Status</label><select id="eb-status">'+opt('pending',b.status)+opt('confirmed',b.status)+opt('balance_due',b.status)+opt('complete',b.status)+'</select></div>';
     html += '<div><label>Balance Remaining ($)</label><input id="eb-balance" type="number" step="0.01" value="'+(Number(b.balance)||0)+'"></div>';
     html += '<div class="full"><label>Notes</label><textarea id="eb-notes" rows="2">'+esc(b.notes)+'</textarea></div>';
-    html += '<div><label>Event Start</label><input id="eb-start" type="time" value="'+esc(pw.startTime||'')+'"></div>';
-    html += '<div><label>Event End</label><input id="eb-end" type="time" value="'+esc(pw.endTime||'')+'"></div>';
+    html += '<div><label>Event Start</label><input id="eb-start" type="time" step="60" value="'+esc(pw.startTime||'')+'"></div>';
+    html += '<div><label>Event End</label><input id="eb-end" type="time" step="60" value="'+esc(pw.endTime||'')+'"></div>';
     html += '<div class="full"><label>Setup Location</label><input id="eb-setup" value="'+esc(pw.setup||'')+'"></div>';
     html += '<div class="full"><label>Overlay / Theme</label><input id="eb-overlay" value="'+esc(pw.overlay||'')+'"></div>';
     html += '<div class="full"><label>Day-of Contact</label><input id="eb-contact" value="'+esc(pw.dayContact||'')+'"></div>';
@@ -4982,8 +4982,11 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
     var dateEl=document.getElementById('cnk-date'); if(!dateEl) return false;
     var grp=dateEl.closest('.form-group'); if(!grp) return false;
     var w=document.createElement('div'); w.className='form-group';
-    w.innerHTML='<label class="form-label">Event Start Time</label><input class="form-input" id="cnk-s1-start" type="time">';
+    w.innerHTML='<label class="form-label">Event Start Time</label><input class="form-input" step="60" id="cnk-s1-start" type="time" step="60">';
     grp.parentNode.insertBefore(w, grp.nextSibling);
+    var w2=document.createElement('div'); w2.className='form-group';
+    w2.innerHTML='<label class="form-label">Event End Time</label><input class="form-input" id="cnk-s1-end" type="time" step="60">';
+    w.parentNode.insertBefore(w2, w.nextSibling);
     return true;
   }
   (function tryInject(n){ if(injectStart()||n>40) return; setTimeout(function(){tryInject(n+1);},300); })(0);
