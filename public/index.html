@@ -5087,12 +5087,21 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
   var PKG_HOURS={ hourly:2, threehour:3, halfday:4, fullday:8 };
   function durHours(){
     try{
-      var p=(window.state&&window.state.pkg)||window.selectedPackage||null;
-      var base=PKG_HOURS[p]||null; if(base===null) return null;
-      var extra=0;
-      if(window.state && typeof window.state.hours==='number' && p==='hourly'){ base=window.state.hours; }
-      if(window.state && typeof window.state.addHours==='number') extra=window.state.addHours;
-      return base+extra;
+      // read the selected package from the DOM (state isn't a global)
+      var selCard=document.querySelector('.package-card.selected[data-pkg]');
+      var p=selCard?selCard.getAttribute('data-pkg'):null;
+      if(!p) return null;
+      var base=PKG_HOURS[p]; if(base==null) return null;
+      // hourly package: read the chosen quantity from the hours control if present
+      if(p==='hourly'){
+        var hq=document.getElementById('cnk-hourly-qty')||document.getElementById('cnk-hours');
+        var q=hq?parseInt(hq.textContent||hq.value,10):NaN;
+        if(!isNaN(q)&&q>0) base=q;
+      }
+      // extra add-on hours if shown
+      var addEl=document.getElementById('cnk-addhours');
+      if(addEl){ var a=parseInt(addEl.value||addEl.textContent,10); if(!isNaN(a)&&a>0) base+=a; }
+      return base;
     }catch(e){ return null; }
   }
   function addH(hhmm,hrs){ var p=hhmm.split(':'); var m=(+p[0])*60+(+p[1])+Math.round(hrs*60); m=((m%1440)+1440)%1440; var h=Math.floor(m/60),mm=m%60; return String(h).padStart(2,'0')+':'+String(mm).padStart(2,'0'); }
