@@ -5092,15 +5092,6 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
       var p=selCard?selCard.getAttribute('data-pkg'):null;
       if(!p) return null;
       var base=PKG_HOURS[p]; if(base==null) return null;
-      // hourly package: read the chosen quantity from the hours control if present
-      if(p==='hourly'){
-        var hq=document.getElementById('cnk-hourly-qty')||document.getElementById('cnk-hours');
-        var q=hq?parseInt(hq.textContent||hq.value,10):NaN;
-        if(!isNaN(q)&&q>0) base=q;
-      }
-      // extra add-on hours if shown
-      var addEl=document.getElementById('cnk-addhours');
-      if(addEl){ var a=parseInt(addEl.value||addEl.textContent,10); if(!isNaN(a)&&a>0) base+=a; }
       return base;
     }catch(e){ return null; }
   }
