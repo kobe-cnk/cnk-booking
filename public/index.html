@@ -684,12 +684,12 @@
       <div class="packages-grid">
         <div class="package-card" data-pkg="hourly" onclick="cnkPick('hourly')">
           <span class="pkg-badge">2 Hours</span>
-          <div class="pkg-price"><sup>$</sup>549</div>
+          <div class="pkg-price"><sup>$</sup>499</div>
           <div class="pkg-duration">2 hours of coverage</div>
           <div class="pkg-divider"></div>
           <ul class="pkg-features">
             <li>Unlimited photo sessions</li>
-            <li>Custom name/date overlay</li><li>Printable photo strips included</li>
+            <li>Custom name/date overlay</li><li>Printable photo strips included</li><li>Delivery &amp; pickup (50 miles round trip included)</li>
           </ul>
           <div id="cnk-hourly-ctrl" style="display:none;margin-top:20px;background:rgba(196,152,58,0.06);border:1px solid rgba(196,152,58,0.15);border-radius:8px;padding:16px;">
             <div style="font-size:13px;color:var(--cream);margin-bottom:4px;font-weight:500;">How many hours?</div>
@@ -709,7 +709,7 @@
           <div class="pkg-divider"></div>
           <ul class="pkg-features">
             <li>Unlimited photo sessions</li>
-            <li>Custom name/date overlay</li><li>Printable photo strips included</li>
+            <li>Custom name/date overlay</li><li>Printable photo strips included</li><li>Delivery &amp; pickup (50 miles round trip included)</li>
           </ul>
           <div id="cnk-threehour-ctrl" style="display:none;margin-top:20px;background:rgba(196,152,58,0.06);border:1px solid rgba(196,152,58,0.15);border-radius:8px;padding:16px;">
             <div style="font-size:13px;color:var(--cream);margin-bottom:4px;font-weight:500;">How many hours?</div>
@@ -730,7 +730,7 @@
           <div class="pkg-divider"></div>
           <ul class="pkg-features">
             <li>Unlimited photo sessions</li>
-            <li>Custom name/date overlay</li><li>Printable photo strips included</li>
+            <li>Custom name/date overlay</li><li>Printable photo strips included</li><li>Delivery &amp; pickup (50 miles round trip included)</li>
           </ul>
           <button type="button" class="pkg-select-btn">Select Half Day</button>
         </div>
@@ -741,7 +741,7 @@
           <div class="pkg-divider"></div>
           <ul class="pkg-features">
             <li>Unlimited photo sessions</li>
-            <li>Custom name/date overlay</li><li>Printable photo strips included</li>
+            <li>Custom name/date overlay</li><li>Printable photo strips included</li><li>Delivery &amp; pickup (50 miles round trip included)</li>
           </ul>
           <button type="button" class="pkg-select-btn">Select Full Day</button>
         </div>
@@ -940,7 +940,7 @@
   var TAX=0.0745, CC=0.03, DEP=0.5, HOUR=150;
   var state={ pkg:null, hours:2, addon:0 }; window._cnkState=state;
   var sqPayments=null, sqCard=null, cardMounted=false; window.__cnkGetCard=function(){return sqCard;}; window.__cnkGetPayments=function(){return sqPayments;};
-  var PKG={ hourly:{label:'2 Hours',base:549}, halfday:{label:'Half Day',base:799}, fullday:{label:'Full Day',base:999} };
+  var PKG={ hourly:{label:'2 Hours',base:499}, halfday:{label:'Half Day',base:799}, fullday:{label:'Full Day',base:999} };
 
   function money(n){ return '$'+n.toFixed(2); }
   function calc(){
@@ -2310,7 +2310,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
 
 <script>
 (function(){
-  var PKG={hourly:{label:'2 Hours',base:549},halfday:{label:'Half Day',base:799},fullday:{label:'Full Day',base:999}};
+  var PKG={hourly:{label:'2 Hours',base:499},halfday:{label:'Half Day',base:799},fullday:{label:'Full Day',base:999}};
   var DUR={hourly:'2 hours',halfday:'Up to 4 hours',fullday:'Up to 8 hours'};
   function money(n){ return '$'+(n||0).toFixed(2); }
   function val(id){ var e=document.getElementById(id); return e?e.value.trim():''; }
@@ -5058,6 +5058,28 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
   wrapFinish();
 })();
 </script>
+
+<script>/* cnk-nav-clickthrough-fix : stop the fixed header from swallowing clicks on content scrolled beneath it */
+(function(){
+  if(window.__cnkNavFix) return; window.__cnkNavFix=true;
+  function apply(){
+    var nav=document.querySelector('nav');
+    if(!nav){ setTimeout(apply,300); return; }
+    // Let clicks pass THROUGH the empty parts of the fixed bar...
+    nav.style.pointerEvents='none';
+    // ...but keep the real nav controls (links, buttons, logo) clickable.
+    nav.querySelectorAll('a,button,[onclick],.logo,[role="button"]').forEach(function(el){ el.style.pointerEvents='auto'; });
+    // Also directly wire package selection as a safety net.
+    document.querySelectorAll('.package-card[data-pkg]').forEach(function(card){
+      if(card.__cnkWired) return; card.__cnkWired=true;
+      var pkg=card.getAttribute('data-pkg');
+      var sel=card.querySelector('.pkg-select-btn');
+      if(sel) sel.addEventListener('click', function(e){ e.stopPropagation(); try{ cnkPick(pkg); }catch(_){} });
+    });
+  }
+  apply();
+})();
+</script>
 </body>
 </html>
 
@@ -5086,7 +5108,7 @@ window.cnkPromoLoad();
 <script>
 (function(){
 if(window.__cnkPricingCfg)return;window.__cnkPricingCfg=true;
-function defs(){return{pkg:{hourly:549,halfday:799,fullday:999},hour:150};}
+function defs(){return{pkg:{hourly:499,halfday:799,fullday:999},hour:150};}
 window.CNK_PRICING=window.CNK_PRICING||defs();
 window.cnkLoadPricing=function(){return fetch('/api/list-bookings?z='+Date.now(),{cache:'no-store'}).then(function(r){return r.json();}).then(function(j){var all=(j&&j.bookings)||j||[];var rec=all.filter(function(b){return b&&String(b.id)==='__SETTINGS__pricing';})[0];var c=defs();if(rec&&rec.pricing){var p=rec.pricing;try{if(p.pkg){['hourly','halfday','fullday'].forEach(function(k){if(typeof p.pkg[k]==='number'&&p.pkg[k]>0)c.pkg[k]=p.pkg[k];});}if(typeof p.hour==='number'&&p.hour>0)c.hour=p.hour;}catch(e){}}window.CNK_PRICING=c;if(window.cnkSyncPriceDisplay)window.cnkSyncPriceDisplay();return c;}).catch(function(){return window.CNK_PRICING;});};
 window.cnkSyncPriceDisplay=function(){try{var c=window.CNK_PRICING;if(!c)return;document.querySelectorAll('[data-pkg]').forEach(function(card){var pk=card.getAttribute('data-pkg');var el=card.querySelector('.pkg-price');if(el&&c.pkg&&c.pkg[pk]){el.innerHTML='<sup>$</sup>'+c.pkg[pk];}});var hr=c.hour;document.querySelectorAll('.addon-hint,[id*=addon]').forEach(function(el){if(el&&el.textContent&&/\$\d+\/hr/.test(el.textContent)){el.textContent=el.textContent.replace(/\$\d+\/hr/,'$'+hr+'/hr');}});}catch(e){}};
@@ -5163,13 +5185,13 @@ if(document.readyState!=='loading'){mount();}else{document.addEventListener('DOM
 <script>
 (function(){
 if(window.__cnkPricingLoader)return;window.__cnkPricingLoader=true;
-window.CNK_PRICING=window.CNK_PRICING||{pkg:{hourly:549,halfday:799,fullday:999},hour:150};
+window.CNK_PRICING=window.CNK_PRICING||{pkg:{hourly:499,halfday:799,fullday:999},hour:150};
 function applyDisplay(){try{var c=window.CNK_PRICING;if(!c)return;
  document.querySelectorAll('[data-pkg]').forEach(function(card){var pk=card.getAttribute('data-pkg');var el=card.querySelector('.pkg-price');if(el&&c.pkg&&typeof c.pkg[pk]==='number'){var h='<sup>$</sup>'+c.pkg[pk];if(el.innerHTML!==h)el.innerHTML=h;}});
  var bar=document.getElementById('cnk-addon-bar');if(bar){var els=bar.querySelectorAll('*');for(var i=0;i<els.length;i++){var e=els[i];if(e.children.length===0&&/\$\d+\/hr/.test(e.textContent)){var nt=e.textContent.replace(/\$\d+\/hr/,'$'+c.hour+'/hr');if(e.textContent!==nt)e.textContent=nt;}}}
 }catch(e){}}
 window.cnkApplyPricingDisplay=applyDisplay;
-window.cnkLoadPricing=function(){return fetch('/api/list-bookings?z='+Date.now(),{cache:'no-store'}).then(function(r){return r.json();}).then(function(j){var all=(j&&j.bookings)||j||[];var rec=all.filter(function(b){return b&&String(b.id)==='__SETTINGS__pricing';})[0];var c={pkg:{hourly:549,halfday:799,fullday:999},hour:150};if(rec&&rec.pricing){try{var p=rec.pricing;if(p.pkg){['hourly','halfday','fullday'].forEach(function(k){if(typeof p.pkg[k]==='number'&&p.pkg[k]>0)c.pkg[k]=p.pkg[k];});}if(typeof p.hour==='number'&&p.hour>0)c.hour=p.hour;}catch(e){}}window.CNK_PRICING=c;applyDisplay();return c;}).catch(function(){return window.CNK_PRICING;});};
+window.cnkLoadPricing=function(){return fetch('/api/list-bookings?z='+Date.now(),{cache:'no-store'}).then(function(r){return r.json();}).then(function(j){var all=(j&&j.bookings)||j||[];var rec=all.filter(function(b){return b&&String(b.id)==='__SETTINGS__pricing';})[0];var c={pkg:{hourly:499,halfday:799,fullday:999},hour:150};if(rec&&rec.pricing){try{var p=rec.pricing;if(p.pkg){['hourly','halfday','fullday'].forEach(function(k){if(typeof p.pkg[k]==='number'&&p.pkg[k]>0)c.pkg[k]=p.pkg[k];});}if(typeof p.hour==='number'&&p.hour>0)c.hour=p.hour;}catch(e){}}window.CNK_PRICING=c;applyDisplay();return c;}).catch(function(){return window.CNK_PRICING;});};
 window.cnkLoadPricing();
 [300,1000,2500].forEach(function(d){setTimeout(applyDisplay,d);});
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){applyDisplay();window.cnkLoadPricing();});
@@ -5181,10 +5203,10 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 (function(){
 if(window.__cnkAdminPricing)return;window.__cnkAdminPricing=true;
 function api(path,body){return fetch(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){return r.json();});}
-function loadCfg(){return fetch('/api/list-bookings?z='+Date.now(),{cache:'no-store'}).then(function(r){return r.json();}).then(function(j){var all=(j&&j.bookings)||j||[];var rec=all.filter(function(b){return b&&String(b.id)==='__SETTINGS__pricing';})[0];return (rec&&rec.pricing)||{pkg:{hourly:549,halfday:799,fullday:999},hour:150};});}
-function fill(){loadCfg().then(function(c){var g=function(id){return document.getElementById(id);};if(g('cnk-pr-2hr'))g('cnk-pr-2hr').value=(c.pkg&&c.pkg.hourly)||549;if(g('cnk-pr-half'))g('cnk-pr-half').value=(c.pkg&&c.pkg.halfday)||799;if(g('cnk-pr-full'))g('cnk-pr-full').value=(c.pkg&&c.pkg.fullday)||999;if(g('cnk-pr-hour'))g('cnk-pr-hour').value=c.hour||150;});}
+function loadCfg(){return fetch('/api/list-bookings?z='+Date.now(),{cache:'no-store'}).then(function(r){return r.json();}).then(function(j){var all=(j&&j.bookings)||j||[];var rec=all.filter(function(b){return b&&String(b.id)==='__SETTINGS__pricing';})[0];return (rec&&rec.pricing)||{pkg:{hourly:499,halfday:799,fullday:999},hour:150};});}
+function fill(){loadCfg().then(function(c){var g=function(id){return document.getElementById(id);};if(g('cnk-pr-2hr'))g('cnk-pr-2hr').value=(c.pkg&&c.pkg.hourly)||499;if(g('cnk-pr-half'))g('cnk-pr-half').value=(c.pkg&&c.pkg.halfday)||799;if(g('cnk-pr-full'))g('cnk-pr-full').value=(c.pkg&&c.pkg.fullday)||999;if(g('cnk-pr-hour'))g('cnk-pr-hour').value=c.hour||150;});}
 function save(){var g=function(id){return Number((document.getElementById(id)||{}).value)||0;};var msg=document.getElementById('cnk-pr-msg');var h=g('cnk-pr-2hr'),hd=g('cnk-pr-half'),fd=g('cnk-pr-full'),hr=g('cnk-pr-hour');if(h<=0||hd<=0||fd<=0||hr<=0){msg.style.color='#c62828';msg.textContent='All prices must be greater than 0';return;}msg.style.color='#666';msg.textContent='Saving…';api('/api/save-booking',{id:'__SETTINGS__pricing',status:'settings',source:'settings',pricing:{pkg:{hourly:h,halfday:hd,fullday:fd},hour:hr},created:Date.now()}).then(function(r){if(r&&r.ok){msg.style.color='#2e7d32';msg.textContent='Saved — new prices are live';if(window.cnkLoadPricing)window.cnkLoadPricing();}else{msg.style.color='#c62828';msg.textContent='Save failed';}});}
-function mount(){var av=document.querySelector('.admin-view');if(!av)return;if(document.getElementById('cnk-pricing-admin'))return;var sec=document.createElement('div');sec.id='cnk-pricing-admin';sec.style.cssText='margin:24px 0;padding:16px;border:1px solid #eee;border-radius:12px;background:#fff;';var fld=function(label,id,val){return '<label style="display:flex;flex-direction:column;font-size:13px;color:#666;gap:4px;">'+label+'<div style="display:flex;align-items:center;gap:4px;"><span style="color:#999;">$</span><input id="'+id+'" type="number" value="'+val+'" style="padding:8px;border:1px solid #ccc;border-radius:6px;width:90px;" /></div></label>';};sec.innerHTML='<div class="section-label" style="font-weight:700;margin-bottom:12px;">Pricing</div><div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end;">'+fld('2 Hours','cnk-pr-2hr',549)+fld('Half Day','cnk-pr-half',799)+fld('Full Day','cnk-pr-full',999)+fld('Extra hour / hr','cnk-pr-hour',150)+'<button id="cnk-pr-save" style="padding:9px 16px;border:none;border-radius:6px;background:#111;color:#fff;cursor:pointer;height:38px;">Save prices</button></div><div id="cnk-pr-msg" style="font-size:13px;margin-top:10px;"></div><div style="font-size:12px;color:#999;margin-top:6px;">Changes apply to the customer booking site immediately.</div>';var promo=document.getElementById('cnk-promo-admin');if(promo&&promo.parentElement){promo.parentElement.insertBefore(sec,promo);}else{av.appendChild(sec);}var sb=document.getElementById('cnk-pr-save');if(sb)sb.addEventListener('click',save);fill();}
+function mount(){var av=document.querySelector('.admin-view');if(!av)return;if(document.getElementById('cnk-pricing-admin'))return;var sec=document.createElement('div');sec.id='cnk-pricing-admin';sec.style.cssText='margin:24px 0;padding:16px;border:1px solid #eee;border-radius:12px;background:#fff;';var fld=function(label,id,val){return '<label style="display:flex;flex-direction:column;font-size:13px;color:#666;gap:4px;">'+label+'<div style="display:flex;align-items:center;gap:4px;"><span style="color:#999;">$</span><input id="'+id+'" type="number" value="'+val+'" style="padding:8px;border:1px solid #ccc;border-radius:6px;width:90px;" /></div></label>';};sec.innerHTML='<div class="section-label" style="font-weight:700;margin-bottom:12px;">Pricing</div><div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end;">'+fld('2 Hours','cnk-pr-2hr',499)+fld('Half Day','cnk-pr-half',799)+fld('Full Day','cnk-pr-full',999)+fld('Extra hour / hr','cnk-pr-hour',150)+'<button id="cnk-pr-save" style="padding:9px 16px;border:none;border-radius:6px;background:#111;color:#fff;cursor:pointer;height:38px;">Save prices</button></div><div id="cnk-pr-msg" style="font-size:13px;margin-top:10px;"></div><div style="font-size:12px;color:#999;margin-top:6px;">Changes apply to the customer booking site immediately.</div>';var promo=document.getElementById('cnk-promo-admin');if(promo&&promo.parentElement){promo.parentElement.insertBefore(sec,promo);}else{av.appendChild(sec);}var sb=document.getElementById('cnk-pr-save');if(sb)sb.addEventListener('click',save);fill();}
 try{var mo=new MutationObserver(function(){mount();});mo.observe(document.documentElement,{childList:true,subtree:true});}catch(e){}
 if(document.readyState!=='loading'){mount();}else{document.addEventListener('DOMContentLoaded',mount);}
 })();
