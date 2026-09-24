@@ -940,7 +940,7 @@
   var TAX=0.0745, CC=0.03, DEP=0.5, HOUR=150;
   var state={ pkg:null, hours:2, addon:0 }; window._cnkState=state;
   var sqPayments=null, sqCard=null, cardMounted=false; window.__cnkGetCard=function(){return sqCard;}; window.__cnkGetPayments=function(){return sqPayments;};
-  var PKG={ hourly:{label:'2 Hours',base:499}, halfday:{label:'Half Day',base:799}, fullday:{label:'Full Day',base:999} };
+  var PKG={ hourly:{label:'2 Hours',base:499}, threehour:{label:'3 Hours',base:699}, halfday:{label:'Half Day',base:799}, fullday:{label:'Full Day',base:999} };
 
   function money(n){ return '$'+n.toFixed(2); }
   function calc(){
@@ -2310,7 +2310,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
 
 <script>
 (function(){
-  var PKG={hourly:{label:'2 Hours',base:499},halfday:{label:'Half Day',base:799},fullday:{label:'Full Day',base:999}};
+  var PKG={hourly:{label:'2 Hours',base:499},threehour:{label:'3 Hours',base:699},halfday:{label:'Half Day',base:799},fullday:{label:'Full Day',base:999}};
   var DUR={hourly:'2 hours',halfday:'Up to 4 hours',fullday:'Up to 8 hours'};
   function money(n){ return '$'+(n||0).toFixed(2); }
   function val(id){ var e=document.getElementById(id); return e?e.value.trim():''; }
@@ -2477,7 +2477,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
 
 <script>
 (function(){
-  var PKG={hourly:'2 Hours',halfday:'Half Day',fullday:'Full Day'};
+  var PKG={hourly:'2 Hours',threehour:'3 Hours',halfday:'Half Day',fullday:'Full Day'};
   function money(n){ n=Number(n)||0; return '$'+n.toFixed(2); }
   function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   function getBookings(){ try{ return JSON.parse(localStorage.getItem('cnk_bookings')||'[]'); }catch(e){ return []; } }
