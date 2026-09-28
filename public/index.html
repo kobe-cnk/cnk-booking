@@ -975,7 +975,7 @@
     if(!val('cnk-first')||!val('cnk-last')){ err.textContent='Please enter your first and last name.'; return; }
     var em=val('cnk-email'); if(!em||!/^[^@]+@[^@]+\.[^@]+$/.test(em)){ err.textContent='Please enter a valid email address.'; return; }
     if(!val('cnk-phone')){ err.textContent='Please enter a phone number.'; return; }
-    if(!val('cnk-date')){ err.textContent='Please choose your event date.'; return; /*__cnkClosedSunday*/ (function(){ var _d=val('cnk-date'); if(_d){ var _p=_d.split('-'); var _dt=new Date(Number(_p[0]), Number(_p[1])-1, Number(_p[2])); if(_dt.getDay()===0){ err.textContent='We are closed on Sundays — please choose another day.'; window.scrollTo({top:0,behavior:'smooth'}); window.__cnkIsSunday=true; } else { window.__cnkIsSunday=false; } } })(); if(window.__cnkIsSunday){ window.__cnkIsSunday=false; return; } }
+    if(!val('cnk-date')){ err.textContent='Please choose your event date.'; return; /*__cnkClosedSunday*/ (function(){ var _d=val('cnk-date'); if(_d){ var _p=_d.split('-'); var _dt=new Date(Number(_p[0]), Number(_p[1])-1, Number(_p[2])); if(_dt.getDay()===0 && _d!=='2027-05-23'){ err.textContent='We are closed on Sundays — please choose another day.'; window.scrollTo({top:0,behavior:'smooth'}); window.__cnkIsSunday=true; } else { window.__cnkIsSunday=false; } } })(); if(window.__cnkIsSunday){ window.__cnkIsSunday=false; return; } }
     fillSummary();
     cnkGoStep(2);
     setTimeout(mountCard, 150);
@@ -1707,7 +1707,7 @@ function renderCalendar() {
     const isPartial = count > 0 && count < boothCount;
     const isPast = new Date(dateStr) < today && !isToday;
     const isPaidDay = count > 0 && paidByDate[dateStr] === true;
-    const isSunday = (function(){ var _p=String(dateStr).split('-'); return new Date(Number(_p[0]),Number(_p[1])-1,Number(_p[2])).getDay()===0; })(); /*__cnkClosedSunday*/
+    const isSunday = (function(){ if(String(dateStr)==='2027-05-23') return false; var _p=String(dateStr).split('-'); return new Date(Number(_p[0]),Number(_p[1])-1,Number(_p[2])).getDay()===0; })(); /*__cnkClosedSunday*/
     const cls = [isToday?'today':'', isFull?'booked':'', isPartial?'partial':'', isPaidDay?'paid':'', isSunday?'closed-sunday':'', isPast?'past':''].filter(Boolean).join(' ');
     const tooltip = isFull ? 'Fully Booked' : isPartial ? `${count}/${boothCount} booths booked` : '';
     grid += `<div class="cal-day ${cls}" title="${tooltip}" onclick="calDayClick('${dateStr}')">${d}</div>`;
@@ -4194,7 +4194,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
   function getBooth(){ try{ if(typeof getBoothCount==='function'){ var b=getBoothCount(); if(b) return b; } }catch(e){} try{ return parseInt(localStorage.getItem('cnk_booth_count')||'1',10)||1; }catch(e){} return 1; }
   function todayStr(){ var t=new Date(); return ymd(t.getFullYear(), t.getMonth(), t.getDate()); }
   function loadData(cb){ boothCount=getBooth(); fetch('/api/list-bookings?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json();}).then(function(j){ counts={}; blocked={}; (j.bookings||[]).forEach(function(b){ if(b&&b.id==='__BOOTH_SETTINGS__'){ if(b.boothCount){ boothCount=parseInt(b.boothCount,10)||boothCount; } return; } if(!b||!b.date) return; var s=String(b.status||'').toLowerCase(); if(s==='blocked'||(String(b.id||'').indexOf('__BLOCK__')===0&&['cancelled','removed'].indexOf(String(b.status||'').toLowerCase())===-1)){ blocked[b.date]=true; return; } if(s==='cancelled'||s==='complete'||s==='completed') return; counts[b.date]=(counts[b.date]||0)+1; }); if(cb) cb(); }).catch(function(){ if(cb) cb(); }); }
-  function blockState(ds){ /*__cnkSundayBlocked*/ try{ var _sp=String(ds).split('-'); if(new Date(Number(_sp[0]),Number(_sp[1])-1,Number(_sp[2])).getDay()===0) return 'booked'; }catch(e){} var t=todayStr(); if(ds<FIRST||ds<t) return 'unavailable'; if(blocked[ds]) return 'booked'; if((counts[ds]||0)>=boothCount) return 'booked'; return ''; }
+  function blockState(ds){ /*__cnkSundayBlocked*/ try{ if(String(ds)!=='2027-05-23'){ var _sp=String(ds).split('-'); if(new Date(Number(_sp[0]),Number(_sp[1])-1,Number(_sp[2])).getDay()===0) return 'booked'; } }catch(e){} var t=todayStr(); if(ds<FIRST||ds<t) return 'unavailable'; if(blocked[ds]) return 'booked'; if((counts[ds]||0)>=boothCount) return 'booked'; return ''; }
   function ensureWrap(){ var input=document.getElementById('cnk-date'); if(!input) return null; var w=document.getElementById('cnk-cal'); if(w) return w; input.style.display='none'; w=document.createElement('div'); w.id='cnk-cal'; w.style.cssText='margin-top:6px;background:#252522;border:1px solid rgba(196,152,58,0.25);border-radius:10px;padding:14px;max-width:380px;'; input.parentNode.insertBefore(w, input.nextSibling); return w; }
   function pick(ds){ var input=document.getElementById('cnk-date'); if(input){ input.value=ds; try{ input.dispatchEvent(new Event('input',{bubbles:true})); input.dispatchEvent(new Event('change',{bubbles:true})); }catch(e){} } render(); }
   function render(){
