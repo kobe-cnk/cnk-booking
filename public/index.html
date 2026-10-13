@@ -6269,16 +6269,9 @@ window.cnkRenderConfirmCalls=render;
     var section = removedBtn.parentElement;
     var b = document.createElement('button');
     b.className='sidebar-btn'; b.id='cnk-fleet-btn';
-    b.innerHTML='<span>&#128225;</span> Fleet Monitor';
+    b.innerHTML='<span>&#128225;</span> Booth Heartbeat';
     b.onclick=function(){
-      var p=document.getElementById('admin-fleet');
-      if(!p){ p=document.createElement('div'); p.id='admin-fleet'; p.className='admin-view';
-        p.innerHTML='<div style="height:calc(100vh - 130px);padding:0;"><iframe src="https://cnk-fleet-monitoring-1.vercel.app/ops.html" style="width:100%;height:100%;border:none;border-radius:12px;"></iframe></div>';
-        document.getElementById('admin-overview').parentElement.appendChild(p); }
-      document.querySelectorAll('.admin-view').forEach(function(v){v.classList.remove('active');});
-      p.classList.add('active');
-      document.querySelectorAll('button.sidebar-btn').forEach(function(x){x.classList.remove('active');});
-      b.classList.add('active');
+      window.open('https://cnk-heartbeat-dashboard.onrender.com/login','_blank','noopener');
     };
     section.insertBefore(b, removedBtn);
     return true;
