@@ -4020,7 +4020,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
   if(window.__cnkMinDate) return; window.__cnkMinDate=true;
   var FIRST='2026-07-20';
   window.CNK_FIRST_BOOKABLE=FIRST;
-  var PAUSE='2026-12-31'; var PAUSEMAX='2026-12-30'; window.CNK_PAUSE_FROM=PAUSE; /*__cnkEventsPaused*/
+  var PAUSE='9999-12-31'; var PAUSEMAX='9999-12-31'; window.CNK_PAUSE_FROM=PAUSE; /*__cnkEventsPaused*/
   function msgEl(){ var d=document.getElementById('cnk-date'); if(!d) return null; var m=document.getElementById('cnk-date-msg'); if(!m){ m=document.createElement('div'); m.id='cnk-date-msg'; m.style.cssText='display:none;margin-top:6px;color:#e06a5a;font-size:13px;font-weight:600;'; if(d.parentNode) d.parentNode.insertBefore(m, d.nextSibling); } return m; }
   function bad(d){ return !!(d && d.value && (d.value < FIRST || d.value >= PAUSE)); }
   function check(){ var d=document.getElementById('cnk-date'); if(!d) return; d.min=FIRST; d.max=PAUSEMAX; var m=msgEl(); if(bad(d)){ d.style.borderColor='#c0392b'; d.style.background='rgba(192,57,43,0.12)'; if(m){ m.textContent=(d.value && d.value>=PAUSE ? 'We\u2019re taking a break from events and aren\u2019t booking new dates right now. Please check back soon or email photos@cnkbooths.com.' : 'That date isn\u2019t available \u2014 please choose another day.'); m.style.display='block'; } d.setAttribute('data-cnk-bad','1'); } else { d.style.borderColor=''; d.style.background=''; if(m){ m.style.display='none'; } d.removeAttribute('data-cnk-bad'); } }
@@ -4187,7 +4187,7 @@ document.getElementById('booking-modal').addEventListener('click', function(e) {
 (function(){
   if(window.__cnkCalendar) return; window.__cnkCalendar=true;
   var FIRST=(window.CNK_FIRST_BOOKABLE||'2026-07-20');
-  var PAUSE=(window.CNK_PAUSE_FROM||'2026-12-31'); /*__cnkEventsPaused*/
+  var PAUSE=(window.CNK_PAUSE_FROM||'9999-12-31'); /*__cnkEventsPaused*/
   var MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
   var DOW=['Su','Mo','Tu','We','Th','Fr','Sa'];
   var counts={}, blocked={}, boothCount=1, viewY, viewM;
